@@ -1,0 +1,202 @@
+/* Our Clients Section Styling - Matching Figma Design */
+.clients-section {
+  padding: 80px 0;
+  position: relative;
+  background: transparent;
+  overflow: hidden;
+}
+
+.clients-section .container {
+  max-width: 1650px;
+  margin: 0 auto;
+  padding: 0 80px;
+  text-align: center;
+}
+
+/* Header Section */
+.clients-header {
+  margin-bottom: 80px;
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.clients-header.animate-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.clients-eyebrow {
+  color: #0066ff;
+  font-weight: 400;
+  margin: 0 0 12px 0;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.clients-title {
+  font-size: 1.7rem;
+  font-weight: 500;
+  color: #ffffff;
+  margin: 0 0 16px 0;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.clients-subtitle {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  font-weight: 300;
+  text-align: center;
+  line-height: 1.6;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Clients Grid - 2 rows of 5 logos */
+.clients-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 60px 40px;
+  align-items: center;
+  justify-items: center;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out 0.3s, transform 0.8s ease-out 0.3s;
+}
+
+.clients-section.animate-in .clients-grid {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Client Logo Placeholder */
+.client-logo {
+  width: 100%;
+  max-width: 180px;
+  height: 80px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.client-logo::before {
+  content: '';
+  position: absolute;
+  width: 60%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.client-logo:hover {
+  border-color: rgba(0, 102, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.client-logo img {
+  max-width: 80%;
+  max-height: 60%;
+  object-fit: contain;
+  filter: brightness(0) invert(1) opacity(0.6);
+  transition: all 0.3s ease;
+}
+
+.client-logo:hover img {
+  opacity: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .clients-section .container {
+    padding: 0 80px;
+  }
+
+  .clients-title {
+    font-size: 1.5rem;
+  }
+
+  .clients-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px 30px;
+  }
+
+  .client-logo {
+    max-width: 150px;
+    height: 70px;
+  }
+}
+
+@media (max-width: 768px) {
+  .clients-section {
+    padding: 60px 0;
+  }
+
+  .clients-section .container {
+    padding: 0 80px;
+  }
+
+  .clients-header {
+    margin-bottom: 50px;
+  }
+
+  .clients-eyebrow {
+    font-size: 1rem;
+  }
+
+  .clients-title {
+    font-size: 1.3rem;
+  }
+
+  .clients-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .clients-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px 20px;
+  }
+
+  .client-logo {
+    max-width: 120px;
+    height: 60px;
+  }
+}
+
+@media (max-width: 576px) {
+  .clients-section {
+    padding: 40px 0;
+  }
+
+  .clients-section .container {
+    padding: 0 80px;
+  }
+
+  .clients-header {
+    margin-bottom: 40px;
+  }
+
+  .clients-title {
+    font-size: 1.2rem;
+  }
+
+  .clients-subtitle {
+    font-size: 0.75rem;
+  }
+
+  .clients-grid {
+    gap: 25px 15px;
+  }
+
+  .client-logo {
+    max-width: 100px;
+    height: 50px;
+  }
+}

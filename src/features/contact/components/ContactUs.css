@@ -1,0 +1,430 @@
+/* Contact Us Section Styling */
+.contact-section {
+  padding: 60px 0 20px 0;
+  position: relative;
+  background: 
+    url('../../../assets/images/ContactUs/backgroundContentUs.png'),
+    radial-gradient(1200px 500px at 99% 5%, rgba(2, 44, 196, 0.15), transparent),
+    radial-gradient(ellipse at top left, rgb(1, 4, 23) 20%, transparent 90%),
+    radial-gradient(ellipse at bottom right, rgb(15, 30, 75) 40%, rgb(10, 24, 60) 70%, transparent 90%),
+    linear-gradient(135deg, rgb(1, 4, 23) 0%, rgb(2, 12, 48) 70%, rgb(30, 40, 81) 50%, rgb(15, 30, 75) 100%);
+  background-size: 80%, auto, 100% 100%, 100% 100%, 100% 100%;
+  background-position: top right, center, top left, bottom right, center;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  overflow: visible;
+}
+
+.contact-section .container {
+  max-width: 1100px;
+  margin: 0 60px;
+  padding: 0 120px;
+}
+
+.contact-section .section-header {
+  text-align: left;
+  margin-bottom: 28px;
+}
+
+.section-eyebrow {
+  color: #0066ff;
+  font-weight: 400;
+  margin: 0 0 10px 0;
+  font-size: 1.2rem;
+}
+
+.section-headline {
+  font-size: 1.7rem;
+  font-weight: 500;
+  color: #ffffff;
+  margin: 0;
+}
+
+.contact-section .section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg, #022cc4, #0066ff);
+  border-radius: 2px;
+}
+
+.contact-section .section-subtitle {
+  font-size: 0.875rem;
+  color: #ffffff;
+  margin-top: 12px;
+  font-weight: 300;
+}
+
+/* Layout */
+.contact-layout {
+  display: grid;
+  grid-template-columns: .30fr .25fr;
+  grid-template-areas:
+    "map phone"
+    "map email"
+    "location instagram";
+  gap: 13px;
+}
+
+.map-card,
+.grid-map {
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(2, 44, 196, 0.25);
+  background: #0f1a3f;
+  max-width: 100%;
+  min-height: 330px;
+}
+
+.grid-map { grid-area: map; }
+.grid-phone { grid-area: phone; }
+.grid-email { grid-area: email; }
+.grid-location { grid-area: location; }
+.grid-instagram { grid-area: instagram; }
+
+.map-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.contact-card {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  justify-content: left;
+  gap: 0px;
+  background: linear-gradient(180deg, #6f7486, rgba(255, 255, 255, 0.413));
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
+  backdrop-filter: blur(25px) saturate(180%);
+  padding: 16px;
+  border-radius: 15px;
+  text-align: left;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.contact-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 8px 20px rgba(0, 102, 255, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.25);
+  text-decoration: none;
+}
+
+.contact-card:hover .contact-icon-img {
+  transform: scale(1.1);
+  filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(0, 102, 255, 0.6));
+}
+
+.contact-icon {
+  width: 60px;
+  height: 62px;
+  background: transparent;
+  border-radius: 0;
+  display: flex;
+  align-items: left;
+  justify-content: left;
+  flex-shrink: 0;
+  margin-top: 19px;
+}
+
+.contact-card:hover .contact-icon {
+  transform: none;
+}
+
+.contact-icon-img {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
+  display: block;
+  filter: brightness(0) invert(1);
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.contact-card > div:not(.contact-icon) {
+  margin-top: -11px;
+}
+
+.contact-title {
+  font-size: 0.85rem;
+  font-weight: 100;
+  color: #ffffff;
+  margin: 0 0 2px 0;
+  line-height: 1.4;
+}
+
+.contact-info {
+  font-size: 1.05rem;
+  color: #ffffff;
+  margin: 0;
+  font-weight: 600;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+/* Contact Footer */
+.contact-footer {
+  margin-top: 50px;
+  width: 100%;
+}
+
+.contact-footer-container {
+  max-width: 1550px;
+  margin: 0 auto;
+  padding: 2px 20px;
+  background: #0043CE;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.contact-footer-logo {
+  display: flex;
+  align-items: center;
+}
+
+.footer-logo-img {
+  height: 70px;
+  width: auto;
+  filter: brightness(0) invert(1);
+}
+
+.contact-footer-copyright {
+  color: #ffffff;
+}
+
+.contact-footer-copyright p {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 100;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .section-headline {
+    font-size: 2rem;
+  }
+  
+  .contact-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "map"
+      "phone"
+      "email"
+      "location"
+      "instagram";
+    gap: 16px;
+  }
+
+  .map-card {
+    min-height: 360px;
+  }
+}
+
+@media (max-width: 768px) {
+  .contact-section {
+    padding: 60px 0;
+  }
+  
+  .contact-section .section-header {
+    margin-bottom: 30px;
+  }
+  
+  .section-headline {
+    font-size: 1.8rem;
+  }
+  
+  .contact-section .section-subtitle {
+    font-size: 1rem;
+  }
+
+  .contact-card {
+    padding: 20px;
+  }
+  
+  .contact-icon {
+    width: 46px;
+    height: 46px;
+  }
+  
+  .contact-title {
+    font-size: 0.95rem;
+  }
+  
+  .contact-info {
+    font-size: 1rem;
+  }
+
+  .contact-footer-container {
+    padding: 18px 20px;
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .contact-footer-copyright p {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .contact-section {
+    padding: 50px 0;
+  }
+  
+  .contact-card {
+    padding: 18px;
+  }
+  
+  .contact-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .contact-footer {
+    margin-top: 40px;
+  }
+
+  .contact-footer-container {
+    padding: 16px 18px;
+    border-radius: 15px;
+  }
+
+  .footer-logo-img {
+    height: 35px;
+  }
+
+  .contact-footer-copyright p {
+    font-size: 0.8rem;
+  }
+}
+
+/* Animation Keyframes */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mapZoomIn {
+  from {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Section Header Animations */
+.section-header {
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.section-header.animate-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.section-eyebrow {
+  animation: fadeInDown 0.6s ease-out forwards;
+  animation-delay: 0.1s;
+  opacity: 0;
+}
+
+.section-header.animate-in .section-eyebrow {
+  animation: fadeInDown 0.6s ease-out forwards;
+}
+
+.section-headline {
+  animation: fadeInDown 0.8s ease-out forwards;
+  animation-delay: 0.2s;
+  opacity: 0;
+}
+
+.section-header.animate-in .section-headline {
+  animation: fadeInDown 0.8s ease-out forwards;
+}
+
+.section-subtitle {
+  animation: fadeInDown 0.8s ease-out forwards;
+  animation-delay: 0.3s;
+  opacity: 0;
+}
+
+.section-header.animate-in .section-subtitle {
+  animation: fadeInDown 0.8s ease-out forwards;
+}
+
+/* Map Animation */
+.map-card {
+  opacity: 0;
+}
+
+.map-card.animate-in {
+  animation: mapZoomIn 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Contact Card Animations */
+.contact-card {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.contact-card.animate-in {
+  animation: fadeUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Footer Animation */
+.contact-footer {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.contact-footer.animate-in {
+  animation: slideUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
