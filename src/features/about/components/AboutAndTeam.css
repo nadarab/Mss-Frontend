@@ -8,7 +8,7 @@
 
 /* Main Container with Figma Styling */
 .about-team-container {
-  max-width: 1582px;
+  max-width: 1300px;
   margin: 0 auto;
   padding: 60px 80px;
   background: linear-gradient(180deg, rgb(2, 12, 48) 0%, rgb(1, 4, 23) 100%);

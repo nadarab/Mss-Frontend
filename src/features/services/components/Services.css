@@ -51,10 +51,8 @@
 
 .services-container {
   position: relative;
-  width: 1524px; /* stage width that matches absolute layout */
-  max-width: none;
-  margin: 0;
-  left: 50%;
+  width: 1520px; /* stage width that matches absolute layout */
+    left: 50%;
   min-height: 520px;
   transform: translateX(-50%) scale(0.62);
   transform-origin: top center;
@@ -68,7 +66,6 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 20px;
   transition: opacity 0.6s ease-out, transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
@@ -124,7 +121,7 @@
 .service-card::before {
   content: '';
   position: absolute;
-  top: 0;
+  top: 0; /* adjust to match absolute layout */
   left: 0;
   width: 100%;
   height: 100%;
@@ -214,7 +211,7 @@
 
 /* Social Media Management Card */
 .social-media-card {
-  width: 1240px;
+  width: 1100px;
   height: 312px;
   top: 0;
   right: 760px;
@@ -244,7 +241,7 @@
 
 /* Marketing Strategies Card */
 .marketing-strategies-card {
-  width: 1205px;
+  width: 1080px;
   height: 456px;
   top: 0;
   left: 792px;
@@ -273,7 +270,7 @@
 
 /* SEO Card */
 .seo-card {
-  width: 615px;
+  width: 470px;
   height: 459px;
   top: 332px;
  right: 1390px;
@@ -363,7 +360,7 @@
 
 /* Web Development Card */
 .web-development-card {
-  width: 1205px;
+  width: 1080px;
   height: 312px;
   top: 476px;
   left: 792px;
@@ -388,34 +385,78 @@
   text-align: left;
   width: 90%;
 }
-/* Responsive adjustments */
-@media (max-width: 1600px) {
-  .services-section {
-    padding: clamp(12px, 1.2vw, 16px) clamp(20px, 4vw, 60px) clamp(8px, 0.8vw, 12px);
+/* Responsive adjustments - Dynamic scaling for all screen sizes */
+
+/* Extra large screens (1920px+) */
+@media (min-width: 1920px) {
+  .services-container {
+    transform: translateX(-50%) scale(0.7);
   }
 }
 
-@media (max-width: 1280px) {
+/* Large screens (1600px - 1919px) */
+@media (min-width: 1600px) and (max-width: 1919px) {
+  .services-container {
+    transform: translateX(-50%) scale(0.65);
+  }
+}
+
+/* Medium-large screens (1440px - 1599px) */
+@media (min-width: 1440px) and (max-width: 1599px) {
+  .services-section {
+    padding: clamp(12px, 1.2vw, 16px) clamp(20px, 4vw, 60px) clamp(8px, 0.8vw, 12px);
+  }
+  
+  .services-container {
+    transform: translateX(-50%) scale(0.58);
+  }
+}
+
+/* Medium screens (1280px - 1439px) */
+@media (min-width: 1280px) and (max-width: 1439px) {
   .services-section {
     padding: clamp(12px, 1vw, 14px) clamp(20px, 3.5vw, 50px) clamp(8px, 0.7vw, 10px);
   }
   
   .services-container {
-    transform: translateX(-50%) scale(0.55);
-    transform-origin: top center;
+    transform: translateX(-50%) scale(0.52);
   }
 }
 
-@media (max-width: 1024px) {
+/* Small-medium screens (1024px - 1279px) */
+@media (min-width: 1024px) and (max-width: 1279px) {
   .services-section {
     padding: clamp(12px, 1vw, 14px) clamp(20px, 3vw, 40px) clamp(8px, 0.6vw, 10px);
   }
   
   .services-container {
-    transform: translateX(-50%) scale(0.5);
+    transform: translateX(-50%) scale(0.45);
   }
 }
 
+/* Tablet landscape (900px - 1023px) */
+@media (min-width: 900px) and (max-width: 1023px) {
+  .services-section {
+    padding: clamp(12px, 1vw, 14px) clamp(20px, 3vw, 40px) clamp(8px, 0.6vw, 10px);
+  }
+  
+  .services-container {
+    transform: translateX(-50%) scale(0.4);
+  }
+}
+
+/* Tablet portrait (769px - 899px) */
+@media (min-width: 769px) and (max-width: 899px) {
+  .services-section {
+    padding: clamp(12px, 1.2vw, 14px) clamp(18px, 3.5vw, 35px) clamp(8px, 0.7vw, 10px);
+  }
+  
+  .services-container {
+    transform: translateX(-50%) scale(0.35);
+  }
+}
+
+/* Mobile and small tablets (768px and below) - Switch to stacked layout */
 @media (max-width: 768px) {
   .services-section {
     padding: clamp(12px, 1.5vw, 16px) clamp(15px, 4vw, 30px) clamp(8px, 1vw, 12px);
@@ -433,7 +474,7 @@
     position: static;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
     min-height: auto;
     transform: none;
     width: 100%;
@@ -446,19 +487,71 @@
     height: auto !important;
     min-height: 250px;
   }
+  
+  .service-character {
+    width: 100%;
+    height: auto;
+    max-height: 200px;
+    object-fit: contain;
+  }
+  
+  .service-card-content {
+    padding: 20px;
+  }
+  
+  .service-card-title {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+  }
+  
+  .service-card-description {
+    font-size: clamp(1rem, 3vw, 1.2rem);
+  }
 }
 
+/* Small mobile devices (480px and below) */
 @media (max-width: 480px) {
   .services-section {
     padding: clamp(10px, 2vw, 14px) clamp(12px, 4vw, 20px) clamp(6px, 1.2vw, 10px);
   }
+  
+  .services-label {
+    font-size: 1rem;
+  }
+  
+  .services-title {
+    font-size: clamp(1.3rem, 5vw, 1.8rem);
+  }
+  
+  .services-subtitle {
+    font-size: clamp(0.75rem, 3vw, 0.9rem);
+  }
+  
+  .service-card {
+    min-height: 220px;
+  }
+  
+  .service-card-title {
+    font-size: clamp(1.2rem, 4.5vw, 1.5rem);
+  }
+  
+  .service-card-description {
+    font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+  }
 }
 
-/* Zoom level adjustments */
-@media (min-width: 1200px) and (max-width: 1600px) {
+/* Very small devices (360px and below) */
+@media (max-width: 360px) {
   .services-section {
-    padding-left: clamp(30px, 4vw, 70px);
-    padding-right: clamp(30px, 4vw, 70px);
+    padding: 8px 10px 6px;
+  }
+  
+  .services-header {
+    margin-bottom: 20px;
+  }
+  
+  .service-card {
+    min-height: 200px;
+    padding: 15px;
   }
 }
 
