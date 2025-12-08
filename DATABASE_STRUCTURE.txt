@@ -1,0 +1,263 @@
+================================================================================
+MSS PROJECT - FIRESTORE DATABASE STRUCTURE
+================================================================================
+
+📊 COLLECTIONS OVERVIEW
+================================================================================
+
+1. employees (Team Members)
+2. video_categories (Video Categories)
+3. videos (Individual Videos)
+4. branding_projects (Branding Portfolio)
+5. design_projects (Design Portfolio)
+
+
+================================================================================
+1️⃣  EMPLOYEES COLLECTION
+================================================================================
+Collection: "employees"
+
+Document Structure:
+{
+  id: "auto-generated",
+  firstName: "John",
+  lastName: "Doe",
+  role: "CEO",
+  imageUrl: "https://storage.firebase.com/.../employee.jpg",
+  bio: "Experienced leader with 10 years...",
+  order: 1
+}
+
+Example Data:
+- Employee 1: { firstName: "Ahmed", lastName: "Ali", role: "CEO" }
+- Employee 2: { firstName: "Sara", lastName: "Hassan", role: "Designer" }
+
+
+================================================================================
+2️⃣  VIDEO_CATEGORIES COLLECTION
+================================================================================
+Collection: "video_categories"
+
+Document Structure:
+{
+  id: "auto-generated",
+  title: "Social Media Ads",
+  subtitle: "Engaging content for your audience",
+  type: "commercial",
+  thumbnailUrl: "https://storage.firebase.com/.../thumb.jpg",
+  order: 1
+}
+
+Example Data:
+- Category 1: { title: "Social Media Ads", subtitle: "Short engaging videos" }
+- Category 2: { title: "Corporate Videos", subtitle: "Professional presentations" }
+- Category 3: { title: "Product Demos", subtitle: "Showcase your products" }
+
+
+================================================================================
+3️⃣  VIDEOS COLLECTION
+================================================================================
+Collection: "videos"
+
+Document Structure:
+{
+  id: "auto-generated",
+  categoryId: "category_doc_id",  // Links to video_categories
+  title: "Nike Ad Campaign",
+  videoUrl: "https://storage.firebase.com/.../video.mp4",
+  thumbnailUrl: "https://storage.firebase.com/.../thumb.jpg",
+  duration: "2:30",
+  order: 1
+}
+
+Example Data:
+- Video 1: { categoryId: "cat1", title: "Ad 1", videoUrl: "..." }
+- Video 2: { categoryId: "cat1", title: "Ad 2", videoUrl: "..." }
+- Video 3: { categoryId: "cat2", title: "Corporate Video", videoUrl: "..." }
+
+
+================================================================================
+4️⃣  BRANDING_PROJECTS COLLECTION
+================================================================================
+Collection: "branding_projects"
+
+Document Structure:
+{
+  id: "auto-generated",
+  title: "XYZ Company Brand Identity",
+  description: "Complete brand identity including logo, colors, typography...",
+  images: [
+    "https://storage.firebase.com/.../image1.jpg",
+    "https://storage.firebase.com/.../image2.jpg",
+    "https://storage.firebase.com/.../image3.jpg"
+  ],
+  clientName: "XYZ Company",
+  year: 2024,
+  featured: true,
+  order: 1
+}
+
+Example Data:
+- Project 1: { title: "ABC Brand", description: "...", images: [...] }
+- Project 2: { title: "Tech Startup Logo", description: "...", images: [...] }
+
+
+================================================================================
+5️⃣  DESIGN_PROJECTS COLLECTION
+================================================================================
+Collection: "design_projects"
+
+Document Structure:
+{
+  id: "auto-generated",
+  title: "Social Media Campaign",
+  description: "Instagram and Facebook post designs",
+  images: [
+    "https://storage.firebase.com/.../post1.jpg",
+    "https://storage.firebase.com/.../post2.jpg"
+  ],
+  category: "social-media",
+  clientName: "Fashion Brand",
+  year: 2024,
+  featured: false,
+  order: 1
+}
+
+Example Data:
+- Design 1: { title: "Instagram Posts", category: "social-media", images: [...] }
+- Design 2: { title: "Brochure Design", category: "print", images: [...] }
+
+
+================================================================================
+📱 HOW IT WORKS IN YOUR APP
+================================================================================
+
+HOME PAGE - "Our Work" Section:
+┌─────────────────────────────────────────────────────────────┐
+│  OUR WORK                                                    │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐                 │
+│  │  VIDEO   │  │  DESIGN  │  │ BRANDING │                 │
+│  │  MAKING  │  │          │  │          │                 │
+│  └──────────┘  └──────────┘  └──────────┘                 │
+└─────────────────────────────────────────────────────────────┘
+
+When user clicks "VIDEO MAKING":
+┌─────────────────────────────────────────────────────────────┐
+│  VIDEO CATEGORIES                                            │
+│  ┌────────────────────────────────────┐                     │
+│  │ Social Media Ads                   │                     │
+│  │ Engaging content for your audience │                     │
+│  │ [View Videos →]                    │                     │
+│  └────────────────────────────────────┘                     │
+│  ┌────────────────────────────────────┐                     │
+│  │ Corporate Videos                   │                     │
+│  │ Professional presentations         │                     │
+│  │ [View Videos →]                    │                     │
+│  └────────────────────────────────────┘                     │
+└─────────────────────────────────────────────────────────────┘
+   ↓ (Load from video_categories collection)
+
+When user clicks "View Videos" on a category:
+┌─────────────────────────────────────────────────────────────┐
+│  Social Media Ads                                            │
+│  Engaging content for your audience                          │
+│                                                              │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐                 │
+│  │ Video 1  │  │ Video 2  │  │ Video 3  │                 │
+│  │ [▶ Play] │  │ [▶ Play] │  │ [▶ Play] │                 │
+│  └──────────┘  └──────────┘  └──────────┘                 │
+└─────────────────────────────────────────────────────────────┘
+   ↓ (Load from videos collection where categoryId = selected category)
+
+When user clicks "BRANDING":
+┌─────────────────────────────────────────────────────────────┐
+│  BRANDING PROJECTS                                           │
+│  ┌────────────────────────────────────┐                     │
+│  │ XYZ Company Brand Identity         │                     │
+│  │ Complete brand identity including  │                     │
+│  │ logo, colors, typography...        │                     │
+│  │ ┌────┐ ┌────┐ ┌────┐              │                     │
+│  │ │Img1│ │Img2│ │Img3│              │                     │
+│  │ └────┘ └────┘ └────┘              │                     │
+│  └────────────────────────────────────┘                     │
+│  ┌────────────────────────────────────┐                     │
+│  │ Tech Startup Logo                  │                     │
+│  │ Modern minimalist logo design...   │                     │
+│  │ ┌────┐ ┌────┐                      │                     │
+│  │ │Img1│ │Img2│                      │                     │
+│  │ └────┘ └────┘                      │                     │
+│  └────────────────────────────────────┘                     │
+└─────────────────────────────────────────────────────────────┘
+   ↓ (Load from branding_projects collection)
+
+
+================================================================================
+🔄 RELATIONSHIPS
+================================================================================
+
+video_categories ←→ videos
+  One category can have MANY videos
+  Each video belongs to ONE category
+  Linked by: videos.categoryId = video_categories.id
+
+
+================================================================================
+✅ ADVANTAGES OF THIS STRUCTURE
+================================================================================
+
+1. ✅ FLEXIBLE: Easy to add/remove categories and videos
+2. ✅ ORGANIZED: Each type of content has its own collection
+3. ✅ SCALABLE: Can handle thousands of projects/videos
+4. ✅ EFFICIENT: Only load what you need (e.g., videos for one category)
+5. ✅ SIMPLE: Easy to understand and maintain
+6. ✅ REUSABLE: Same pattern for design and branding
+
+
+================================================================================
+📝 HOW TO ADD DATA
+================================================================================
+
+Step 1: Add Video Categories
+  → Go to Firebase Console → Firestore
+  → Create collection: "video_categories"
+  → Add documents with: title, subtitle, type, order
+
+Step 2: Add Videos
+  → Upload videos to Firebase Storage
+  → Create collection: "videos"
+  → Add documents with: categoryId, videoUrl, title
+
+Step 3: Add Branding Projects
+  → Upload images to Firebase Storage
+  → Create collection: "branding_projects"
+  → Add documents with: title, description, images array
+
+Step 4: Add Design Projects
+  → Same as branding projects
+  → Create collection: "design_projects"
+
+Step 5: Add Team Members
+  → Upload employee photos to Firebase Storage
+  → Create collection: "employees"
+  → Add documents with: firstName, lastName, role, imageUrl
+
+
+================================================================================
+💡 USAGE IN CODE
+================================================================================
+
+Import the services:
+  import { videoCategoryService, videoService } from '../firebase/collections';
+
+Load video categories:
+  const categories = await videoCategoryService.getAll();
+
+Load videos for a category:
+  const videos = await videoService.getByCategory(categoryId);
+
+Load branding projects:
+  const projects = await brandingProjectService.getAll();
+
+
+================================================================================
+

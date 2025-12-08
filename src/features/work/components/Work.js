@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './Work.css';
+import { videoService } from '../../../firebase/collections';
 import workVideo from '../../../assets/videos/workVedio.MP4';
 import post3 from '../../../assets/images/design/post3.JPG';
 import Branding1 from '../../../assets/images/branding/Branding1.JPG';
@@ -22,6 +23,26 @@ function Work() {
   const headerSubtitleRef = useRef(null);
   const cardTitleRefs = [useRef(null), useRef(null), useRef(null)];
   const cardDescriptionRefs = [useRef(null), useRef(null), useRef(null)];
+  const [firestoreVideo, setFirestoreVideo] = useState(null);
+
+  // Load first video from Firestore
+  useEffect(() => {
+    loadFirstVideo();
+  }, []);
+
+  const loadFirstVideo = async () => {
+    try {
+      // Get all videos
+      const allVideos = await videoService.getAll();
+      
+      // Get the first video if available
+      if (allVideos.length > 0) {
+        setFirestoreVideo(allVideos[0].videoUrl);
+      }
+    } catch (error) {
+      console.error('Error loading video:', error);
+    }
+  };
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -245,7 +266,7 @@ function Work() {
       type: 'video',
       name: 'Video Making',
       description: 'Turning ideas into cinematic stories that connect with your audience',
-      mediaSrc: workVideo,
+      mediaSrc: firestoreVideo || workVideo, // Use Firestore video if available, fallback to local
       link: '/work/video',
       isVideo: true,
     },

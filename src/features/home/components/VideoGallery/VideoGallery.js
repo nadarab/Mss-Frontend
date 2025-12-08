@@ -2,19 +2,50 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './VideoGallery.css';
 import { CenteredVideoCarousel } from '../../../work/ui';
+import { videoCategoryService, videoService } from '../../../../firebase/collections';
 import heroVideo from '../../../../assets/videos/HeroSection (2).mp4';
-import video2 from '../../../../assets/videos/Vedio2.MOV';
-import video3 from '../../../../assets/videos/Vedio3.MOV';
-import video4 from '../../../../assets/videos/Vedio4.MOV';
-import video5 from '../../../../assets/videos/Vedio5.MOV';
-import video6 from '../../../../assets/videos/Vedio6.MOV';
-import video7 from '../../../../assets/videos/Vedio7.MOV';
-import video8 from '../../../../assets/videos/Vedio8.MOV';
 
 function VideoGallery() {
   const heroRef = useRef(null);
   const sectionsRef = useRef(null);
   const [scrollY, setScrollY] = useState(0);
+  const [sections, setSections] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load videos from Firestore
+  useEffect(() => {
+    loadVideosFromFirestore();
+  }, []);
+
+  const loadVideosFromFirestore = async () => {
+    try {
+      // Get all video categories
+      const categories = await videoCategoryService.getAll();
+      
+      // For each category, get its videos
+      const sectionsData = await Promise.all(
+        categories.map(async (category, index) => {
+          const videos = await videoService.getByCategory(category.id);
+          
+          return {
+            id: category.id,
+            title: category.title,
+            description: category.subtitle || 'Amazing video content',
+            videos: videos.map(v => v.videoUrl),
+            reverse: index % 2 !== 0 // Alternate layout
+          };
+        })
+      );
+
+      setSections(sectionsData);
+    } catch (error) {
+      console.error('Error loading videos:', error);
+      // Fallback to empty array if error
+      setSections([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,36 +83,22 @@ function VideoGallery() {
     return () => observer.disconnect();
   }, []);
 
-  const sections = [
-    {
-      id: 1,
-      title: "Item",
-      description: "Showcasing products in their best light. Highlighting details, textures, and design with precision photography.",
-      videos: [video2, video3, video4, video5, video6, video7, video8],
-      reverse: false
-    },
-    {
-      id: 2,
-      title: "Events",
-      description: "Capturing the essence of every event — the energy, emotions, and unforgettable moments through our lens.",
-      videos: [video5, video6, video7, video8, video2, video3, video4],
-      reverse: true
-    },
-    {
-      id: 3,
-      title: "Places",
-      description: "Transforming locations into visual stories — from architecture to intimate corners, we reveal their character.",
-      videos: [video8, video2, video3, video4, video5, video6, video7],
-      reverse: false
-    },
-    {
-      id: 4,
-      title: "Clothes",
-      description: "Highlighting each piece with elegance — capturing the details and textures.",
-      videos: [video4, video5, video6, video7, video8, video2, video3],
-      reverse: true
-    }
-  ];
+  if (loading) {
+    return (
+      <div className="video-gallery-page">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          minHeight: '100vh',
+          color: '#fff',
+          fontSize: '1.5rem'
+        }}>
+          Loading videos...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="video-gallery-page">
@@ -121,26 +138,47 @@ function VideoGallery() {
       </section>
 
       <div className="video-sections-container" ref={sectionsRef}>
-        {sections.map((section) => (
-          <section 
-            key={section.id}
-            className={`video-section ${section.reverse ? 'reverse' : ''}`}
-          >
-            <div className="video-section-content-carousel">
-              <div className="video-text-content">
-                <h2>{section.title}</h2>
-                <p>{section.description}</p>
-              </div>
+        {sections.length === 0 ? (
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '100px 20px',
+            color: '#fff'
+          }}>
+            <h2>No video categories yet</h2>
+            <p>Add video categories and videos in the admin panel at <a href="/admin" style={{ color: '#0066ff' }}>/admin</a></p>
+          </div>
+        ) : (
+          sections.map((section) => (
+            <section 
+              key={section.id}
+              className={`video-section ${section.reverse ? 'reverse' : ''}`}
+            >
+              <div className="video-section-content-carousel">
+                <div className="video-text-content">
+                  <h2>{section.title}</h2>
+                  <p>{section.description}</p>
+                </div>
 
-              <div className="section-carousel-wrapper">
-                <CenteredVideoCarousel 
-                  videos={section.videos} 
-                  carouselId={`carousel-${section.id}`}
-                />
+                {section.videos.length > 0 ? (
+                  <div className="section-carousel-wrapper">
+                    <CenteredVideoCarousel 
+                      videos={section.videos} 
+                      carouselId={`carousel-${section.id}`}
+                    />
+                  </div>
+                ) : (
+                  <div style={{ 
+                    textAlign: 'center', 
+                    padding: '40px',
+                    color: '#aaa'
+                  }}>
+                    <p>No videos in this category yet</p>
+                  </div>
+                )}
               </div>
-            </div>
-          </section>
-        ))}
+            </section>
+          ))
+        )}
       </div>
 
       <div className="video-footer">

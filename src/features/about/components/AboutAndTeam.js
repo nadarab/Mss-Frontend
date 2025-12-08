@@ -2,96 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import './AboutAndTeam.css';
 import aboutUsChar from '../../../assets/images/design/AboutUsChar.png';
 import charHazem from '../../../assets/images/common/charHazem.PNG';
-
-const managementTeam = [
-  {
-    id: 1,
-    name: 'Rashed Rababah',
-    position: 'Company Owner',
-    image: charHazem
-  },
-  {
-    id: 2,
-    name: 'Hazem Al Zubi',
-    position: 'Company Owner',
-    image: charHazem
-  }
-];
-
-const allTeamMembers = [
-  {
-    id: 3,
-    name: 'Zaid Al-Abbadi',
-    position: 'Photographer',
-    image: charHazem
-  },
-  {
-    id: 4,
-    name: 'Sameer Mashagbeh',
-    position: 'Photographer',
-    image: charHazem
-  },
-  {
-    id: 5,
-    name: 'Sanad Al-Abbadi',
-    position: 'Photographer',
-    image: charHazem
-  },
-  {
-    id: 6,
-    name: 'Faisal Asaad',
-    position: 'Manager',
-    image: charHazem
-  },
-  {
-    id: 7,
-    name: 'Yousef Sungur',
-    position: 'Assistant Manager',
-    image: charHazem
-  },
-  {
-    id: 8,
-    name: 'Sara Rababah',
-    position: 'Team Leader',
-    image: charHazem
-  },
-  {
-    id: 9,
-    name: 'Diana Aswad',
-    position: 'Account Manager',
-    image: charHazem
-  },
-  {
-    id: 10,
-    name: 'Aya AL-hamaidah',
-    position: 'Account Manager',
-    image: charHazem
-  },
-  {
-    id: 11,
-    name: 'Ghaedaa AL-Faqeeh',
-    position: 'Account Manager',
-    image: charHazem
-  },
-  {
-    id: 12,
-    name: 'Reem Rababah',
-    position: 'Branding & Graphic Designer',
-    image: charHazem
-  },
-  {
-    id: 13,
-    name: 'Ahmad Alzubi',
-    position: 'Developer',
-    image: charHazem
-  },
-  {
-    id: 14,
-    name: 'Nada Rababah',
-    position: 'Developer',
-    image: charHazem
-  }
-];
+import { employeeService } from '../../../firebase/collections';
 
 function TeamMember({ member, size, index, animateDirection }) {
   const memberRef = useRef(null);
@@ -149,8 +60,57 @@ function AboutAndTeam() {
   const scrollContainerRef = useRef(null);
   const titleRefs = useRef([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [managementTeam, setManagementTeam] = useState([]);
+  const [allTeamMembers, setAllTeamMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const membersPerPage = 4;
   const totalPages = Math.ceil(allTeamMembers.length / membersPerPage);
+
+  // Load employees from Firestore
+  useEffect(() => {
+    loadEmployees();
+  }, []);
+
+  const loadEmployees = async () => {
+    try {
+      // Get all employees from Firestore
+      const employees = await employeeService.getAll();
+
+      // Separate Company Owners from other employees
+      const owners = employees.filter(emp => 
+        emp.role.toLowerCase() === 'company owner'
+      );
+      
+      const otherMembers = employees.filter(emp => 
+        emp.role.toLowerCase() !== 'company owner'
+      );
+
+      // Map to the format expected by the component
+      const formattedOwners = owners.map(emp => ({
+        id: emp.id,
+        name: `${emp.firstName} ${emp.lastName}`,
+        position: emp.role,
+        image: emp.imageUrl || charHazem
+      }));
+
+      const formattedMembers = otherMembers.map(emp => ({
+        id: emp.id,
+        name: `${emp.firstName} ${emp.lastName}`,
+        position: emp.role,
+        image: emp.imageUrl || charHazem
+      }));
+
+      setManagementTeam(formattedOwners);
+      setAllTeamMembers(formattedMembers);
+    } catch (error) {
+      console.error('Error loading employees:', error);
+      // Set empty arrays on error
+      setManagementTeam([]);
+      setAllTeamMembers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const scrollLeft = () => {
     if (scrollContainerRef.current && currentPage > 1) {
@@ -211,6 +171,23 @@ function AboutAndTeam() {
     };
   }, []);
 
+  if (loading) {
+    return (
+      <section id="about-and-team" className="about-team-section" ref={sectionRef}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          minHeight: '50vh',
+          color: '#fff',
+          fontSize: '1.2rem'
+        }}>
+          Loading team...
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section id="about-and-team" className="about-team-section" ref={sectionRef}>
       <div className="about-team-container">
@@ -241,6 +218,7 @@ function AboutAndTeam() {
 
         {/* Team Section */}
         <div className="team-section-content">
+          {/* Company Owners Section */}
           <div className="team-subsection">
             <h2 
               ref={(el) => (titleRefs.current[0] = el)}
@@ -249,18 +227,30 @@ function AboutAndTeam() {
               The Minds Who Started It All
             </h2>
             <div className="team-row management-row">
-              {managementTeam.map((member, index) => (
-                <TeamMember 
-                  key={member.id} 
-                  member={member} 
-                  size="large" 
-                  index={index}
-                  animateDirection={index === 0 ? 'slide-left' : 'slide-right'}
-                />
-              ))}
+              {managementTeam.length > 0 ? (
+                managementTeam.map((member, index) => (
+                  <TeamMember 
+                    key={member.id} 
+                    member={member} 
+                    size="large" 
+                    index={index}
+                    animateDirection={index === 0 ? 'slide-left' : 'slide-right'}
+                  />
+                ))
+              ) : (
+                <div style={{ 
+                  textAlign: 'center', 
+                  padding: '40px',
+                  color: '#aaa',
+                  width: '100%'
+                }}>
+                  <p>No company owners added yet. Add them in the <a href="/admin" style={{ color: '#0066ff' }}>admin panel</a>.</p>
+                </div>
+              )}
             </div>
           </div>
 
+          {/* Other Team Members Section */}
           <div className="team-subsection">
             <div className="team-subsection-header">
               <h2 
@@ -269,43 +259,56 @@ function AboutAndTeam() {
               >
                 The Talent Behind Our Work
               </h2>
-              <div className="team-pagination">
-                <button 
-                  className="team-arrow team-arrow-left" 
-                  onClick={scrollLeft}
-                  aria-label="Previous page"
-                  disabled={currentPage === 1}
-                >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="15 18 9 12 15 6"></polyline>
-                  </svg>
-                </button>
-                <span className="team-page-indicator">{currentPage}/{totalPages}</span>
-                <button 
-                  className="team-arrow team-arrow-right" 
-                  onClick={scrollRight}
-                  aria-label="Next page"
-                  disabled={currentPage === totalPages}
-                >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                  </svg>
-                </button>
-              </div>
+              {allTeamMembers.length > 0 && (
+                <div className="team-pagination">
+                  <button 
+                    className="team-arrow team-arrow-left" 
+                    onClick={scrollLeft}
+                    aria-label="Previous page"
+                    disabled={currentPage === 1}
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                  </button>
+                  <span className="team-page-indicator">{currentPage}/{totalPages}</span>
+                  <button 
+                    className="team-arrow team-arrow-right" 
+                    onClick={scrollRight}
+                    aria-label="Next page"
+                    disabled={currentPage === totalPages}
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                  </button>
+                </div>
+              )}
             </div>
             
             <div className="team-carousel-wrapper">
               <div className="team-row-scrollable" ref={scrollContainerRef}>
                 <div className="team-scroll-container">
-                  {allTeamMembers.map((member, index) => (
-                    <TeamMember 
-                      key={member.id} 
-                      member={member} 
-                      size="small" 
-                      index={index}
-                      animateDirection="fade-up"
-                    />
-                  ))}
+                  {allTeamMembers.length > 0 ? (
+                    allTeamMembers.map((member, index) => (
+                      <TeamMember 
+                        key={member.id} 
+                        member={member} 
+                        size="small" 
+                        index={index}
+                        animateDirection="fade-up"
+                      />
+                    ))
+                  ) : (
+                    <div style={{ 
+                      textAlign: 'center', 
+                      padding: '40px',
+                      color: '#aaa',
+                      width: '100%'
+                    }}>
+                      <p>No team members added yet. Add them in the <a href="/admin" style={{ color: '#0066ff' }}>admin panel</a>.</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
