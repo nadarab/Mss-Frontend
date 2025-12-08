@@ -1,9 +1,20 @@
 .services-section {
+  --section-horizontal-padding: clamp(24px, 5vw, 64px);
+  --section-vertical-padding: clamp(16px, 3vw, 28px);
+  --design-width: 1520;
+  --design-height: 820;
+  --scale: clamp(
+    0.35,
+    calc(
+      ((100vw - 2 * var(--section-horizontal-padding)) / (var(--design-width) * 1px)) * 0.7
+    ),
+    0.7
+  );
   min-height: 85vh;
-  padding: clamp(12px, 1.5vw, 16px) clamp(20px, 5vw, 80px) clamp(8px, 1vw, 12px);
+  padding: var(--section-vertical-padding) var(--section-horizontal-padding) clamp(12px, 1vw, 14px);
   background: transparent;
   color: #fff;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .services-header {
@@ -25,12 +36,11 @@
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  margin-bottom: 16px;
   margin: 0 0 9px 0;
 }
 
 .services-title {
-  font-size: 1.7rem; /* ~30px to match Services */
+  font-size: 1.7rem;
   font-weight: 500;
   color: #ffffff;
   margin: 0 0 10px 0;
@@ -51,10 +61,10 @@
 
 .services-container {
   position: relative;
-  width: 1520px; /* stage width that matches absolute layout */
-    left: 50%;
-  min-height: 520px;
-  transform: translateX(-50%) scale(0.62);
+  width: calc(var(--design-width) * 1px);
+  min-height: calc(var(--design-height) * 1px);
+  left: 50%;
+  transform: translateX(-50%) scale(var(--scale));
   transform-origin: top center;
 }
 
@@ -121,7 +131,7 @@
 .service-card::before {
   content: '';
   position: absolute;
-  top: 0; /* adjust to match absolute layout */
+  top: 0;
   left: 0;
   width: 100%;
   height: 100%;
@@ -142,7 +152,7 @@
   width: 100%;
   height: 100%;
   z-index: 0;
-  background-image: 
+  background-image:
     repeating-linear-gradient(
       0deg,
       transparent 0,
@@ -256,7 +266,7 @@
 }
 
 .marketing-strategies-card .service-card-content {
-  align-self: flex-end !;
+  align-self: flex-end;
   align-items: flex-start;
   padding-left: 0;
   max-width: 630px;
@@ -273,7 +283,7 @@
   width: 470px;
   height: 459px;
   top: 332px;
- right: 1390px;
+  right: 1390px;
   background: linear-gradient(180deg, #003d7a 0%, #001D6C 50%, #001141 100%) !important;
 }
 
@@ -307,7 +317,7 @@
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(9px);
   border-radius: 32px 32px 0 0;
-  z-index: -1; /* between character/background and text */
+  z-index: -1;
 }
 
 /* Branding & Identity Card */
@@ -331,8 +341,6 @@
   object-position: center;
 }
 
-
-
 .branding-card .service-card-content::before {
   content: '';
   position: absolute;
@@ -351,12 +359,8 @@
   backdrop-filter: blur(9px);
   -webkit-backdrop-filter: blur(3px);
   border-radius:  20px;
-  z-index: -1; /* between character/background and text */
+  z-index: -1;
 }
-
-
-
-
 
 /* Web Development Card */
 .web-development-card {
@@ -374,7 +378,7 @@
   width: auto;
 }
 .web-development-card .service-card-content {
-  align-self: flex-end !;
+  align-self: flex-end;
   align-items: flex-start;
   padding-left: 0;
   max-width: 730px;
@@ -385,173 +389,549 @@
   text-align: left;
   width: 90%;
 }
-/* Responsive adjustments - Dynamic scaling for all screen sizes */
 
-/* Extra large screens (1920px+) */
-@media (min-width: 1920px) {
-  .services-container {
-    transform: translateX(-50%) scale(0.7);
-  }
-}
-
-/* Large screens (1600px - 1919px) */
-@media (min-width: 1600px) and (max-width: 1919px) {
-  .services-container {
-    transform: translateX(-50%) scale(0.65);
-  }
-}
-
-/* Medium-large screens (1440px - 1599px) */
-@media (min-width: 1440px) and (max-width: 1599px) {
+/* Large Screens */
+@media (max-width: 1400px) {
   .services-section {
-    padding: clamp(12px, 1.2vw, 16px) clamp(20px, 4vw, 60px) clamp(8px, 0.8vw, 12px);
+    --section-horizontal-padding: clamp(1.5rem, 4vw, 4rem);
+    --section-vertical-padding: clamp(1rem, 2.3vw, 1.75rem);
+    padding: var(--section-vertical-padding) var(--section-horizontal-padding) clamp(0.75rem, 1.9vw, 0.875rem);
   }
-  
-  .services-container {
-    transform: translateX(-50%) scale(0.58);
-  }
-}
 
-/* Medium screens (1280px - 1439px) */
-@media (min-width: 1280px) and (max-width: 1439px) {
-  .services-section {
-    padding: clamp(12px, 1vw, 14px) clamp(20px, 3.5vw, 50px) clamp(8px, 0.7vw, 10px);
+  .services-header {
+    margin-bottom: clamp(1.4rem, 3.8vw, 2rem);
   }
-  
-  .services-container {
-    transform: translateX(-50%) scale(0.52);
-  }
-}
 
-/* Small-medium screens (1024px - 1279px) */
-@media (min-width: 1024px) and (max-width: 1279px) {
-  .services-section {
-    padding: clamp(12px, 1vw, 14px) clamp(20px, 3vw, 40px) clamp(8px, 0.6vw, 10px);
-  }
-  
-  .services-container {
-    transform: translateX(-50%) scale(0.45);
-  }
-}
-
-/* Tablet landscape (900px - 1023px) */
-@media (min-width: 900px) and (max-width: 1023px) {
-  .services-section {
-    padding: clamp(12px, 1vw, 14px) clamp(20px, 3vw, 40px) clamp(8px, 0.6vw, 10px);
-  }
-  
-  .services-container {
-    transform: translateX(-50%) scale(0.4);
-  }
-}
-
-/* Tablet portrait (769px - 899px) */
-@media (min-width: 769px) and (max-width: 899px) {
-  .services-section {
-    padding: clamp(12px, 1.2vw, 14px) clamp(18px, 3.5vw, 35px) clamp(8px, 0.7vw, 10px);
-  }
-  
-  .services-container {
-    transform: translateX(-50%) scale(0.35);
-  }
-}
-
-/* Mobile and small tablets (768px and below) - Switch to stacked layout */
-@media (max-width: 768px) {
-  .services-section {
-    padding: clamp(12px, 1.5vw, 16px) clamp(15px, 4vw, 30px) clamp(8px, 1vw, 12px);
+  .services-label {
+    font-size: clamp(0.875rem, 1.7vw, 1.2rem);
   }
 
   .services-title {
-    font-size: clamp(1.5rem, 4vw, 2.25rem);
+    font-size: clamp(1.5rem, 3.8vw, 1.7rem);
+    margin-bottom: clamp(0.6rem, 1.5vw, 0.625rem);
   }
 
   .services-subtitle {
-    font-size: clamp(0.8rem, 2vw, 1rem);
+    font-size: clamp(0.8rem, 1.5vw, 0.875rem);
   }
 
   .services-container {
+    --scale: clamp(
+      0.35,
+      calc(
+        ((100vw - 2 * var(--section-horizontal-padding)) / (var(--design-width) * 1px)) * 0.65
+      ),
+      0.65
+    );
+  }
+
+  .service-card {
+    padding: clamp(1rem, 1.9vw, 1.25rem);
+    border-radius: clamp(1rem, 1.9vw, 1.25rem);
+  }
+
+  .service-card-title {
+    font-size: clamp(1.5rem, 3.5vw, 1.875rem);
+  }
+
+  .service-card-description {
+    font-size: clamp(1rem, 2.2vw, 1.375rem);
+  }
+}
+
+/* Medium Laptop */
+@media (max-width: 1200px) {
+  .services-section {
+    --section-horizontal-padding: clamp(1.3rem, 3.5vw, 3.5rem);
+    --section-vertical-padding: clamp(0.95rem, 2.2vw, 1.5rem);
+    padding: var(--section-vertical-padding) var(--section-horizontal-padding) clamp(0.7rem, 1.8vw, 0.875rem);
+  }
+
+  .services-header {
+    margin-bottom: clamp(1.3rem, 3.5vw, 1.75rem);
+  }
+
+  .services-label {
+    font-size: clamp(0.85rem, 1.6vw, 1.1rem);
+  }
+
+  .services-title {
+    font-size: clamp(1.4rem, 3.5vw, 1.6rem);
+    line-height: 1.25;
+    margin-bottom: clamp(0.55rem, 1.4vw, 0.6rem);
+  }
+
+  .services-subtitle {
+    font-size: clamp(0.75rem, 1.4vw, 0.8rem);
+    line-height: 1.65;
+  }
+
+  .services-container {
+    --scale: clamp(
+      0.35,
+      calc(
+        ((100vw - 2 * var(--section-horizontal-padding)) / (var(--design-width) * 1px)) * 0.6
+      ),
+      0.6
+    );
+  }
+
+  .service-card {
+    padding: clamp(0.95rem, 1.8vw, 1.2rem);
+    border-radius: clamp(0.95rem, 1.8vw, 1.2rem);
+  }
+
+  .service-card-title {
+    font-size: clamp(1.4rem, 3.2vw, 1.75rem);
+  }
+
+  .service-card-description {
+    font-size: clamp(0.95rem, 2vw, 1.25rem);
+  }
+}
+
+/* Tablet Landscape / Small Laptop */
+@media (max-width: 992px) {
+  .services-section {
+    min-height: 100vh;
+    --section-horizontal-padding: clamp(1.2rem, 3.2vw, 3rem);
+    --section-vertical-padding: clamp(0.9rem, 2vw, 1.3rem);
+    padding: var(--section-vertical-padding) var(--section-horizontal-padding) clamp(0.65rem, 1.6vw, 0.8rem);
+  }
+
+  .services-header {
+    margin-bottom: clamp(1.2rem, 3.2vw, 1.5rem);
+  }
+
+  .services-label {
+    font-size: clamp(0.8rem, 1.5vw, 1rem);
+  }
+
+  .services-title {
+    font-size: clamp(1.3rem, 3.2vw, 1.5rem);
+    line-height: 1.3;
+    margin-bottom: clamp(0.5rem, 1.3vw, 0.55rem);
+  }
+
+  .services-subtitle {
+    font-size: clamp(0.7rem, 1.3vw, 0.75rem);
+    line-height: 1.7;
+  }
+
+  .services-container {
+    --scale: 1;
     position: static;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(1rem, 2.5vw, 1.25rem);
+    width: min(100%, 520px);
     min-height: auto;
-    transform: none;
-    width: 100%;
     left: auto;
+    transform: none;
+    margin: 0 auto;
   }
 
   .service-card {
     position: static !important;
     width: 100% !important;
     height: auto !important;
-    min-height: 250px;
+    min-height: clamp(15rem, 35vw, 17.5rem);
+    padding: clamp(1rem, 2.3vw, 1.25rem) clamp(1.1rem, 2.5vw, 1.375rem);
+    border-radius: clamp(0.875rem, 1.6vw, 1rem);
   }
-  
+
+  /* Layout: full, two side-by-side, full, full */
+  /* Row 1: Social Media (full width) */
+  .social-media-card {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  /* Row 2: Marketing Strategies (full width) - but we want it in row 3 */
+  .marketing-strategies-card {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+
+  /* Row 2: SEO and Branding (side by side) */
+  .seo-card {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .branding-card {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  /* Row 4: Web Development (full width) */
+  .web-development-card {
+    grid-column: 1 / -1;
+    grid-row: 4;
+  }
+
   .service-character {
-    width: 100%;
-    height: auto;
-    max-height: 200px;
+    width: auto;
+    height: clamp(12rem, 28vw, 13.75rem);
+    max-height: clamp(13rem, 30vw, 15rem);
+    right: -8%;
+    bottom: -4%;
     object-fit: contain;
   }
-  
+
   .service-card-content {
-    padding: 20px;
+    padding: clamp(1rem, 2.3vw, 1.125rem) clamp(0.375rem, 1vw, 0.5rem) clamp(0.5rem, 1.2vw, 0.625rem);
   }
-  
+
   .service-card-title {
-    font-size: clamp(1.5rem, 5vw, 2rem);
+    font-size: clamp(1.3rem, 3.2vw, 1.5rem);
   }
-  
+
   .service-card-description {
-    font-size: clamp(1rem, 3vw, 1.2rem);
+    font-size: clamp(0.9rem, 2.2vw, 1.1rem);
+  }
+
+  /* Per-card tweaks to mirror desktop composition */
+  .social-media-card {
+    min-height: clamp(15rem, 35vw, 17.5rem);
+  }
+  .social-media-card .service-character {
+    left: -10%;
+    right: auto;
+    height: clamp(12.5rem, 29vw, 14.375rem);
+    max-height: clamp(13.5rem, 31vw, 15rem);
+  }
+  .social-media-card .service-card-content {
+    padding: clamp(0.875rem, 2vw, 1rem) clamp(0.375rem, 1vw, 0.5rem) clamp(0.5rem, 1.2vw, 0.625rem);
+  }
+
+  .marketing-strategies-card {
+    min-height: clamp(16rem, 37vw, 18.75rem);
+  }
+  .marketing-strategies-card .service-character {
+    left: 45%;
+    right: auto;
+    height: clamp(13rem, 30vw, 15rem);
+  }
+  .marketing-strategies-card .service-card-content {
+    padding: clamp(1rem, 2.3vw, 1.125rem) clamp(0.375rem, 1vw, 0.5rem) clamp(0.6rem, 1.4vw, 0.75rem);
+  }
+
+  .seo-card {
+    min-height: clamp(14rem, 32vw, 15.625rem);
+  }
+  .seo-card .service-character {
+    left: -26%;
+    top: -8%;
+    height: clamp(12rem, 28vw, 13.75rem);
+  }
+
+  .branding-card {
+    min-height: clamp(14rem, 32vw, 15.625rem);
+  }
+  .branding-card .service-character {
+    left: -18%;
+    top: -6%;
+    height: clamp(12.5rem, 29vw, 14.375rem);
+  }
+
+  .web-development-card {
+    min-height: clamp(15rem, 35vw, 17.5rem);
+  }
+  .web-development-card .service-character {
+    left: 55%;
+    right: auto;
+    height: clamp(12.5rem, 29vw, 14.375rem);
   }
 }
 
-/* Small mobile devices (480px and below) */
-@media (max-width: 480px) {
+/* Tablet Portrait */
+@media (max-width: 768px) {
   .services-section {
-    padding: clamp(10px, 2vw, 14px) clamp(12px, 4vw, 20px) clamp(6px, 1.2vw, 10px);
+    min-height: 100vh;
+    --section-horizontal-padding: clamp(1rem, 2.5vw, 2.5rem);
+    --section-vertical-padding: clamp(0.85rem, 1.9vw, 1.1rem);
+    padding: var(--section-vertical-padding) var(--section-horizontal-padding) clamp(0.6rem, 1.5vw, 0.75rem);
   }
-  
-  .services-label {
-    font-size: 1rem;
-  }
-  
-  .services-title {
-    font-size: clamp(1.3rem, 5vw, 1.8rem);
-  }
-  
-  .services-subtitle {
-    font-size: clamp(0.75rem, 3vw, 0.9rem);
-  }
-  
-  .service-card {
-    min-height: 220px;
-  }
-  
-  .service-card-title {
-    font-size: clamp(1.2rem, 4.5vw, 1.5rem);
-  }
-  
-  .service-card-description {
-    font-size: clamp(0.9rem, 3.5vw, 1.1rem);
-  }
-}
 
-/* Very small devices (360px and below) */
-@media (max-width: 360px) {
-  .services-section {
-    padding: 8px 10px 6px;
-  }
-  
   .services-header {
-    margin-bottom: 20px;
+    margin-bottom: clamp(1.1rem, 3vw, 1.3rem);
   }
-  
+
+  .services-label {
+    font-size: clamp(0.75rem, 1.4vw, 0.9rem);
+  }
+
+  .services-title {
+    font-size: clamp(1.2rem, 3vw, 1.4rem);
+    line-height: 1.35;
+    margin-bottom: clamp(0.45rem, 1.2vw, 0.5rem);
+  }
+
+  .services-subtitle {
+    font-size: clamp(0.65rem, 1.2vw, 0.7rem);
+    line-height: 1.75;
+  }
+
+  .services-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(0.9rem, 2.2vw, 1.1rem);
+    width: min(100%, 480px);
+  }
+
   .service-card {
-    min-height: 200px;
-    padding: 15px;
+    min-height: clamp(13.5rem, 33vw, 16rem);
+    padding: clamp(0.9rem, 2.2vw, 1.1rem) clamp(1rem, 2.3vw, 1.2rem);
+    border-radius: clamp(0.75rem, 1.5vw, 0.875rem);
+  }
+
+  /* Layout: full, two side-by-side, full, full */
+  .social-media-card {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .marketing-strategies-card {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+
+  .seo-card {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .branding-card {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .web-development-card {
+    grid-column: 1 / -1;
+    grid-row: 4;
+  }
+
+  .service-character {
+    height: clamp(11rem, 27vw, 13.5rem);
+    max-height: clamp(12rem, 29vw, 14.5rem);
+  }
+
+  .service-card-content {
+    padding: clamp(0.9rem, 2.2vw, 1.05rem) clamp(0.3rem, 0.9vw, 0.45rem) clamp(0.45rem, 1.1vw, 0.55rem);
+  }
+
+  .service-card-title {
+    font-size: clamp(1.2rem, 3vw, 1.4rem);
+  }
+
+  .service-card-description {
+    font-size: clamp(0.85rem, 2vw, 1rem);
+  }
+
+  .social-media-card {
+    min-height: clamp(13.5rem, 33vw, 16rem);
+  }
+  .social-media-card .service-character {
+    height: clamp(11.5rem, 28vw, 13.75rem);
+    max-height: clamp(12.5rem, 30vw, 14.75rem);
+  }
+  .social-media-card .service-card-content {
+    padding: clamp(0.85rem, 2vw, 1rem) clamp(0.3rem, 0.9vw, 0.45rem) clamp(0.45rem, 1.1vw, 0.55rem);
+  }
+
+  .marketing-strategies-card {
+    min-height: clamp(14.5rem, 35vw, 17rem);
+  }
+  .marketing-strategies-card .service-character {
+    height: clamp(12rem, 29vw, 14.5rem);
+  }
+  .marketing-strategies-card .service-card-content {
+    padding: clamp(0.9rem, 2.2vw, 1.05rem) clamp(0.3rem, 0.9vw, 0.45rem) clamp(0.55rem, 1.3vw, 0.65rem);
+  }
+
+  .seo-card {
+    min-height: clamp(12.5rem, 30vw, 15rem);
+  }
+  .seo-card .service-character {
+    height: clamp(11rem, 27vw, 13.5rem);
+  }
+
+  .branding-card {
+    min-height: clamp(12.5rem, 30vw, 15rem);
+  }
+  .branding-card .service-character {
+    height: clamp(11.5rem, 28vw, 13.75rem);
+  }
+
+  .web-development-card {
+    min-height: clamp(13.5rem, 33vw, 16rem);
+  }
+  .web-development-card .service-character {
+    height: clamp(11.5rem, 28vw, 13.75rem);
   }
 }
 
+/* Mobile */
+@media (max-width: 576px) {
+  .services-section {
+    min-height: 93vh;
+    overflow-x: hidden;
+    padding-bottom: 4rem;
+    --section-horizontal-padding: clamp(0.8rem, 2.8vw, 1.5rem);
+    --section-vertical-padding: clamp(0.8rem, 1.8vw, 1rem);
+    padding: var(--section-vertical-padding) var(--section-horizontal-padding) clamp(0.5rem, 1.4vw, 0.6875rem);
+  }
+
+  .services-header {
+    margin-bottom: clamp(1rem, 2.8vw, 1.2rem);
+  }
+
+  .services-label {
+    font-size: clamp(0.8rem, 1.3vw, 1rem);
+  }
+
+  .services-title {
+    font-size: clamp(1.1rem, 3.2vw, 1.3rem);
+    line-height: 1.4;
+    margin-bottom: clamp(0.4rem, 1.1vw, 0.45rem);
+  }
+
+  .services-subtitle {
+    font-size: clamp(0.6rem, 1.8vw, 0.75rem);
+    line-height: 1.8;
+    margin-bottom: clamp(0.5rem, 1.4vw, 0.6rem);
+  }
+
+  .services-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(0.75rem, 2vw, 1rem);
+    width: min(100%, 92vw);
+  }
+
+  .service-card {
+    min-height: clamp(12rem, 30vw, 14.5rem);
+    padding: clamp(0.75rem, 2vw, 1rem) clamp(0.9rem, 2.3vw, 1.1rem);
+    border-radius: clamp(0.625rem, 1.4vw, 0.75rem);
+  }
+
+  /* Layout: full, two side-by-side, full, full */
+  .social-media-card {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .marketing-strategies-card {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+
+  .seo-card {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .branding-card {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .web-development-card {
+    grid-column: 1 / -1;
+    grid-row: 4;
+  }
+
+  .service-character {
+    height: clamp(10rem, 25vw, 12.5rem);
+    max-height: clamp(11rem, 27vw, 13.5rem);
+  }
+
+  .service-card-content {
+    padding: clamp(0.8rem, 2vw, 1rem) clamp(0.25rem, 0.8vw, 0.4rem) clamp(0.4rem, 1vw, 0.5rem);
+  }
+
+  .service-card-title {
+    font-size: clamp(1.1rem, 3.2vw, 1.3rem);
+    margin-bottom: clamp(0.5rem, 1.4vw, 0.625rem);
+  }
+
+  .service-card-description {
+    font-size: clamp(0.8rem, 1.8vw, 0.95rem);
+  }
+
+  .social-media-card {
+    min-height: clamp(12rem, 30vw, 14.5rem);
+  }
+  .social-media-card .service-character {
+    left: 2%;
+    right: auto;
+    height: clamp(12rem, 28vw, 14.75rem);
+    max-height: clamp(13rem, 30vw, 15.75rem);
+  }
+  .social-media-card .service-card-content {
+    align-items: flex-end;
+    align-self: flex-start;
+    padding: clamp(0.5rem, 1.9vw, 0.95rem) clamp(0.15rem, 0.8vw, 0.4rem) clamp(0.1rem, 1vw, 0.5rem);
+    margin-left: auto;
+    text-align: right;
+  }
+
+  .social-media-card .service-card-title {
+    text-align: right;
+    font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  }
+
+  .social-media-card .service-card-description {
+    text-align: right;
+    font-size: clamp(0.7rem, 1.8vw, 0.85rem);
+  }
+
+  .marketing-strategies-card {
+    min-height: clamp(13rem, 32vw, 15.5rem);
+  }
+  .marketing-strategies-card .service-character {
+    height: clamp(11rem, 27vw, 13.5rem);
+  }
+  .marketing-strategies-card .service-card-content {
+    padding: clamp(0.8rem, 2vw, 1rem) clamp(0.25rem, 0.8vw, 0.4rem) clamp(0.5rem, 1.2vw, 0.6rem);
+  }
+
+  .seo-card {
+    min-height: clamp(11.5rem, 28vw, 14rem);
+  }
+  .seo-card .service-character {
+    height: clamp(10rem, 25vw, 12.5rem);
+  }
+
+  .branding-card {
+    min-height: clamp(11.5rem, 28vw, 14rem);
+  }
+  .branding-card .service-character {
+    height: clamp(10.5rem, 26vw, 12.75rem);
+  }
+
+  .web-development-card {
+    min-height: clamp(12rem, 30vw, 14.5rem);
+  }
+  .web-development-card .service-character {
+    height: clamp(10.5rem, 26vw, 12.75rem);
+  }
+
+  /* Ensure cards display properly on mobile */
+  @media (orientation: portrait) {
+    .service-card {
+      min-height: clamp(11.5rem, 28vw, 14rem);
+    }
+  }
+
+  @media (orientation: landscape) {
+    .service-card {
+      min-height: clamp(10rem, 25vw, 12.5rem);
+    }
+
+    .services-container {
+      gap: clamp(0.6rem, 1.6vw, 0.8rem);
+    }
+  }
+}

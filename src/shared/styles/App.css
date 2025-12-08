@@ -35,6 +35,32 @@ section {
   background: transparent;
 }
 
+@media (max-width: 576px) {
+  section {
+    padding-inline: clamp(1rem, 5vw, 1.5rem);
+  }
+
+  /* Center all section content on mobile */
+  section:not([class*="hero-section"]):not([class*="video-hero"]) {
+    text-align: center;
+  }
+
+  section:not([class*="hero-section"]):not([class*="video-hero"]) .container {
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  section:not([class*="hero-section"]):not([class*="video-hero"]) h1,
+  section:not([class*="hero-section"]):not([class*="video-hero"]) h2,
+  section:not([class*="hero-section"]):not([class*="video-hero"]) h3,
+  section:not([class*="hero-section"]):not([class*="video-hero"]) h4,
+  section:not([class*="hero-section"]):not([class*="video-hero"]) h5,
+  section:not([class*="hero-section"]):not([class*="video-hero"]) h6,
+  section:not([class*="hero-section"]):not([class*="video-hero"]) p {
+    text-align: center;
+  }
+}
+
 /* Improve scroll performance */
 * {
   -webkit-overflow-scrolling: touch;
