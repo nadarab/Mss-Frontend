@@ -173,7 +173,7 @@ function AboutAndTeam() {
 
   if (loading) {
     return (
-      <section id="about-and-team" className="about-team-section" ref={sectionRef}>
+      <section id="about" className="about-team-section" ref={sectionRef}>
         <div style={{ 
           display: 'flex', 
           justifyContent: 'center', 
@@ -189,7 +189,7 @@ function AboutAndTeam() {
   }
 
   return (
-    <section id="about-and-team" className="about-team-section" ref={sectionRef}>
+    <section id="about" className="about-team-section" ref={sectionRef}>
       <div className="about-team-container">
         {/* About Us Section */}
         <div className="about-section-content">

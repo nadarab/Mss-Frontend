@@ -1,5 +1,5 @@
 .services-section {
-  min-height: 85vh;
+  min-height: 60vh;
   padding: clamp(12px, 1.5vw, 16px) clamp(20px, 5vw, 80px) clamp(8px, 1vw, 12px);
   background: transparent;
   color: #fff;
@@ -197,7 +197,7 @@
 .service-card-title {
   font-size: 30px;
   font-weight: 700;
-  margin: 0 0 10px 0;
+  margin: 0 0 5px 0;
   color: #fff;
 }
 
@@ -248,7 +248,7 @@
   background: linear-gradient(90deg, #0052cc 0%, #0066ff 50%, #00a3ff 100%) !important;
 }
 .marketing-strategies-card .service-character {
-  left: 530px;
+  left: 430px;
   right: auto;
   object-position: left center;
   height: 100%;
@@ -367,7 +367,7 @@
   background: linear-gradient(90deg, #0052cc 0%, #0066ff 50%, #00a3ff 100%) !important;
 }
 .web-development-card .service-character {
-  left: 690px;
+  left: 530px;
   right: auto;
   object-position: left center;
   height: 100%;
@@ -456,7 +456,7 @@
   }
 }
 
-/* Mobile and small tablets (768px and below) - Switch to stacked layout */
+/* Mobile and small tablets (768px and below) - Switch to alternating layout */
 @media (max-width: 768px) {
   .services-section {
     padding: clamp(12px, 1.5vw, 16px) clamp(15px, 4vw, 30px) clamp(8px, 1vw, 12px);
@@ -473,7 +473,8 @@
   .services-container {
     position: static;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     gap: 20px;
     min-height: auto;
     transform: none;
@@ -483,9 +484,63 @@
 
   .service-card {
     position: static !important;
-    width: 100% !important;
     height: auto !important;
-    min-height: 250px;
+    min-height: 220px;
+  }
+
+  /* Pattern: one card, two cards, one card, one card */
+  /* 1st card: full width */
+  .service-card:nth-child(1) {
+    width: 100% !important;
+    min-height: 200px !important;
+  }
+
+  /* First card: smaller image */
+  .service-card:nth-child(1) .service-character {
+    max-height: 150px;
+    width: auto;
+  }
+
+  /* 2nd and 3rd cards: half width each (side by side) */
+  .service-card:nth-child(2),
+  .service-card:nth-child(3) {
+    width: calc(50% - 10px) !important;
+    flex: 0 0 calc(50% - 10px);
+  }
+
+  /* 2nd and 3rd cards: position content at left-bottom */
+  .service-card:nth-child(2) .service-card-content,
+  .service-card:nth-child(3) .service-card-content {
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding-left: 2px;
+    padding-bottom: 2px;
+  }
+
+  .service-card:nth-child(2) .service-card-title,
+  .service-card:nth-child(2) .service-card-description,
+  .service-card:nth-child(3) .service-card-title,
+  .service-card:nth-child(3) .service-card-description {
+    text-align: left;
+  }
+
+  /* 4th card and onwards: full width, position content at left-bottom */
+  .service-card:nth-child(n+4) {
+    width: 100% !important;
+  }
+
+  .service-card:nth-child(n+4) .service-card-content {
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding-left: 2px;
+    padding-bottom: 2px;
+    padding-right: 15px;
+    max-width: 75%;
+  }
+
+  .service-card:nth-child(n+4) .service-card-title,
+  .service-card:nth-child(n+4) .service-card-description {
+    text-align: left;
   }
   
   .service-character {
@@ -498,13 +553,43 @@
   .service-card-content {
     padding: 20px;
   }
+
+  /* Marketing and Web Development cards: position image at far right, cover full height */
+  .marketing-strategies-card .service-character,
+  .web-development-card .service-character {
+    position: absolute !important;
+    right: 0 !important;
+    left: 13% !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    width: auto !important;
+    height: 100% !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    object-position: right center !important;
+  }
+
+  /* First card: position content at bottom-right */
+  .service-card:nth-child(1) .service-card-content {
+    align-items: flex-end;
+    justify-content: flex-end;
+    padding-right: 20px;
+    padding-bottom: 20px;
+    margin-left: auto;
+  }
+
+  .service-card:nth-child(1) .service-card-title,
+  .service-card:nth-child(1) .service-card-description {
+    text-align: right;
+  }
   
   .service-card-title {
-    font-size: clamp(1.5rem, 5vw, 2rem);
+    font-size: clamp(1.2rem, 4vw, 1.5rem);
+    margin-bottom: 4px;
   }
   
   .service-card-description {
-    font-size: clamp(1rem, 3vw, 1.2rem);
+    font-size: clamp(0.85rem, 2.5vw, 1rem);
   }
 }
 
@@ -525,17 +610,106 @@
   .services-subtitle {
     font-size: clamp(0.75rem, 3vw, 0.9rem);
   }
+
+  .services-container {
+    gap: 5px;
+  }
+
+  /* Maintain the pattern: one card, two cards, one card, one card */
+  .service-card:nth-child(1) {
+    width: 100% !important;
+    min-height: 180px !important;
+  }
+
+  /* First card: smaller image */
+  .service-card:nth-child(1) .service-character {
+    max-height: 178px;
+    width: auto;
+  }
+
+  .service-card:nth-child(2),
+  .service-card:nth-child(3) {
+    width: calc(50% - 7.5px) !important;
+    flex: 0 0 calc(50% - 7.5px);
+  }
+
+  /* 2nd and 3rd cards: position content at left-bottom */
+  .service-card:nth-child(2) .service-card-content,
+  .service-card:nth-child(3) .service-card-content {
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding-left: 0;
+    padding-bottom: 0;
+  }
+
+  .service-card:nth-child(2) .service-card-title,
+  .service-card:nth-child(2) .service-card-description,
+  .service-card:nth-child(3) .service-card-title,
+  .service-card:nth-child(3) .service-card-description {
+    text-align: left;
+  }
+
+  .service-card:nth-child(n+4) {
+    width: 100% !important;
+  }
+
+  /* 4th card and onwards: position content at left-bottom */
+  .service-card:nth-child(n+4) .service-card-content {
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding-left: 0;
+    padding-bottom: 0;
+    padding-right: 12px;
+    max-width: 59%;
+  }
+
+  .service-card:nth-child(n+4) .service-card-title,
+  .service-card:nth-child(n+4) .service-card-description {
+    text-align: left;
+  }
   
   .service-card {
-    min-height: 220px;
+    min-height: 200px;
+  }
+
+  /* Marketing and Web Development cards: position image at far right, cover full height */
+  .marketing-strategies-card .service-character,
+  .web-development-card .service-character {
+    position: absolute !important;
+    right: 0 !important;
+    left: 20% !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    width: auto !important;
+    height: 100% !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    object-position: right center !important;
+  }
+
+  /* First card: position content at bottom-right */
+  .service-card:nth-child(1) .service-card-content {
+    align-items: flex-end;
+    justify-content: flex-end;
+    padding-right: 0.1rem;
+    padding-bottom: 0.1rem;
+    margin-left: 7.8rem;
+  }
+
+  .service-card:nth-child(1) .service-card-title,
+  .service-card:nth-child(1) .service-card-description {
+    text-align: left;
+    
   }
   
   .service-card-title {
-    font-size: clamp(1.2rem, 4.5vw, 1.5rem);
+    font-size: clamp(0.7rem, 3.5vw, 0.8rem);
+    margin-bottom: 0.4px;
   }
   
   .service-card-description {
-    font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+    font-size: clamp(0.5rem, 2.5vw, 0.7rem);
+    margin-bottom: -11px;
   }
 }
 
@@ -548,10 +722,114 @@
   .services-header {
     margin-bottom: 20px;
   }
+
+  .services-container {
+    gap: 12px;
+  }
+
+  /* Maintain the pattern: one card, two cards, one card, one card */
+  .service-card:nth-child(1) {
+    width: 100% !important;
+    min-height: 178px !important;
+  }
+
+  /* First card: smaller image */
+  .service-card:nth-child(1) .service-character {
+    max-height: 110px;
+    width: auto;
+  }
+
+  .service-card:nth-child(2),
+  .service-card:nth-child(3) {
+    width: calc(50% - 6px) !important;
+    flex: 0 0 calc(50% - 6px);
+  }
+
+  /* 2nd and 3rd cards: position content at left-bottom */
+  .service-card:nth-child(2) .service-card-content,
+  .service-card:nth-child(3) .service-card-content {
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding-left: 0;
+    padding-bottom: 0;
+  }
+
+  .service-card:nth-child(2) .service-card-title,
+  .service-card:nth-child(2) .service-card-description,
+  .service-card:nth-child(3) .service-card-title,
+  .service-card:nth-child(3) .service-card-description {
+    text-align: left;
+  }
+
+  .service-card:nth-child(n+4) {
+    width: 100% !important;
+  }
+
+  /* 4th card and onwards: position content at left-bottom */
+  .service-card:nth-child(n+4) .service-card-content {
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding-left: 0;
+    padding-bottom: 0;
+    padding-right: 10px;
+    max-width: 53%;
+  }
+
+  .service-card:nth-child(n+4) .service-card-title,
+  .service-card:nth-child(n+4) .service-card-description {
+    text-align: left;
+  }
   
   .service-card {
     min-height: 200px;
     padding: 15px;
+  }
+
+  /* Marketing and Web Development cards: position image at far right, cover full height */
+  .marketing-strategies-card .service-character,
+  .web-development-card .service-character {
+    position: absolute !important;
+    right: 0 !important;
+    left: 10% !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    width: auto !important;
+    height: 100% !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    object-position: right center !important;
+  }
+
+  /* First card: position content at bottom-right */
+  .service-card:nth-child(1) .service-card-content {
+    align-items: flex-end;
+    justify-content: flex-end;
+    padding-right: 0.1rem;
+    padding-bottom: 0.1rem;
+    margin-left: 7.1rem;
+  }
+
+  .service-card:nth-child(1) .service-card-title,
+  .service-card:nth-child(1) .service-card-description {
+    text-align: left;
+    
+  }
+
+  .service-card-title {
+    font-size: clamp(1rem, 3.5vw, 1.2rem);
+    margin-bottom: 3px;
+  }
+
+  .service-card-description {
+    font-size: clamp(0.75rem, 2.5vw, 0.9rem);
+  }
+}
+
+/* Specific resolution: 1366 x 768 - Reduce gap between work and services sections */
+@media (min-width: 1300px) and (max-width: 1400px) {
+  .services-section {
+    padding-bottom: 0 !important;
+    margin-bottom: -50px !important;
   }
 }
 

@@ -1,292 +1,403 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { Navbar, Nav, Container } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
 import './BrandingGallery.css';
 import logo from '../../../../assets/images/common/logoMSS.PNG';
-import b1 from '../../../../assets/images/branding/Branding1.JPG';
-import b2 from '../../../../assets/images/branding/Branding2.JPG';
-import b3 from '../../../../assets/images/branding/Branding3.JPG';
-import b4 from '../../../../assets/images/branding/Branding4.png';
+import { getDocument } from '../../../../firebase/firestoreService';
+import ContactUs from '../../../contact/components/ContactUs';
 
-// Constants
-const NAVIGATION_ITEMS = [
-  { path: '/', label: 'Home' },
-  { path: '/#services', label: 'Our Services' },
-  { path: '/#work', label: 'Our Work' },
-  { path: '/#about', label: 'About Us' },
-  { path: '/#contact', label: 'Contact Us' },
-];
-
-const PROJECTS = [
-  {
-    name: 'Project Name',
-    description: 'Short Description',
-    mainImage: b1,
-    thumbnails: [b1, b2, b3],
-  },
-];
-
-const EXPLORE_PROJECTS = [b1, b2, b3, b4, b1, b2];
-const ITEMS_PER_PAGE = 6;
-const SCROLL_OFFSET = 600;
-
-const HERO_CONTENT = {
-  category: 'Branding & Identity',
-  title: 'Crafting identities that define who you are and what you stand for.',
-  description: 'Short Description',
-};
-
-const BREADCRUMB_LABEL = 'Branding & Identity';
-
-// SVG Icons Components
-const HomeIcon = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-    <polyline points="9 22 9 12 15 12 15 22" />
-  </svg>
-);
-
-const ChevronRightIcon = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M9 18l6-6-6-6" />
-  </svg>
-);
-
-const ChevronLeftIcon = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M15 18l-6-6 6-6" />
-  </svg>
-);
-
-// Sub-components
-const NavigationHeader = ({ navExpanded, onToggle }) => (
-  <Navbar expand="lg" className="branding-header" expanded={navExpanded} onToggle={onToggle}>
-    <Container fluid>
-      <Navbar.Brand href="/" className="navbar-brand-custom">
-        <img src={logo} alt="MSS Agency" className="navbar-logo" />
-      </Navbar.Brand>
-      <Navbar.Toggle aria-controls="basic-navbar-nav" />
-      <Navbar.Collapse id="basic-navbar-nav">
-        <Nav className="ms-auto">
-          {NAVIGATION_ITEMS.map((item) => (
-            <Nav.Link key={item.path} as={Link} to={item.path}>
-              {item.label}
-            </Nav.Link>
-          ))}
-        </Nav>
-      </Navbar.Collapse>
-    </Container>
-  </Navbar>
-);
-
-const Breadcrumbs = () => (
-  <div className="branding-breadcrumbs">
-    <Link to="/" className="breadcrumb-home-link">
-      <HomeIcon className="breadcrumb-home-icon" />
-    </Link>
-    <ChevronRightIcon className="breadcrumb-separator" />
-    <span>{BREADCRUMB_LABEL}</span>
-  </div>
-);
-
-const HeroSection = ({ backgroundImage }) => (
-  <section className="branding-hero-section">
-    <img src={backgroundImage} alt="Hero Background" className="branding-hero-bg" />
-    <div className="branding-hero-overlay-gradient" />
-    <div className="branding-hero-content">
-      <div className="branding-hero-overlay-box">
-        <div className="branding-hero-category">{HERO_CONTENT.category}</div>
-        <h1 className="branding-hero-title">{HERO_CONTENT.title}</h1>
-        <p className="branding-hero-description">{HERO_CONTENT.description}</p>
-      </div>
-    </div>
-  </section>
-);
-
-const CarouselControls = ({ onPrev, onNext, currentIndex, totalItems }) => (
-  <div className="branding-carousel-controls">
-    <button className="branding-carousel-arrow" onClick={onPrev} aria-label="Previous project">
-      <ChevronLeftIcon />
-    </button>
-    <span className="branding-carousel-counter">
-      {currentIndex + 1}/{totalItems}
-    </span>
-    <button className="branding-carousel-arrow" onClick={onNext} aria-label="Next project">
-      <ChevronRightIcon />
-    </button>
-  </div>
-);
-
-const ThumbnailGallery = ({ thumbnails, onThumbnailClick }) => (
-  <div className="branding-thumbnails">
-    {thumbnails.map((thumb, index) => (
-      <div
-        key={index}
-        className="branding-thumbnail"
-        onClick={() => onThumbnailClick(thumb)}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            onThumbnailClick(thumb);
-          }
-        }}
-        aria-label={`View thumbnail ${index + 1}`}
-      >
-        <img src={thumb} alt={`Thumbnail ${index + 1}`} />
-      </div>
-    ))}
-  </div>
-);
-
-const ProjectShowcase = ({
-  project,
-  currentMainImage,
-  currentIndex,
-  totalProjects,
-  onPrevProject,
-  onNextProject,
-  onThumbnailClick,
-}) => (
-  <div className="branding-project-card">
-    <div className="branding-project-left">
-      <div>
-        <h3 className="branding-project-name">{project.name}</h3>
-        <p className="branding-project-description">{project.description}</p>
-      </div>
-
-      <CarouselControls
-        onPrev={onPrevProject}
-        onNext={onNextProject}
-        currentIndex={currentIndex}
-        totalItems={totalProjects}
-      />
-
-      <ThumbnailGallery thumbnails={project.thumbnails} onThumbnailClick={onThumbnailClick} />
-    </div>
-
-    <div className="branding-project-right">
-      <img src={currentMainImage} alt={project.name} className="branding-main-image" />
-    </div>
-  </div>
-);
-
-const ExploreSection = ({
-  projects,
-  currentIndex,
-  totalPages,
-  onPrev,
-  onNext,
-  galleryRef,
-}) => (
-  <section className="branding-explore-section">
-    <div className="branding-explore-header">
-      <h2 className="branding-explore-title">Explore Other Projects</h2>
-      <div className="branding-explore-controls">
-        <button className="branding-explore-arrow" onClick={onPrev} aria-label="Previous page">
-          <ChevronLeftIcon />
-        </button>
-        <span className="branding-explore-counter">
-          {currentIndex + 1}/{totalPages}
-        </span>
-        <button className="branding-explore-arrow" onClick={onNext} aria-label="Next page">
-          <ChevronRightIcon />
-        </button>
-      </div>
-    </div>
-
-    <div className="branding-explore-gallery" ref={galleryRef}>
-      {projects.map((project, index) => (
-        <div key={index} className="branding-explore-item">
-          <img src={project} alt={`Project ${index + 1}`} />
-        </div>
-      ))}
-    </div>
-  </section>
-);
-
-// Main Component
 function BrandingGallery() {
-  const [currentProjectIndex, setCurrentProjectIndex] = useState(0);
-  const [currentExploreIndex, setCurrentExploreIndex] = useState(0);
-  const [currentMainImage, setCurrentMainImage] = useState(PROJECTS[0].mainImage);
+  const [isLoaded, setIsLoaded] = useState(false);
   const [navExpanded, setNavExpanded] = useState(false);
-  const exploreGalleryRef = useRef(null);
+  const [pageData, setPageData] = useState({
+    desktopHeroImage: '',
+    mobileHeroImage: '',
+    title: 'Branding & Identity',
+    mainText: 'Crafting identities that define who you are and what you stand for.',
+    shortDescription: 'Short Description',
+  });
+  const navigate = useNavigate();
 
-  const currentProject = useMemo(() => PROJECTS[currentProjectIndex], [currentProjectIndex]);
-  const totalExplorePages = useMemo(
-    () => Math.ceil(EXPLORE_PROJECTS.length / ITEMS_PER_PAGE),
-    []
-  );
+  // Main showcase state
+  const [currentItemIndex, setCurrentItemIndex] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [explorePage, setExplorePage] = useState(1);
+
+  // Placeholder branding items data (will be replaced with database data later)
+  const [brandingItems, setBrandingItems] = useState([
+    {
+      id: 1,
+      projectName: 'Project Name',
+      shortDescription: 'Short Description',
+      images: [
+        'https://via.placeholder.com/800x600/cccccc/000000?text=Image+1',
+        'https://via.placeholder.com/800x600/dddddd/000000?text=Image+2',
+        'https://via.placeholder.com/800x600/eeeeee/000000?text=Image+3',
+      ],
+    },
+    {
+      id: 2,
+      projectName: 'Project Name 2',
+      shortDescription: 'Short Description 2',
+      images: [
+        'https://via.placeholder.com/800x600/cccccc/000000?text=Image+1',
+        'https://via.placeholder.com/800x600/dddddd/000000?text=Image+2',
+        'https://via.placeholder.com/800x600/eeeeee/000000?text=Image+3',
+      ],
+    },
+    {
+      id: 3,
+      projectName: 'Project Name 3',
+      shortDescription: 'Short Description 3',
+      images: [
+        'https://via.placeholder.com/800x600/cccccc/000000?text=Image+1',
+        'https://via.placeholder.com/800x600/dddddd/000000?text=Image+2',
+        'https://via.placeholder.com/800x600/eeeeee/000000?text=Image+3',
+      ],
+    },
+    {
+      id: 4,
+      projectName: 'Project Name 4',
+      shortDescription: 'Short Description 4',
+      images: [
+        'https://via.placeholder.com/800x600/cccccc/000000?text=Image+1',
+        'https://via.placeholder.com/800x600/dddddd/000000?text=Image+2',
+        'https://via.placeholder.com/800x600/eeeeee/000000?text=Image+3',
+      ],
+    },
+    {
+      id: 5,
+      projectName: 'Project Name 5',
+      shortDescription: 'Short Description 5',
+      images: [
+        'https://via.placeholder.com/800x600/cccccc/000000?text=Image+1',
+        'https://via.placeholder.com/800x600/dddddd/000000?text=Image+2',
+        'https://via.placeholder.com/800x600/eeeeee/000000?text=Image+3',
+      ],
+    },
+    {
+      id: 6,
+      projectName: 'Project Name 6',
+      shortDescription: 'Short Description 6',
+      images: [
+        'https://via.placeholder.com/800x600/cccccc/000000?text=Image+1',
+        'https://via.placeholder.com/800x600/dddddd/000000?text=Image+2',
+        'https://via.placeholder.com/800x600/eeeeee/000000?text=Image+3',
+      ],
+    },
+  ]);
+
+  // Items per page for "Explore Other Projects" (responsive)
+  const [itemsPerPage, setItemsPerPage] = useState(6);
+  
+  useEffect(() => {
+    const updateItemsPerPage = () => {
+      if (window.innerWidth <= 768) {
+        setItemsPerPage(4); // 4 items for tablets and phones
+      } else {
+        setItemsPerPage(6); // 6 items for larger screens
+      }
+    };
+    
+    updateItemsPerPage();
+    window.addEventListener('resize', updateItemsPerPage);
+    return () => window.removeEventListener('resize', updateItemsPerPage);
+  }, []);
+  
+  const totalPages = Math.ceil(brandingItems.length / itemsPerPage);
 
   useEffect(() => {
-    setCurrentMainImage(currentProject.mainImage);
-  }, [currentProject]);
+    setTimeout(() => {
+      setIsLoaded(true);
+    }, 100);
 
-  const handlePrevProject = useCallback(() => {
-    setCurrentProjectIndex((prev) => (prev - 1 + PROJECTS.length) % PROJECTS.length);
+    // Fetch branding page data from Firestore
+    const fetchPageData = async () => {
+      try {
+        // Try to fetch from 'branding_page' collection first
+        // If it doesn't exist, use default values
+        const data = await getDocument('branding_page', 'hero_section');
+        if (data) {
+          setPageData({
+            desktopHeroImage: data.desktopHeroImage || '',
+            mobileHeroImage: data.mobileHeroImage || '',
+            title: data.title || 'Branding & Identity',
+            mainText: data.mainText || 'Crafting identities that define who you are and what you stand for.',
+            shortDescription: data.shortDescription || 'Short Description',
+          });
+        }
+      } catch (error) {
+        console.log('Branding page data not found in Firestore, using defaults');
+      }
+    };
+
+    fetchPageData();
   }, []);
 
-  const handleNextProject = useCallback(() => {
-    setCurrentProjectIndex((prev) => (prev + 1) % PROJECTS.length);
-  }, []);
+  const handleNavClick = (e, targetPath) => {
+    e.preventDefault();
+    setNavExpanded(false);
 
-  const handlePrevExplore = useCallback(() => {
-    if (exploreGalleryRef.current) {
-      exploreGalleryRef.current.scrollBy({ left: -SCROLL_OFFSET, behavior: 'smooth' });
+    if (targetPath === 'hero') {
+      navigate('/');
+      setTimeout(() => {
+        const element = document.getElementById('hero');
+        if (element) {
+          window.scrollTo({ top: element.offsetTop - 80, behavior: 'smooth' });
+        }
+      }, 100);
+    } else if (targetPath.startsWith('/')) {
+      navigate(targetPath);
+    } else {
+      navigate('/');
+      setTimeout(() => {
+        const element = document.getElementById(targetPath);
+        if (element) {
+          window.scrollTo({ top: element.offsetTop - 80, behavior: 'smooth' });
+        }
+      }, 100);
     }
-    setCurrentExploreIndex((prev) => (prev - 1 + totalExplorePages) % totalExplorePages);
-  }, [totalExplorePages]);
+  };
 
-  const handleNextExplore = useCallback(() => {
-    if (exploreGalleryRef.current) {
-      exploreGalleryRef.current.scrollBy({ left: SCROLL_OFFSET, behavior: 'smooth' });
+  const handleHomeClick = (e) => {
+    e.preventDefault();
+    navigate('/');
+  };
+
+  // Handle thumbnail carousel navigation
+  const handleThumbnailPrev = () => {
+    const currentItem = brandingItems[currentItemIndex];
+    if (currentItem && currentItem.images.length > 0) {
+      setCurrentImageIndex((prev) => 
+        prev === 0 ? currentItem.images.length - 1 : prev - 1
+      );
     }
-    setCurrentExploreIndex((prev) => (prev + 1) % totalExplorePages);
-  }, [totalExplorePages]);
+  };
 
-  const handleThumbnailClick = useCallback((thumbnailImage) => {
-    setCurrentMainImage(thumbnailImage);
-  }, []);
+  const handleThumbnailNext = () => {
+    const currentItem = brandingItems[currentItemIndex];
+    if (currentItem && currentItem.images.length > 0) {
+      setCurrentImageIndex((prev) => 
+        prev === currentItem.images.length - 1 ? 0 : prev + 1
+      );
+    }
+  };
+
+  const handleThumbnailClick = (index) => {
+    setCurrentImageIndex(index);
+  };
+
+  // Handle "Explore Other Projects" pagination
+  const handleExplorePrev = () => {
+    setExplorePage((prev) => (prev === 1 ? totalPages : prev - 1));
+  };
+
+  const handleExploreNext = () => {
+    setExplorePage((prev) => (prev === totalPages ? 1 : prev + 1));
+  };
+
+  // Handle clicking on a project thumbnail in "Explore Other Projects"
+  const handleProjectClick = (itemIndex) => {
+    setCurrentItemIndex(itemIndex);
+    setCurrentImageIndex(0);
+    // Scroll to showcase section
+    const showcaseSection = document.getElementById('branding-showcase');
+    if (showcaseSection) {
+      showcaseSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  // Get current branding item
+  const currentItem = brandingItems[currentItemIndex] || brandingItems[0];
+  
+  // Get items for current explore page
+  const startIndex = (explorePage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentPageItems = brandingItems.slice(startIndex, endIndex);
 
   return (
-    <div className="branding-gallery-page">
-      <NavigationHeader navExpanded={navExpanded} onToggle={setNavExpanded} />
-      <Breadcrumbs />
+    <section className={`branding-page ${isLoaded ? 'loaded' : ''}`}>
+      {/* Navbar */}
+      <Navbar expand="lg" className="branding-navbar" expanded={navExpanded} onToggle={setNavExpanded}>
+        <Container fluid>
+          <Navbar.Brand href="/" className="navbar-brand-custom" onClick={handleHomeClick}>
+            <img src={logo} alt="MSS Agency" className="navbar-logo" />
+          </Navbar.Brand>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="ms-auto">
+              <Nav.Link href="/" onClick={(e) => handleNavClick(e, 'hero')}>Home</Nav.Link>
+              <Nav.Link href="/#services" onClick={(e) => handleNavClick(e, 'services')}>Our Services</Nav.Link>
+              <Nav.Link href="/#work" onClick={(e) => handleNavClick(e, 'work')}>Our Work</Nav.Link>
+              <Nav.Link href="/#about" onClick={(e) => handleNavClick(e, 'about')}>About Us</Nav.Link>
+              <Nav.Link href="/#contact" onClick={(e) => handleNavClick(e, 'contact')}>Contact Us</Nav.Link>
+            </Nav>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
 
-      <HeroSection backgroundImage={b1} />
+      {/* Breadcrumb */}
+      <div className="branding-breadcrumb">
+        <Link to="/" className="breadcrumb-link" onClick={handleHomeClick}>
+          <svg className="breadcrumb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+        </Link>
+        <span className="breadcrumb-separator">&gt;</span>
+        <span className="breadcrumb-current">Branding & Identity</span>
+      </div>
 
-      <section className="branding-showcase-section">
-        <div className="branding-showcase-header">
-          <h2 className="branding-showcase-title">Branding & Identity Work Showcase</h2>
-          <p className="branding-showcase-subtitle">
-            Discover more of our creative work across different disciplines.
-          </p>
+      {/* Hero Section */}
+      <div className="branding-hero-section">
+        {/* Desktop Background Image */}
+        <div className="branding-hero-bg branding-hero-bg-desktop">
+          {pageData.desktopHeroImage && (
+            <img src={pageData.desktopHeroImage} alt="Branding Hero Desktop" />
+          )}
         </div>
 
-        <ProjectShowcase
-          project={currentProject}
-          currentMainImage={currentMainImage}
-          currentIndex={currentProjectIndex}
-          totalProjects={PROJECTS.length}
-          onPrevProject={handlePrevProject}
-          onNextProject={handleNextProject}
-          onThumbnailClick={handleThumbnailClick}
-        />
+        {/* Mobile Background Image */}
+        <div className="branding-hero-bg branding-hero-bg-mobile">
+          {pageData.mobileHeroImage && (
+            <img src={pageData.mobileHeroImage} alt="Branding Hero Mobile" />
+          )}
+        </div>
+
+        {/* Overlay Text Box */}
+        <div className="branding-hero-overlay-box">
+          <div className="branding-hero-content">
+            <div className="branding-hero-title-small">{pageData.title}</div>
+            <div className="branding-hero-text-main">{pageData.mainText}</div>
+            <div className="branding-hero-description">{pageData.shortDescription}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Branding Work Showcase Section */}
+      <section id="branding-showcase" className="branding-showcase-section">
+        <div className="branding-showcase-container">
+          <div className="branding-showcase-header">
+            <h2 className="branding-showcase-title">Branding & Identity Work Showcase</h2>
+            <p className="branding-showcase-subtitle">Discover more of our creative work across different disciplines.</p>
+          </div>
+
+          {/* Main Showcase Card */}
+          <div className="branding-showcase-card">
+            {/* Large Main Image - Full Width */}
+            {currentItem && currentItem.images && currentItem.images.length > 0 && (
+              <div className="branding-main-image">
+                <img 
+                  src={currentItem.images[currentImageIndex]} 
+                  alt={currentItem.projectName}
+                />
+                
+                {/* Project Name Overlay - Top Left */}
+                <div className="branding-project-name-overlay">
+                  <h3 className="branding-project-name">{currentItem?.projectName || 'Project Name'}</h3>
+                  <p className="branding-project-description">{currentItem?.shortDescription || 'Short Description'}</p>
+                </div>
+
+                {/* Thumbnail Carousel - Bottom Left */}
+                {currentItem.images.length > 0 && (
+                  <div className="branding-thumbnail-carousel">
+                    <button 
+                      className="branding-carousel-btn branding-carousel-btn-prev"
+                      onClick={handleThumbnailPrev}
+                      aria-label="Previous image"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M15 18l-6-6 6-6" />
+                      </svg>
+                    </button>
+                    
+                    <div className="branding-thumbnail-indicator">
+                      {currentImageIndex + 1}/{currentItem.images.length}
+                    </div>
+
+                    <div className="branding-thumbnails-container">
+                      {currentItem.images.map((image, index) => (
+                        <div
+                          key={index}
+                          className={`branding-thumbnail ${index === currentImageIndex ? 'active' : ''}`}
+                          onClick={() => handleThumbnailClick(index)}
+                        >
+                          <img src={image} alt={`Thumbnail ${index + 1}`} />
+                        </div>
+                      ))}
+                    </div>
+
+                    <button 
+                      className="branding-carousel-btn branding-carousel-btn-next"
+                      onClick={handleThumbnailNext}
+                      aria-label="Next image"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M9 18l6-6-6-6" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Explore Other Projects Section */}
+          <div className="branding-explore-section">
+            <h3 className="branding-explore-title">Explore Other Projects</h3>
+            
+            <div className="branding-explore-container">
+              <div className="branding-explore-grid">
+                {currentPageItems.map((item, index) => {
+                  const globalIndex = startIndex + index;
+                  const thumbnailImage = item.images && item.images.length > 0 ? item.images[0] : '';
+                  return (
+                    <div
+                      key={item.id}
+                      className={`branding-explore-thumbnail ${globalIndex === currentItemIndex ? 'active' : ''}`}
+                      onClick={() => handleProjectClick(globalIndex)}
+                    >
+                      {thumbnailImage && (
+                        <img src={thumbnailImage} alt={item.projectName} />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="branding-explore-pagination">
+                  <div className="branding-explore-page-indicator">
+                    {explorePage}/{totalPages}
+                  </div>
+                  <button 
+                    className="branding-explore-btn branding-explore-btn-prev"
+                    onClick={handleExplorePrev}
+                    aria-label="Previous page"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                  </button>
+                  <button 
+                    className="branding-explore-btn branding-explore-btn-next"
+                    onClick={handleExploreNext}
+                    aria-label="Next page"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M9 18l6-6-6-6" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </section>
 
-      <ExploreSection
-        projects={EXPLORE_PROJECTS}
-        currentIndex={currentExploreIndex}
-        totalPages={totalExplorePages}
-        onPrev={handlePrevExplore}
-        onNext={handleNextExplore}
-        galleryRef={exploreGalleryRef}
-      />
-    </div>
+      {/* Contact Us Section */}
+      <ContactUs />
+    </section>
   );
 }
 
 export default BrandingGallery;
-

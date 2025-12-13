@@ -71,18 +71,19 @@
   position: relative;
   min-height: 100vh;
   height: auto;
-  width: 105%;
+  width: 100%;
   margin: 0 auto;
   margin-top: 0;
   padding-bottom: 20px;
-  transform: scale(0.78);
+  transform: scale(0.85);
   transform-origin: top center;
 }
 
 /* ============================================ 5. CUSTOM CARD ============================================ */
 .custom-card {
   position: absolute;
-  width: 99.6%;
+  width: 100%;
+  max-width: 1600px;
   height: 96vh;
   margin-bottom: 50px;
   display: flex;
@@ -92,13 +93,13 @@
   box-shadow: 0 0 30px 0 rgba(0, 0, 0, 0.2);
   overflow: hidden;
   top: 0;
-  left: -50px;
+  left: 50%;
 }
 
 /* First card - always visible and static (not animated by GSAP) */
 .custom-card.card1 {
   opacity: 1 !important;
-  transform: translateY(0) !important;
+  transform: translate(-50%, 0) !important;
   z-index: 2;
 }
 
@@ -238,15 +239,19 @@
 
 /* ============================================ 9. RESPONSIVE DESIGN ============================================ */
 
-/* Tablet (1024px and below) */
-@media (max-width: 1024px) {
+/* Desktop - Large Screens */
+@media (min-width: 993px) {
+  .work-section {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
   .work-section .row:first-child {
-    padding: 25px 80px 10px;
+    padding: 40px 80px 20px;
   }
 
   .work-section .row:first-child .work-label {
-    font-size: 1.1rem;
-    margin-bottom: 12px;
+    font-size: 1.4rem;
   }
 
   .work-section .row:first-child h1 {
@@ -255,222 +260,496 @@
   }
 
   .work-section .row:first-child .section-subtitle {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
   }
 
   .cards {
-    height: 100vh;
-    width: 95%;
-    transform: scale(0.9);
+    width: 100%;
+    max-width: 2000px;
+    transform: scale(0.85);
     transform-origin: top center;
   }
 
-  .block_top,
-  .next_block {
-    height: 350px;
-    border-radius: 40px;
-  }
-
-  .block_top h1,
-  .next_block h1 {
-    font-size: 2.8rem;
-  }
-
   .custom-card {
-    height: 70vh;
-    border-radius: 40px;
-  }
-
-  .card-title {
-    font-size: 1.35rem;
-  }
-
-  .card-description {
-    font-size: 0.95rem;
+    width: 100%;
+    max-width: 1800px;
+    height: 96vh;
+    left: 50%;
   }
 
   .card-content {
-    top: 30px;
-    left: 30px;
+    top: 100px;
+    left: 60px;
   }
 
-  .check-work-btn {
-    top: 30px;
-    right: 30px;
-    padding: 10px 20px;
-    font-size: 0.85rem;
-  }
-}
-
-/* Mobile (768px and below) */
-@media (max-width: 768px) {
-  .work-section {
-    padding: 30px 0;
-  }
-
-  .work-section .row:first-child {
-    padding: 20px 80px 10px;
-  }
-
-  .work-section .row:first-child .work-label {
-    font-size: 1rem;
-    margin-bottom: 10px;
-  }
-
-  .work-section .row:first-child h1 {
+  .card-title {
     font-size: 2.5rem;
-    margin-bottom: 15px;
-    letter-spacing: -1px;
-  }
-
-  .work-section .row:first-child .section-subtitle {
-    font-size: 1rem;
-    margin-top: 0;
-  }
-
-  .cards {
-    height: 100vh;
-    width: 95%;
-    margin: 30px auto;
-    transform: none;
-  }
-
-  .block_top,
-  .next_block {
-    height: 300px;
-    border-radius: 30px;
-    margin-bottom: 30px;
-  }
-
-  .block_top {
-    margin-top: 30px;
-  }
-
-  .block_top h1,
-  .next_block h1 {
-    font-size: 2rem;
-  }
-
-  .block_top .section-subtitle {
-    font-size: 1rem;
-  }
-
-  .custom-card {
-    height: 65vh;
-    border-radius: 30px;
-    margin-bottom: 30px;
-  }
-
-  .card-content {
-    top: 30px;
-    left: 30px;
-    padding: 0;
-  }
-
-  .card-title {
-    font-size: 1.1rem;
-    margin-bottom: 15px;
-  }
-
-  .card-description {
-    font-size: 0.9rem;
-    margin-bottom: 30px;
-  }
-
-  .check-work-btn {
-    top: 20px;
-    right: 20px;
-    padding: 10px 20px;
-    font-size: 0.85rem;
-    gap: 8px;
-  }
-
-  .btn-arrow {
-    width: 16px;
-    height: 16px;
-  }
-}
-
-/* Small Mobile (480px and below) */
-@media (max-width: 480px) {
-  .work-section .row:first-child {
-    padding: 15px 80px 10px;
-  }
-
-  .work-section .row:first-child .work-label {
-    font-size: 0.9rem;
-    margin-bottom: 8px;
-  }
-
-  .work-section .row:first-child h1 {
-    font-size: 2rem;
-    margin-bottom: 12px;
-    letter-spacing: -1px;
-  }
-
-  .work-section .row:first-child .section-subtitle {
-    font-size: 0.9rem;
-  }
-
-  .cards {
-    width: 98%;
-    margin: 20px auto;
-  }
-
-  .block_top,
-  .next_block {
-    height: 250px;
-    border-radius: 25px;
-    margin-bottom: 20px;
-  }
-
-  .block_top {
-    margin-top: 20px;
-  }
-
-  .block_top h1,
-  .next_block h1 {
-    font-size: 1.75rem;
-  }
-
-  .block_top .section-subtitle {
-    font-size: 0.9rem;
-  }
-
-  .custom-card {
-    height: 70vh;
-    border-radius: 25px;
-    margin-bottom: 20px;
-  }
-
-  .card-content {
-    top: 20px;
-    left: 20px;
-    padding: 0;
-  }
-
-  .card-title {
-    font-size: 1.8rem;
-    margin-bottom: 12px;
-  }
-
-  .card-description {
-    font-size: 0.9rem;
     margin-bottom: 25px;
   }
 
+  .card-description {
+    font-size: 1.2rem;
+    margin-bottom: 50px;
+  }
+
   .check-work-btn {
-    top: 15px;
-    right: 15px;
-    padding: 8px 16px;
-    font-size: 0.8rem;
-    gap: 6px;
-    border-radius: 25px;
+    top: 90px;
+    right: 60px;
+    padding: 14px 28px;
+    font-size: 1.1rem;
+  }
+}
+
+/* Extra Large Desktop Screens (24-inch and above) */
+@media (min-width: 1920px) {
+  .work-section .row:first-child {
+    padding: 60px 120px 30px;
+  }
+
+  .work-section .row:first-child .work-label {
+    font-size: 1.6rem;
+    margin-bottom: 12px;
+  }
+
+  .work-section .row:first-child h1 {
+    font-size: 4.5rem;
+    margin-bottom: 20px;
+  }
+
+  .work-section .row:first-child .section-subtitle {
+    font-size: 1.3rem;
+    line-height: 1.6;
+  }
+
+  .cards {
+    max-width: 2400px;
+    transform: scale(0.95);
+    transform-origin: top center;
+  }
+
+  .custom-card {
+    max-width: 2200px;
+    height: 96vh;
+    border-radius: 60px;
+  }
+
+  .card-content {
+    top: 120px;
+    left: 80px;
+    max-width: 900px;
+  }
+
+  .card-title {
+    font-size: 3.2rem;
+    margin-bottom: 30px;
+  }
+
+  .card-description {
+    font-size: 1.4rem;
+    margin-bottom: 60px;
+    line-height: 1.7;
+  }
+
+  .check-work-btn {
+    top: 110px;
+    right: 80px;
+    padding: 16px 32px;
+    font-size: 1.2rem;
+    border-radius: 45px;
   }
 
   .btn-arrow {
-    width: 14px;
-    height: 14px;
+    width: 22px;
+    height: 22px;
+  }
+
+  .next_block {
+    height: 500px;
+    margin-bottom: 60px;
+  }
+
+  .next_block h1 {
+    font-size: 4.5rem;
+  }
+}
+
+/* Specific resolution: 1366 x 768 - Reduce gap between work and services sections */
+@media (min-width: 1300px) and (max-width: 1400px) {
+  .work-section {
+    margin-bottom: -40px !important;
+  }
+  
+  .next_block {
+    margin-bottom: 5px !important;
+  }
+  
+  .cards {
+    padding-bottom: 0 !important;
+    margin-bottom: -20px !important;
+  }
+}
+
+/* Tablet Landscape / Small Laptop */
+@media (max-width: 992px) {
+  .work-section {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+  }
+
+  .work-section .row:first-child {
+    padding: clamp(1.25rem, 3vw, 1.5625rem) clamp(2rem, 5vw, 5rem) clamp(0.75rem, 1.5vw, 0.875rem);
+  }
+
+  .work-section .row:first-child .work-label {
+    font-size: clamp(0.9rem, 1.8vw, 1.2rem);
+    margin-bottom: clamp(0.5rem, 1.2vw, 0.75rem);
+  }
+
+  .work-section .row:first-child h1 {
+    font-size: clamp(1.5rem, 3.8vw, 2.5rem);
+    margin-bottom: clamp(0.625rem, 1.5vw, 0.9375rem);
+    line-height: 1.3;
+  }
+
+  .work-section .row:first-child .section-subtitle {
+    font-size: clamp(0.9rem, 2vw, 1.15rem);
+    line-height: 1.7;
+  }
+
+  .cards {
+    width: 100%;
+    max-width: 100%;
+    transform: scale(0.85);
+    transform-origin: top center;
+  }
+
+  .custom-card {
+    width: 95%;
+    max-width: 1200px;
+    height: calc(85vh - 3.5rem);
+    border-radius: clamp(0.875rem, 2vw, 3.125rem);
+    left: 50%;
+  }
+
+  .custom-card.card1 {
+    transform: translate(-50%, 0) !important;
+  }
+
+  .card-content {
+    top: clamp(2rem, 4vw, 5.625rem);
+    left: clamp(1.5rem, 3vw, 2.5rem);
+    max-width: 80%;
+  }
+
+  .card-title {
+    font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+    margin-bottom: clamp(1rem, 2vw, 1.25rem);
+  }
+
+  .card-description {
+    font-size: clamp(0.85rem, 1.6vw, 1rem);
+    margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+    line-height: 1.6;
+  }
+
+  .check-work-btn {
+    top: auto;
+    bottom: clamp(1.5rem, 3vw, 2.5rem);
+    left: clamp(1.5rem, 3vw, 2.5rem);
+    right: auto;
+    padding: clamp(0.6rem, 1.6vw, 0.75rem) clamp(1.2rem, 3.2vw, 1.5rem);
+    font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+    border-radius: clamp(1.5rem, 3vw, 2.5rem);
+  }
+
+  .btn-arrow {
+    width: clamp(1rem, 2vw, 1.25rem);
+    height: clamp(1rem, 2vw, 1.25rem);
+  }
+
+  .next_block {
+    height: clamp(18.75rem, 40vw, 25rem);
+    border-radius: clamp(0.875rem, 2vw, 3.125rem);
+  }
+
+  .next_block h1 {
+    font-size: clamp(2rem, 4.5vw, 3.5rem);
+  }
+}
+
+/* Tablet Portrait */
+@media (max-width: 768px) {
+  .work-section {
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-bottom: 2rem;
+    width: 100%;
+    max-width: 100vw;
+  }
+
+  .work-section .row:first-child {
+    padding: clamp(1rem, 2.5vw, 1.25rem) clamp(1.5rem, 4vw, 3rem) clamp(0.5rem, 1.2vw, 0.75rem);
+  }
+
+  .work-section .row:first-child .work-label {
+    font-size: clamp(0.8rem, 1.8vw, 1rem);
+    margin-bottom: clamp(0.4rem, 1vw, 0.625rem);
+  }
+
+  .work-section .row:first-child h1 {
+    font-size: clamp(1.3rem, 3.2vw, 1.875rem);
+    margin-bottom: clamp(0.5rem, 1.2vw, 0.9375rem);
+    line-height: 1.4;
+  }
+
+  .work-section .row:first-child .section-subtitle {
+    font-size: clamp(0.8rem, 1.8vw, 1rem);
+    line-height: 1.8;
+  }
+
+  .cards {
+    width: 100%;
+    max-width: 100%;
+    transform: scale(0.9);
+    transform-origin: top center;
+    box-sizing: border-box;
+  }
+
+  .custom-card {
+    width: 92%;
+    max-width: 1000px;
+    height: calc(75vh - 3rem);
+    border-radius: clamp(0.625rem, 1.5vw, 1.875rem);
+    left: 50%;
+    box-sizing: border-box;
+  }
+
+  .custom-card.card1 {
+    transform: translate(-50%, 0) !important;
+  }
+
+  .card-bg-media {
+    filter: blur(0.02rem) brightness(0.6);
+  }
+
+  .card-overlay {
+    backdrop-filter: blur(1px);
+  }
+
+  .card-content {
+    top: clamp(1.5rem, 3vw, 3.75rem);
+    left: clamp(1rem, 2.5vw, 2rem);
+    max-width: 75%;
+    box-sizing: border-box;
+  }
+
+  .card-title {
+    font-size: clamp(1rem, 2.2vw, 1.25rem);
+    margin-bottom: clamp(0.75rem, 1.5vw, 1rem);
+  }
+
+  .card-description {
+    font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+    margin-bottom: clamp(1.25rem, 2.5vw, 2rem);
+    line-height: 1.6;
+  }
+
+  .check-work-btn {
+    top: auto;
+    bottom: clamp(1rem, 2.5vw, 1.5rem);
+    left: clamp(1rem, 2.5vw, 2rem);
+    right: auto;
+    padding: clamp(0.5rem, 1.4vw, 0.6875rem) clamp(1rem, 2.8vw, 1.25rem);
+    font-size: clamp(0.7rem, 1.4vw, 0.85rem);
+    border-radius: 2.5rem;
+    gap: clamp(0.4rem, 1vw, 0.625rem);
+  }
+
+  .btn-arrow {
+    width: clamp(0.875rem, 1.8vw, 1rem);
+    height: clamp(0.875rem, 1.8vw, 1rem);
+  }
+
+  .next_block {
+    height: clamp(15rem, 35vw, 20rem);
+    border-radius: clamp(0.625rem, 1.5vw, 1.875rem);
+  }
+
+  .next_block h1 {
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  }
+}
+
+/* Mobile */
+@media (max-width: 576px) {
+  .work-section {
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-bottom: 0 !important;
+    padding-left: 0;
+    padding-right: 0;
+    width: 100%;
+    max-width: 100vw;
+    margin: 0 !important;
+    margin-bottom: 2rem !important;
+  }
+
+  /* Override GSAP pin spacing on mobile */
+  .work-section[style*="height"],
+  .work-section[style*="pinSpacing"] {
+    margin-bottom: 2rem !important;
+  }
+
+  /* Reduce pin spacing effect */
+  body:has(.work-section) {
+    overflow-x: hidden;
+  }
+
+  .work-section .row:first-child {
+    padding: clamp(0.875rem, 2vw, 1rem) clamp(1rem, 3vw, 2rem) clamp(0.5rem, 1vw, 0.625rem);
+    text-align: center;
+  }
+
+  .work-section .row:first-child .work-label {
+    font-size: clamp(0.75rem, 1.6vw, 0.9rem);
+    margin-bottom: clamp(0.35rem, 0.9vw, 0.5rem);
+  }
+
+  .work-section .row:first-child h1 {
+    font-size: clamp(1.3rem, 3.2vw, 1.875rem);
+    margin-bottom: clamp(0.4rem, 1vw, 0.625rem);
+    line-height: 1.4;
+  }
+
+  .work-section .row:first-child .section-subtitle {
+    font-size: clamp(0.8rem, 1.8vw, 1rem);
+    line-height: 1.8;
+  }
+
+  .row.cards-row {
+    width: 100%;
+    margin: 0 !important;
+    margin-bottom: 2rem !important;
+    padding: 0;
+  }
+
+  .col-12 {
+    padding: 0 !important;
+    width: 100%;
+    margin: 0;
+  }
+
+  .cards {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 !important;
+    margin-bottom: 2rem !important;
+    padding: 0 !important;
+    padding-bottom: 0 !important;
+    min-height: 60vh!important;
+    height: 60vh !important;
+    transform: scale(0.95);
+    transform-origin: center top;
+    box-sizing: border-box;
+    position: relative;
+  }
+
+  .custom-card {
+    width: 95%;
+    max-width: 95%;
+    height: calc(55vh - 2rem);
+    border-radius: clamp(0.625rem, 1.5vw, 1.875rem);
+    left: 50% !important;
+    right: auto;
+    box-sizing: border-box;
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 2rem !important;
+  }
+
+  .custom-card.card1 {
+    transform: translateX(-50%) !important;
+  }
+
+  .card-bg-media {
+    filter: blur(0.02rem) brightness(0.6);
+  }
+
+  .card-overlay {
+    backdrop-filter: blur(1px);
+  }
+
+  .card-content {
+    top: clamp(1rem, 2.5vw, 2rem);
+    left: clamp(0.875rem, 2vw, 1.5rem);
+    max-width: 60%;
+    box-sizing: border-box;
+  }
+
+  .card-title {
+    font-size: clamp(1.1rem, 2vw, 1.15rem);
+    margin-bottom: clamp(1.8rem, 1.2vw, 0.875rem);
+  }
+
+  .card-description {
+    font-size: clamp(0.85rem, 1.4vw, 0.9rem);
+    margin-bottom: clamp(1.5rem, 2vw, 1.5rem);
+    line-height: 1.2;
+  }
+
+  .check-work-btn {
+    top: auto;
+    bottom: clamp(1.5rem, 2vw, 1rem);
+    left: clamp(1.4rem, 2vw, 1.5rem);
+    right: auto;
+    padding: clamp(0.5rem, 1.4vw, 0.6875rem) clamp(1rem, 2.8vw, 1.25rem);
+    font-size: clamp(0.7rem, 1.4vw, 0.85rem);
+    border-radius: 2.5rem;
+    gap: clamp(0.35rem, 0.9vw, 0.5rem);
+  }
+
+  .btn-arrow {
+    width: clamp(0.75rem, 1.6vw, 0.875rem);
+    height: clamp(0.75rem, 1.6vw, 0.875rem);
+  }
+
+  .next_block {
+    height: clamp(12.5rem, 30vw, 16rem);
+    border-radius: clamp(0.625rem, 1.5vw, 1.875rem);
+    margin-bottom: 2rem !important;
+    margin-top: 0 !important;
+  }
+
+  .next_block h1 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+  }
+
+  /* Ensure video covers properly on mobile */
+  @media (orientation: portrait) {
+    .card-bg-media {
+      width: 100%;
+      height: auto;
+      min-height: 100%;
+    }
+  }
+
+  @media (orientation: landscape) {
+    .card-bg-media {
+      width: auto;
+      height: 100%;
+      min-width: 100%;
+    }
+
+    .custom-card {
+      height: calc(100vh - 3rem);
+    }
+
+    .card-content {
+      top: clamp(1rem, 2.5vw, 2rem);
+      left: clamp(0.875rem, 2vw, 1.5rem);
+      max-width: 70%;
+    }
   }
 }
 

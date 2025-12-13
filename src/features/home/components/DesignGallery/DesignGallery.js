@@ -2,18 +2,78 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './DesignGallery.css';
 import { CenteredImageCarousel } from '../../../work/ui';
+import { designProjectService } from '../../../../firebase/collections';
+import { getDocument } from '../../../../firebase/firestoreService';
 import heroImg from '../../../../assets/images/design/VedioGallaryBackground.jpg';
-import post1 from '../../../../assets/images/design/post1.JPG';
-import post2 from '../../../../assets/images/design/post2.JPG';
-import post3 from '../../../../assets/images/design/post3.JPG';
-import post4 from '../../../../assets/images/design/post4.JPG';
-import post5 from '../../../../assets/images/design/post5.PNG';
-import post6 from '../../../../assets/images/design/post6.PNG';
 
 function DesignGallery() {
   const heroRef = useRef(null);
   const sectionsRef = useRef(null);
   const [scrollY, setScrollY] = useState(0);
+  const [sections, setSections] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [heroImage, setHeroImage] = useState(heroImg);
+
+  // Load design projects from Firestore
+  useEffect(() => {
+    loadDesignProjectsFromFirestore();
+    loadHeroImageFromFirestore();
+  }, []);
+
+  const loadHeroImageFromFirestore = async () => {
+    try {
+      const pageData = await getDocument('design_page', 'hero_section');
+      if (pageData && pageData.heroImage) {
+        setHeroImage(pageData.heroImage);
+      }
+    } catch (error) {
+      console.log('Design page hero image not found in Firestore, using default');
+    }
+  };
+
+  const loadDesignProjectsFromFirestore = async () => {
+    try {
+      // Get all design projects
+      const allProjects = await designProjectService.getAll();
+      
+      // Group projects by category
+      const categoryMap = {};
+      
+      allProjects.forEach(project => {
+        const category = project.category || 'uncategorized';
+        if (!categoryMap[category]) {
+          categoryMap[category] = {
+            category: category,
+            title: project.title || category.charAt(0).toUpperCase() + category.slice(1),
+            description: project.description || `Creative design work in ${category}`,
+            images: []
+          };
+        }
+        
+        // Add all images from this project to the category
+        if (project.images && Array.isArray(project.images)) {
+          categoryMap[category].images.push(...project.images);
+        }
+      });
+
+      // Convert to sections array
+      const sectionsData = Object.values(categoryMap).map((category, index) => ({
+        id: category.category,
+        title: category.title,
+        description: category.description,
+        images: category.images,
+        reverse: index % 2 !== 0 // Alternate layout
+      }));
+
+      setSections(sectionsData);
+    } catch (error) {
+      console.error('Error loading design projects:', error);
+      // Fallback to empty array if error
+      setSections([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -41,38 +101,7 @@ function DesignGallery() {
     const sections = document.querySelectorAll('.video-section');
     sections.forEach(section => observer.observe(section));
     return () => observer.disconnect();
-  }, []);
-
-  const sections = [
-    {
-      id: 1,
-      title: "Item",
-      description: "Showcasing products in their best light. Highlighting details, textures, and design with precision photography.",
-      images: [post2, post3, post4, post5, post6, post1],
-      reverse: false
-    },
-    {
-      id: 2,
-      title: "Events",
-      description: "Capturing the essence of every event — the energy, emotions, and unforgettable moments through our lens.",
-      images: [post5, post6, post1, post2, post3, post4],
-      reverse: true
-    },
-    {
-      id: 3,
-      title: "Places",
-      description: "Transforming locations into visual stories — from architecture to intimate corners, we reveal their character.",
-      images: [post6, post1, post2, post3, post4, post5],
-      reverse: false
-    },
-    {
-      id: 4,
-      title: "Clothes",
-      description: "Highlighting each piece with elegance — capturing the details and textures.",
-      images: [post3, post4, post5, post6, post1, post2],
-      reverse: true
-    }
-  ];
+  }, [sections]);
 
   return (
     <div className="video-gallery-page">
@@ -94,23 +123,47 @@ function DesignGallery() {
             <div className="scroll-arrow"></div>
           </div>
         </div>
-        <img className="video-hero-bg" src={heroImg} alt="Design Hero" />
+        <img className="video-hero-bg" src={heroImage} alt="Design Hero" />
       </section>
 
       <div className="video-sections-container" ref={sectionsRef}>
-        {sections.map(section => (
-          <section key={section.id} className={`video-section ${section.reverse ? 'reverse' : ''}`}>
-            <div className="video-section-content-carousel">
-              <div className="video-text-content">
-                <h2>{section.title}</h2>
-                <p>{section.description}</p>
-              </div>
-              <div className="section-carousel-wrapper">
-                <CenteredImageCarousel images={section.images} carouselId={`design-carousel-${section.id}`} />
-              </div>
-            </div>
-          </section>
-        ))}
+        {loading ? (
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            minHeight: '50vh',
+            color: '#fff',
+            fontSize: '1.5rem'
+          }}>
+            Loading design projects...
+          </div>
+        ) : sections.length === 0 ? (
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '100px 20px',
+            color: '#fff'
+          }}>
+            <h2>No design projects yet</h2>
+            <p>Add design projects in the admin panel at <a href="/admin" style={{ color: '#0066ff' }}>/admin</a></p>
+          </div>
+        ) : (
+          sections.map(section => (
+            section.images && section.images.length > 0 ? (
+              <section key={section.id} className={`video-section ${section.reverse ? 'reverse' : ''}`}>
+                <div className="video-section-content-carousel">
+                  <div className="video-text-content">
+                    <h2>{section.title}</h2>
+                    <p>{section.description}</p>
+                  </div>
+                  <div className="section-carousel-wrapper">
+                    <CenteredImageCarousel images={section.images} carouselId={`design-carousel-${section.id}`} />
+                  </div>
+                </div>
+              </section>
+            ) : null
+          ))
+        )}
       </div>
 
       <div className="video-footer">

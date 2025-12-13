@@ -15,13 +15,6 @@ const services = [
     slideDirection: 'left',
   },
   {
-    id: 'marketing-strategies',
-    title: 'Marketing Strategies',
-    description: 'Smart, customized strategies that drive measurable results and move you closer to your goals.',
-    image: marketingCardImage,
-    slideDirection: 'right',
-  },
-  {
     id: 'seo',
     title: 'SEO',
     description: 'Get found first. Rank higher. Drive real results.',
@@ -36,6 +29,13 @@ const services = [
     slideDirection: 'bottom',
   },
   {
+    id: 'marketing-strategies',
+    title: 'Marketing Strategies',
+    description: 'Smart, customized strategies that drive measurable results and move you closer to your goals.',
+    image: marketingCardImage,
+    slideDirection: 'right',
+  },
+  {
     id: 'web-development',
     title: 'Web Development',
     description: 'Building robust, scalable web applications with cutting-edge technologies and industry best practices.',
@@ -45,39 +45,80 @@ const services = [
 ];
 
 function Services() {
-  const [isVisible, setIsVisible] = useState(false);
+  const [visibleCards, setVisibleCards] = useState(new Set());
+  const [isHeaderVisible, setIsHeaderVisible] = useState(false);
   const sectionRef = useRef(null);
+  const cardRefs = useRef({});
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
+    // Observer for header
+    const headerObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setIsVisible(true);
-            observer.unobserve(entry.target);
+            setIsHeaderVisible(true);
+            headerObserver.unobserve(entry.target);
           }
         });
       },
       {
         threshold: 0.1,
-        rootMargin: '0px 0px -100px 0px',
+        rootMargin: '0px 0px -50px 0px',
       }
     );
 
+    // Observer for individual cards
+    const cardObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const cardId = entry.target.dataset.cardId;
+            if (cardId) {
+              setVisibleCards((prev) => new Set([...prev, cardId]));
+              cardObserver.unobserve(entry.target);
+            }
+          }
+        });
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px',
+      }
+    );
+
+    // Observe header
     if (sectionRef.current) {
-      observer.observe(sectionRef.current);
+      const headerElement = sectionRef.current.querySelector('.services-header');
+      if (headerElement) {
+        headerObserver.observe(headerElement);
+      }
     }
+
+    // Observe all cards
+    Object.values(cardRefs.current).forEach((cardRef) => {
+      if (cardRef) {
+        cardObserver.observe(cardRef);
+      }
+    });
 
     return () => {
       if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
+        const headerElement = sectionRef.current.querySelector('.services-header');
+        if (headerElement) {
+          headerObserver.unobserve(headerElement);
+        }
       }
+      Object.values(cardRefs.current).forEach((cardRef) => {
+        if (cardRef) {
+          cardObserver.unobserve(cardRef);
+        }
+      });
     };
   }, []);
 
   return (
-    <section ref={sectionRef} className="services-section">
-      <div className={`services-header ${isVisible ? 'animate-header' : ''}`}>
+    <section id="services" ref={sectionRef} className="services-section">
+      <div className={`services-header ${isHeaderVisible ? 'animate-header' : ''}`}>
         <p className="services-label">Our Services</p>
         <h1 className="services-title">Services That Keep You Ahead</h1>
         <p className="services-subtitle">
@@ -86,33 +127,35 @@ function Services() {
       </div>
 
       <div className="services-container">
-        {services.map((service, index) => (
-          <div
-            key={service.id}
-            className={`service-card ${service.id}-card ${
-              isVisible ? `animate-${service.slideDirection}` : ''
-            }`}
-            style={{
-              animationDelay: `${index * 0.15}s`,
-            }}
-          >
-            <div className="service-card-background">
-              <img src={service.image} alt={service.title} className="service-character" />
+        {services.map((service, index) => {
+          const isCardVisible = visibleCards.has(service.id);
+          return (
+            <div
+              key={service.id}
+              ref={(el) => (cardRefs.current[service.id] = el)}
+              data-card-id={service.id}
+              className={`service-card ${service.id}-card ${
+                isCardVisible ? `animate-${service.slideDirection}` : ''
+              }`}
+            >
+              <div className="service-card-background">
+                <img src={service.image} alt={service.title} className="service-character" />
+              </div>
+              <div className="service-card-content">
+                <h3 className="service-card-title">{service.title}</h3>
+                <p className="service-card-description">
+                  {service.description}
+                  {service.description2 && (
+                    <>
+                      <br />
+                      {service.description2}
+                    </>
+                  )}
+                </p>
+              </div>
             </div>
-            <div className="service-card-content">
-              <h3 className="service-card-title">{service.title}</h3>
-              <p className="service-card-description">
-                {service.description}
-                {service.description2 && (
-                  <>
-                    <br />
-                    {service.description2}
-                  </>
-                )}
-              </p>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

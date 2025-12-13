@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import './HeroSection.css';
-import heroVideo from '../../../assets/videos/HeroSection (2).mp4';
+import heroVideo from '../../../assets/Vedio/HeroSection.mp4';
 import logo from '../../../assets/images/common/logoMSS.PNG';
 import orbetLogo from '../../../assets/images/Hero/orbet.png';
 import rashedLogo from '../../../assets/images/Hero/rashed.png';
@@ -10,6 +10,8 @@ import { smoothScrollTo } from '../../../shared/utils/smoothScroll';
 function HeroSection() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [navExpanded, setNavExpanded] = useState(false);
+  const videoRef = useRef(null);
+  const logosTrackRef = useRef(null);
 
   useEffect(() => {
     setTimeout(() => {
@@ -17,17 +19,92 @@ function HeroSection() {
     }, 100);
   }, []);
 
+  // Handle seamless infinite scroll for partner logos
+  useEffect(() => {
+    const track = logosTrackRef.current;
+    if (!track) return;
+
+    let animationId;
+    let position = 0;
+    let lastTime = performance.now();
+    const duration = 30000; // 30 seconds in milliseconds
+    let setWidth = 0;
+
+    // Calculate set width after layout
+    const calculateSetWidth = () => {
+      if (track.scrollWidth > 0) {
+        setWidth = track.scrollWidth / 2; // Width of one set of logos
+        return true;
+      }
+      return false;
+    };
+
+    const animate = (currentTime) => {
+      if (!setWidth && !calculateSetWidth()) {
+        animationId = requestAnimationFrame(animate);
+        return;
+      }
+
+      const deltaTime = currentTime - lastTime;
+      lastTime = currentTime;
+
+      // Calculate speed based on duration (setWidth pixels in 30 seconds)
+      const speed = (setWidth / duration) * deltaTime;
+      position -= speed;
+
+      // Reset position seamlessly when we've moved one full set width
+      if (Math.abs(position) >= setWidth) {
+        position = 0;
+      }
+
+      track.style.transform = `translateX(${position}px)`;
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animationId = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+    };
+  }, []);  
   const handleNavClick = (e, targetId) => {
     e.preventDefault();
     e.stopPropagation();
     setNavExpanded(false);
-    
-    setTimeout(() => {
-      const targetElement = document.getElementById(targetId);
-      if (targetElement) {
-        smoothScrollTo(targetElement, 80);
+
+    // Immediate check first
+    const targetElement = document.getElementById(targetId);
+    if (targetElement) {
+      smoothScrollTo(targetElement, 80);
+      return;
+    }
+
+    // Quick retry for dynamic content (only if not found immediately)
+    const scrollToTarget = (retries = 2) => {
+      const element = document.getElementById(targetId);
+      if (element) {
+        smoothScrollTo(element, 80);
+      } else if (retries > 0) {
+        // Very short delay for retry
+        setTimeout(() => scrollToTarget(retries - 1), 10);
       }
-    }, 100);
+    };
+    
+    scrollToTarget();
+  };
+
+  const handleVideoEnd = () => {
+    if (videoRef.current) {
+      const video = videoRef.current;
+      if (video.duration && !isNaN(video.duration)) {
+        // تثبيت الفيديو عند آخر إطار تقريباً (1/30 ثانية قبل النهاية)
+        const lastFrameTime = Math.max(0, video.duration - 1 / 60);
+        video.currentTime = lastFrameTime;
+        video.pause();
+      }
+    }
   };
 
   // Partner logos data
@@ -58,16 +135,27 @@ function HeroSection() {
       </Navbar>
 
       <div className="hero-video-container">
-        <video 
-          className="hero-video" 
-          autoPlay 
-          loop 
-          muted 
-          playsInline
-        >
-          <source src={heroVideo} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+      <video 
+  ref={videoRef}
+  className="hero-video" 
+  autoPlay 
+  muted 
+  playsInline
+  onTimeUpdate={() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const freezeThreshold = 0.07; // 50ms قبل النهاية
+    if (video.currentTime >= video.duration - freezeThreshold) {
+      video.pause();
+      video.currentTime = video.duration - freezeThreshold; // ابقِ على آخر إطار تقريبًا
+    }
+  }}
+>
+  <source src={heroVideo} type="video/mp4" />
+  Your browser does not support the video tag.
+</video>
+
         <div className="hero-video-overlay"></div>
       </div>
 
@@ -83,7 +171,7 @@ function HeroSection() {
       <div className="trusted-worldwide-section">
         <div className="trusted-text">Our<div> Partners</div></div>
         <div className="partner-logos-container">
-          <div className="partner-logos-track">
+          <div className="partner-logos-track" ref={logosTrackRef}>
             {partnerLogos.map((logo, index) => (
               <div key={index} className={`partner-logo ${logo.name === 'MSS' || logo.name === 'Rashed' || logo.name === 'Orbet' ? 'partner-logo-with-text' : ''} ${logo.name === 'Orbet' ? 'partner-logo-orbet' : ''}`}>
                 <img src={logo.image} alt={logo.name} />
@@ -109,4 +197,3 @@ function HeroSection() {
 }
 
 export default HeroSection;
-

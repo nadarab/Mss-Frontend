@@ -1,10 +1,21 @@
+// Store the current animation frame ID to allow cancellation
+let currentAnimationFrame = null;
+
 export const smoothScrollTo = (targetElement, offset = 80) => {
   if (!targetElement) return;
 
-  const startPosition = window.pageYOffset;
+  // Cancel any ongoing scroll animation
+  if (currentAnimationFrame !== null) {
+    cancelAnimationFrame(currentAnimationFrame);
+    currentAnimationFrame = null;
+  }
+
+  const startPosition = window.pageYOffset || window.scrollY;
   const targetPosition = targetElement.getBoundingClientRect().top + startPosition - offset;
   const distance = targetPosition - startPosition;
-  const duration = 1000;
+  
+  // Faster duration for quick response (400ms)
+  const duration = 400;
   let startTime = null;
 
   const animate = (currentTime) => {
@@ -12,18 +23,24 @@ export const smoothScrollTo = (targetElement, offset = 80) => {
     const elapsed = currentTime - startTime;
     const progress = Math.min(elapsed / duration, 1);
     
+    // Easing function for smooth animation
     const easing = progress < 0.5
       ? 4 * progress * progress * progress
       : 1 - Math.pow(-2 * progress + 2, 3) / 2;
     
-    window.scrollTo(0, startPosition + distance * easing);
+    window.scrollTo({
+      top: startPosition + distance * easing,
+      behavior: 'auto' // Use 'auto' to avoid conflicts with CSS scroll-behavior
+    });
     
     if (elapsed < duration) {
-      requestAnimationFrame(animate);
+      currentAnimationFrame = requestAnimationFrame(animate);
+    } else {
+      currentAnimationFrame = null;
     }
   };
 
-  requestAnimationFrame(animate);
+  currentAnimationFrame = requestAnimationFrame(animate);
 };
 
 export const handleHashChange = () => {

@@ -4,7 +4,8 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './Work.css';
 import { videoService } from '../../../firebase/collections';
-import workVideo from '../../../assets/videos/workVedio.MP4';
+import workVideo from '../../../assets/Vedio/HeroSection.mp4';
+
 import post3 from '../../../assets/images/design/post3.JPG';
 import Branding1 from '../../../assets/images/branding/Branding1.JPG';
 import arrowIcon from '../../../assets/images/OurWorkSection/arrow.png';
@@ -226,10 +227,10 @@ function Work() {
 
     // ========== CARD STACKING ANIMATION ==========
     // Card 1: keep visible and static (GSAP does not animate it)
-    gsap.set(card1, { yPercent: 0, opacity: 1 });
+    gsap.set(card1, { yPercent: 0, xPercent: -50, opacity: 1 });
 
-    // Card 2 & 3: start hidden below and transparent
-    gsap.set([card2, card3], { yPercent: 100, opacity: 0 });
+    // Card 2 & 3: start hidden below and transparent, but centered horizontally
+    gsap.set([card2, card3], { yPercent: 100, xPercent: -50, opacity: 0 });
 
     // Timeline: pin the whole section (title + cards) and animate only card2 & card3
     const tl = gsap.timeline({
@@ -246,10 +247,12 @@ function Work() {
 
     tl.to(card2, {
       yPercent: 0,
+      xPercent: -50,
       opacity: 1,
       duration: 0.6,
     }).to(card3, {
       yPercent: 0,
+      xPercent: -50,
       opacity: 1,
       duration: 0.6,
     });

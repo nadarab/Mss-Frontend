@@ -12,6 +12,9 @@ html {
   background: linear-gradient(180deg, rgb(2, 12, 48) 0%, rgb(1, 4, 23) 100%);
   min-height: 100%;
   font-size: clamp(14px, 1vw, 16px);
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
 }
 
 body {
@@ -21,6 +24,22 @@ body {
   background: linear-gradient(180deg, rgb(2, 12, 48) 0%, rgb(1, 4, 23) 100%);
   min-height: 100%;
   background-attachment: fixed;
+  width: 100%;
+  max-width: 100vw;
+}
+
+#root {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Ensure all main containers respect viewport */
+#root > * {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -31,13 +50,23 @@ h1, h2, h3, h4, h5, h6 {
 /* Smooth scroll for anchor links */
 section {
   scroll-margin-top: 5rem;
-  scroll-snap-stop: always;
+  scroll-snap-stop: normal;
   background: transparent;
 }
 
 @media (max-width: 576px) {
+  html, body, #root {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    position: relative;
+  }
+
   section {
     padding-inline: clamp(1rem, 5vw, 1.5rem);
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 
   /* Center all section content on mobile */

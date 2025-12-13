@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import './VideoGallery.css';
 import { CenteredVideoCarousel } from '../../../work/ui';
 import { videoCategoryService, videoService } from '../../../../firebase/collections';
-import heroVideo from '../../../../assets/videos/HeroSection (2).mp4';
+import { getDocument } from '../../../../firebase/firestoreService';
+import heroVideo from '../../../../assets/Vedio/HeroSection.mp4';
 
 function VideoGallery() {
   const heroRef = useRef(null);
@@ -11,11 +12,24 @@ function VideoGallery() {
   const [scrollY, setScrollY] = useState(0);
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [heroVideoUrl, setHeroVideoUrl] = useState(heroVideo);
 
   // Load videos from Firestore
   useEffect(() => {
     loadVideosFromFirestore();
+    loadHeroVideoFromFirestore();
   }, []);
+
+  const loadHeroVideoFromFirestore = async () => {
+    try {
+      const pageData = await getDocument('video_page', 'hero_section');
+      if (pageData && pageData.heroVideo) {
+        setHeroVideoUrl(pageData.heroVideo);
+      }
+    } catch (error) {
+      console.log('Video page hero video not found in Firestore, using default');
+    }
+  };
 
   const loadVideosFromFirestore = async () => {
     try {
@@ -133,7 +147,7 @@ function VideoGallery() {
           muted
           playsInline
         >
-          <source src={heroVideo} type="video/mp4" />
+          <source src={heroVideoUrl} type="video/mp4" />
         </video>
       </section>
 

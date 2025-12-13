@@ -87,6 +87,7 @@ function ContactUs() {
             <img src={contactUsMap} alt="Map showing Amman, Jordan" loading="lazy" />
           </div>
 
+          {/* Desktop Layout - Grid Areas */}
           <a 
             ref={(el) => (cardRefs.current[0] = el)}
             href="tel:+962776684015" 
@@ -149,6 +150,72 @@ function ContactUs() {
               <p className="contact-info">@mss.team1</p>
             </div>
           </a>
+
+          {/* Mobile & Tablet Layout - 2x2 Grid */}
+          <div className="contact-cards-mobile">
+            <div 
+              ref={(el) => (cardRefs.current[4] = el)}
+              className="contact-card mobile-card"
+              style={{ animationDelay: '0.1s' }}
+            >
+              <div className="contact-icon">
+                <img src={locationIcon} alt="Location" className="contact-icon-img" />
+              </div>
+              <div>
+                <h5 className="contact-title">Location</h5>
+                <p className="contact-info">Amman, Jordan</p>
+              </div>
+            </div>
+
+            <a 
+              ref={(el) => (cardRefs.current[5] = el)}
+              href="tel:+962776684015" 
+              className="contact-card mobile-card"
+              style={{ animationDelay: '0.2s' }}
+            >
+              <div className="contact-icon">
+                <img src={phoneIcon} alt="Phone" className="contact-icon-img" />
+              </div>
+              <div>
+                <h5 className="contact-title">Phone</h5>
+                <p className="contact-info">+962 7 7668 4015</p>
+              </div>
+            </a>
+
+            <a
+              ref={(el) => (cardRefs.current[6] = el)}
+              href="mailto:mss.hrteam@gmail.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="contact-card mobile-card"
+              style={{ animationDelay: '0.3s' }}
+            >
+              <div className="contact-icon">
+                <img src={emailIcon} alt="Email" className="contact-icon-img" />
+              </div>
+              <div>
+                <h5 className="contact-title">Email</h5>
+                <p className="contact-info">mss.hrteam@gmail.com</p>
+              </div>
+            </a>
+
+            <a
+              ref={(el) => (cardRefs.current[7] = el)}
+              href="https://www.instagram.com/mss.team1"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="contact-card mobile-card"
+              style={{ animationDelay: '0.4s' }}
+            >
+              <div className="contact-icon">
+                <img src={instaIcon} alt="Instagram" className="contact-icon-img" />
+              </div>
+              <div>
+                <h5 className="contact-title">Instagram</h5>
+                <p className="contact-info">@mss.team1</p>
+              </div>
+            </a>
+          </div>
         </div>
       </div>
       
