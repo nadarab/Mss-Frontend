@@ -1,11 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './Work.css';
 import { videoService } from '../../../firebase/collections';
-import workVideo from '../../../assets/Vedio/HeroSection.mp4';
-
 import post3 from '../../../assets/images/design/post3.JPG';
 import Branding1 from '../../../assets/images/branding/Branding1.JPG';
 import arrowIcon from '../../../assets/images/OurWorkSection/arrow.png';
@@ -14,6 +12,8 @@ import arrowIcon from '../../../assets/images/OurWorkSection/arrow.png';
 gsap.registerPlugin(ScrollTrigger);
 
 function Work() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const sectionRef = useRef(null);
   const cardsContainerRef = useRef(null);
   const card1Ref = useRef(null);
@@ -25,6 +25,28 @@ function Work() {
   const cardTitleRefs = [useRef(null), useRef(null), useRef(null)];
   const cardDescriptionRefs = [useRef(null), useRef(null), useRef(null)];
   const [firestoreVideo, setFirestoreVideo] = useState(null);
+
+  // Clean up GSAP when component unmounts or location changes
+  useEffect(() => {
+    return () => {
+      // Aggressive cleanup of all GSAP ScrollTriggers
+      try {
+        const triggers = ScrollTrigger.getAll();
+        triggers.forEach((trigger) => {
+          try {
+            trigger.disable();
+            trigger.kill(false); // false = don't revert inline styles
+          } catch (err) {
+            // Ignore errors
+          }
+        });
+        ScrollTrigger.clearMatchMedia();
+        ScrollTrigger.refresh();
+      } catch (error) {
+        // Ignore cleanup errors
+      }
+    };
+  }, [location.pathname]);
 
   // Load first video from Firestore
   useEffect(() => {
@@ -58,6 +80,9 @@ function Work() {
     if (!section || !cardsContainer || !card1 || !card2 || !card3) {
       return undefined;
     }
+
+    // Track if component is mounted
+    let isMounted = true;
 
     // Kill any existing ScrollTriggers (defensive in case of hot reloads)
     ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
@@ -242,6 +267,13 @@ function Work() {
         start: 'top top',
         end: '+=1500',
         scrub: 1.8,
+        onLeave: () => {
+          // Ensure we don't manipulate DOM if component is unmounting
+          if (!isMounted) return;
+        },
+        onEnterBack: () => {
+          if (!isMounted) return;
+        },
       },
     });
 
@@ -260,7 +292,52 @@ function Work() {
     ScrollTrigger.refresh();
 
     return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      // Mark as unmounted first
+      isMounted = false;
+      
+      // Safely clean up GSAP ScrollTrigger and pinned elements
+      try {
+        // Disable all triggers first to stop any ongoing animations
+        ScrollTrigger.getAll().forEach((trigger) => {
+          try {
+            trigger.disable();
+          } catch (err) {
+            // Ignore disable errors
+          }
+        });
+        
+        // Small delay to let GSAP finish current operations
+        setTimeout(() => {
+          try {
+            // Kill all triggers
+            ScrollTrigger.getAll().forEach((trigger) => {
+              try {
+                trigger.kill();
+              } catch (err) {
+                // Ignore kill errors
+              }
+            });
+            
+            // Final refresh to clean up DOM
+            ScrollTrigger.refresh();
+          } catch (error) {
+            // Ignore all cleanup errors
+          }
+        }, 0);
+      } catch (error) {
+        // Final cleanup attempt
+        try {
+          ScrollTrigger.getAll().forEach((trigger) => {
+            try {
+              trigger.kill();
+            } catch (err) {
+              // Ignore
+            }
+          });
+        } catch (err) {
+          // Ignore all errors
+        }
+      }
     };
   }, []);
 
@@ -269,7 +346,7 @@ function Work() {
       type: 'video',
       name: 'Video Making',
       description: 'Turning ideas into cinematic stories that connect with your audience',
-      mediaSrc: firestoreVideo || workVideo, // Use Firestore video if available, fallback to local
+      mediaSrc: firestoreVideo || '', // Use Firestore video if available
       link: '/work/video',
       isVideo: true,
     },
@@ -343,10 +420,32 @@ function Work() {
                     {category.description}
                   </p>
                 </div>
-                <Link to={category.link} className="check-work-btn">
+                <button 
+                  onClick={() => {
+                    // Immediately disable and kill all ScrollTriggers
+                    try {
+                      ScrollTrigger.getAll().forEach((trigger) => {
+                        try {
+                          trigger.disable();
+                          trigger.kill(false);
+                        } catch (err) {
+                          // Ignore
+                        }
+                      });
+                      ScrollTrigger.clearMatchMedia();
+                      ScrollTrigger.refresh();
+                    } catch (err) {
+                      // Ignore
+                    }
+                    // Navigate immediately - React will handle unmount
+                    navigate(category.link, { replace: true });
+                  }}
+                  className="check-work-btn"
+                  type="button"
+                >
                   Check Our Work
                   <img src={arrowIcon} alt="arrow" className="btn-arrow" />
-                </Link>
+                </button>
               </div>
             ))}
           </div>

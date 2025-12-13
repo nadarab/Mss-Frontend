@@ -102,17 +102,13 @@ function Services() {
     });
 
     return () => {
-      if (sectionRef.current) {
-        const headerElement = sectionRef.current.querySelector('.services-header');
-        if (headerElement) {
-          headerObserver.unobserve(headerElement);
-        }
+      // Safely disconnect observers instead of unobserve
+      try {
+        headerObserver.disconnect();
+        cardObserver.disconnect();
+      } catch (error) {
+        // Ignore disconnect errors
       }
-      Object.values(cardRefs.current).forEach((cardRef) => {
-        if (cardRef) {
-          cardObserver.unobserve(cardRef);
-        }
-      });
     };
   }, []);
 

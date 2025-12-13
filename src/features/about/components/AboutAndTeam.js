@@ -29,8 +29,11 @@ function TeamMember({ member, size, index, animateDirection }) {
     }
 
     return () => {
-      if (memberRef.current) {
-        observer.unobserve(memberRef.current);
+      // Safely disconnect observer instead of unobserve
+      try {
+        observer.disconnect();
+      } catch (error) {
+        // Ignore disconnect errors
       }
     };
   }, []);
@@ -163,11 +166,12 @@ function AboutAndTeam() {
     });
 
     return () => {
-      if (sectionRef.current) observer.unobserve(sectionRef.current);
-      if (headerRef.current) observer.unobserve(headerRef.current);
-      titleRefs.current.forEach((title) => {
-        if (title) observer.unobserve(title);
-      });
+      // Safely disconnect observer instead of unobserve
+      try {
+        observer.disconnect();
+      } catch (error) {
+        // Ignore disconnect errors
+      }
     };
   }, []);
 

@@ -28,8 +28,12 @@ function OurClient() {
     }
 
     return () => {
-      if (sectionRef.current) observer.unobserve(sectionRef.current);
-      if (headerRef.current) observer.unobserve(headerRef.current);
+      // Safely disconnect observer instead of unobserve
+      try {
+        observer.disconnect();
+      } catch (error) {
+        // Ignore disconnect errors
+      }
     };
   }, []);
 

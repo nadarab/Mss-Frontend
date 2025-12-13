@@ -13,59 +13,34 @@ function ContactUs() {
   const footerRef = useRef(null);
   const cardRefs = useRef([]);
   const headerRef = useRef(null);
+  const observerRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate-in');
-            if (entry.target === sectionRef.current) {
-              setIsVisible(true);
-            }
-          }
+    // Add animate-in class immediately for elements that are already visible
+    // This avoids needing IntersectionObserver for initial render
+    const addInitialAnimations = () => {
+      try {
+        if (sectionRef.current) {
+          sectionRef.current.classList.add('animate-in');
+          setIsVisible(true);
+        }
+        if (mapRef.current) mapRef.current.classList.add('animate-in');
+        if (footerRef.current) footerRef.current.classList.add('animate-in');
+        if (headerRef.current) headerRef.current.classList.add('animate-in');
+        cardRefs.current.forEach((card) => {
+          if (card) card.classList.add('animate-in');
         });
-      },
-      {
-        threshold: 0.2,
-        rootMargin: '0px 0px -50px 0px',
+      } catch (error) {
+        // Ignore errors
       }
-    );
+    };
 
-    // Observe section for header animation
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    // Observe map
-    if (mapRef.current) {
-      observer.observe(mapRef.current);
-    }
-
-    // Observe cards
-    cardRefs.current.forEach((card) => {
-      if (card) observer.observe(card);
-    });
-
-    // Observe footer
-    if (footerRef.current) {
-      observer.observe(footerRef.current);
-    }
-
-    // Observe header
-    if (headerRef.current) {
-      observer.observe(headerRef.current);
-    }
+    // Small delay to ensure DOM is ready
+    const timeoutId = setTimeout(addInitialAnimations, 100);
 
     return () => {
-      if (sectionRef.current) observer.unobserve(sectionRef.current);
-      if (mapRef.current) observer.unobserve(mapRef.current);
-      if (footerRef.current) observer.unobserve(footerRef.current);
-      if (headerRef.current) observer.unobserve(headerRef.current);
-      cardRefs.current.forEach((card) => {
-        if (card) observer.unobserve(card);
-      });
+      clearTimeout(timeoutId);
     };
   }, []);
 

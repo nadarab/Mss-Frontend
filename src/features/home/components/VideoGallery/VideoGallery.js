@@ -1,35 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './VideoGallery.css';
 import { CenteredVideoCarousel } from '../../../work/ui';
 import { videoCategoryService, videoService } from '../../../../firebase/collections';
-import { getDocument } from '../../../../firebase/firestoreService';
-import heroVideo from '../../../../assets/Vedio/HeroSection.mp4';
 
 function VideoGallery() {
+  const navigate = useNavigate();
   const heroRef = useRef(null);
   const sectionsRef = useRef(null);
   const [scrollY, setScrollY] = useState(0);
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [heroVideoUrl, setHeroVideoUrl] = useState(heroVideo);
 
   // Load videos from Firestore
   useEffect(() => {
     loadVideosFromFirestore();
-    loadHeroVideoFromFirestore();
   }, []);
-
-  const loadHeroVideoFromFirestore = async () => {
-    try {
-      const pageData = await getDocument('video_page', 'hero_section');
-      if (pageData && pageData.heroVideo) {
-        setHeroVideoUrl(pageData.heroVideo);
-      }
-    } catch (error) {
-      console.log('Video page hero video not found in Firestore, using default');
-    }
-  };
 
   const loadVideosFromFirestore = async () => {
     try {
@@ -71,31 +57,72 @@ function VideoGallery() {
   }, []);
 
   useEffect(() => {
-    const observerOptions = {
-      threshold: 0.15,
-      rootMargin: '0px 0px -50px 0px'
+    let observer = null;
+    let mounted = true;
+
+    const setupObserver = () => {
+      if (!mounted) return;
+
+      try {
+        observer = new IntersectionObserver((entries) => {
+          if (!mounted) return;
+          
+          entries.forEach(entry => {
+            try {
+              if (entry.isIntersecting && entry.target && entry.target.isConnected) {
+                entry.target.classList.add('animate-in');
+                entry.target.classList.remove('animate-out');
+              } else if (entry.target && entry.target.isConnected) {
+                const rect = entry.target.getBoundingClientRect();
+                if (rect.bottom < 0) {
+                  entry.target.classList.remove('animate-in');
+                  entry.target.classList.add('animate-out');
+                }
+              }
+            } catch (err) {
+              // Ignore individual entry errors
+            }
+          });
+        }, {
+          threshold: 0.15,
+          rootMargin: '0px 0px -50px 0px'
+        });
+
+        // Use refs instead of querySelectorAll
+        if (sectionsRef.current && sectionsRef.current.isConnected) {
+          const sections = sectionsRef.current.querySelectorAll('.video-section');
+          sections.forEach(section => {
+            if (section && section.isConnected && mounted) {
+              try {
+                observer.observe(section);
+              } catch (err) {
+                // Ignore observation errors
+              }
+            }
+          });
+        }
+      } catch (error) {
+        // If observer fails, continue without animations
+      }
     };
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('animate-in');
-          entry.target.classList.remove('animate-out');
-        } else {
-          const rect = entry.target.getBoundingClientRect();
-          if (rect.bottom < 0) {
-            entry.target.classList.remove('animate-in');
-            entry.target.classList.add('animate-out');
-          }
+    // Delay to ensure DOM is ready
+    const timeoutId = setTimeout(setupObserver, 100);
+
+    return () => {
+      mounted = false;
+      clearTimeout(timeoutId);
+      
+      if (observer) {
+        try {
+          observer.disconnect();
+        } catch (err) {
+          // Ignore disconnect errors
         }
-      });
-    }, observerOptions);
-
-    const sections = document.querySelectorAll('.video-section');
-    sections.forEach(section => observer.observe(section));
-
-    return () => observer.disconnect();
-  }, []);
+        observer = null;
+      }
+    };
+  }, [sections]);
 
   if (loading) {
     return (
@@ -147,7 +174,7 @@ function VideoGallery() {
           muted
           playsInline
         >
-          <source src={heroVideoUrl} type="video/mp4" />
+          {/* Add your hero video URL from Firebase Storage here */}
         </video>
       </section>
 
@@ -163,23 +190,23 @@ function VideoGallery() {
           </div>
         ) : (
           sections.map((section) => (
-            <section 
-              key={section.id}
-              className={`video-section ${section.reverse ? 'reverse' : ''}`}
-            >
-              <div className="video-section-content-carousel">
-                <div className="video-text-content">
-                  <h2>{section.title}</h2>
-                  <p>{section.description}</p>
-                </div>
+          <section 
+            key={section.id}
+            className={`video-section ${section.reverse ? 'reverse' : ''}`}
+          >
+            <div className="video-section-content-carousel">
+              <div className="video-text-content">
+                <h2>{section.title}</h2>
+                <p>{section.description}</p>
+              </div>
 
                 {section.videos.length > 0 ? (
-                  <div className="section-carousel-wrapper">
-                    <CenteredVideoCarousel 
-                      videos={section.videos} 
-                      carouselId={`carousel-${section.id}`}
-                    />
-                  </div>
+              <div className="section-carousel-wrapper">
+                <CenteredVideoCarousel 
+                  videos={section.videos} 
+                  carouselId={`carousel-${section.id}`}
+                />
+              </div>
                 ) : (
                   <div style={{ 
                     textAlign: 'center', 
@@ -189,19 +216,23 @@ function VideoGallery() {
                     <p>No videos in this category yet</p>
                   </div>
                 )}
-              </div>
-            </section>
+            </div>
+          </section>
           ))
         )}
       </div>
 
       <div className="video-footer">
-        <Link to="/" className="back-home-btn">
+        <button 
+          onClick={() => navigate('/', { replace: true })}
+          className="back-home-btn"
+          type="button"
+        >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
           Back to Home
-        </Link>
+        </button>
       </div>
     </div>
   );

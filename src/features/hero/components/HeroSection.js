@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import './HeroSection.css';
-import heroVideo from '../../../assets/Vedio/HeroSection.mp4';
 import logo from '../../../assets/images/common/logoMSS.PNG';
 import orbetLogo from '../../../assets/images/Hero/orbet.png';
 import rashedLogo from '../../../assets/images/Hero/rashed.png';
@@ -152,7 +151,7 @@ function HeroSection() {
     }
   }}
 >
-  <source src={heroVideo} type="video/mp4" />
+  {/* Add your video URL from Firebase Storage here */}
   Your browser does not support the video tag.
 </video>
 

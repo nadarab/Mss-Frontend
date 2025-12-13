@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './DesignGallery.css';
 import { CenteredImageCarousel } from '../../../work/ui';
 import { designProjectService } from '../../../../firebase/collections';
@@ -7,6 +7,7 @@ import { getDocument } from '../../../../firebase/firestoreService';
 import heroImg from '../../../../assets/images/design/VedioGallaryBackground.jpg';
 
 function DesignGallery() {
+  const navigate = useNavigate();
   const heroRef = useRef(null);
   const sectionsRef = useRef(null);
   const [scrollY, setScrollY] = useState(0);
@@ -82,25 +83,71 @@ function DesignGallery() {
   }, []);
 
   useEffect(() => {
-    const observerOptions = { threshold: 0.15, rootMargin: '0px 0px -50px 0px' };
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('animate-in');
-          entry.target.classList.remove('animate-out');
-        } else {
-          const rect = entry.target.getBoundingClientRect();
-          if (rect.bottom < 0) {
-            entry.target.classList.remove('animate-in');
-            entry.target.classList.add('animate-out');
-          }
-        }
-      });
-    }, observerOptions);
+    let observer = null;
+    let mounted = true;
 
-    const sections = document.querySelectorAll('.video-section');
-    sections.forEach(section => observer.observe(section));
-    return () => observer.disconnect();
+    const setupObserver = () => {
+      if (!mounted) return;
+
+      try {
+        observer = new IntersectionObserver((entries) => {
+          if (!mounted) return;
+          
+          entries.forEach(entry => {
+            try {
+              if (entry.isIntersecting && entry.target && entry.target.isConnected) {
+                entry.target.classList.add('animate-in');
+                entry.target.classList.remove('animate-out');
+              } else if (entry.target && entry.target.isConnected) {
+                const rect = entry.target.getBoundingClientRect();
+                if (rect.bottom < 0) {
+                  entry.target.classList.remove('animate-in');
+                  entry.target.classList.add('animate-out');
+                }
+              }
+            } catch (err) {
+              // Ignore individual entry errors
+            }
+          });
+        }, {
+          threshold: 0.15,
+          rootMargin: '0px 0px -50px 0px'
+        });
+
+        // Use refs instead of querySelectorAll
+        if (sectionsRef.current && sectionsRef.current.isConnected) {
+          const sections = sectionsRef.current.querySelectorAll('.video-section');
+          sections.forEach(section => {
+            if (section && section.isConnected && mounted) {
+              try {
+                observer.observe(section);
+              } catch (err) {
+                // Ignore observation errors
+              }
+            }
+          });
+        }
+      } catch (error) {
+        // If observer fails, continue without animations
+      }
+    };
+
+    // Delay to ensure DOM is ready
+    const timeoutId = setTimeout(setupObserver, 100);
+
+    return () => {
+      mounted = false;
+      clearTimeout(timeoutId);
+      
+      if (observer) {
+        try {
+          observer.disconnect();
+        } catch (err) {
+          // Ignore disconnect errors
+        }
+        observer = null;
+      }
+    };
   }, [sections]);
 
   return (
@@ -167,12 +214,16 @@ function DesignGallery() {
       </div>
 
       <div className="video-footer">
-        <Link to="/" className="back-home-btn">
+        <button 
+          onClick={() => navigate('/', { replace: true })}
+          className="back-home-btn"
+          type="button"
+        >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
           Back to Home
-        </Link>
+        </button>
       </div>
     </div>
   );

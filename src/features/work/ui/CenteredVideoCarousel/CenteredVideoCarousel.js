@@ -53,8 +53,12 @@ function CenteredVideoCarousel({ videos, carouselId = 'default' }) {
     observer.observe(currentContainer);
 
     return () => {
-      observer.unobserve(currentContainer);
-      observer.disconnect();
+      // Safely disconnect observer
+      try {
+        observer.disconnect();
+      } catch (error) {
+        // Ignore disconnect errors
+      }
     };
   }, []);
 

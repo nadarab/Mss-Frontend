@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar, Nav, Container } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './BrandingGallery.css';
 import logo from '../../../../assets/images/common/logoMSS.PNG';
-import { getDocument } from '../../../../firebase/firestoreService';
+import { brandingProjectService } from '../../../../firebase/collections';
 import ContactUs from '../../../contact/components/ContactUs';
 
 function BrandingGallery() {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [navExpanded, setNavExpanded] = useState(false);
-  const [pageData, setPageData] = useState({
-    desktopHeroImage: '',
-    mobileHeroImage: '',
+  const [pageData] = useState({
     title: 'Branding & Identity',
     mainText: 'Crafting identities that define who you are and what you stand for.',
-    shortDescription: 'Short Description',
+    shortDescription: 'Explore our branding projects',
   });
   const navigate = useNavigate();
 
@@ -23,69 +22,8 @@ function BrandingGallery() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [explorePage, setExplorePage] = useState(1);
 
-  // Placeholder branding items data (will be replaced with database data later)
-  const [brandingItems, setBrandingItems] = useState([
-    {
-      id: 1,
-      projectName: 'Project Name',
-      shortDescription: 'Short Description',
-      images: [
-        'https://via.placeholder.com/800x600/cccccc/000000?text=Image+1',
-        'https://via.placeholder.com/800x600/dddddd/000000?text=Image+2',
-        'https://via.placeholder.com/800x600/eeeeee/000000?text=Image+3',
-      ],
-    },
-    {
-      id: 2,
-      projectName: 'Project Name 2',
-      shortDescription: 'Short Description 2',
-      images: [
-        'https://via.placeholder.com/800x600/cccccc/000000?text=Image+1',
-        'https://via.placeholder.com/800x600/dddddd/000000?text=Image+2',
-        'https://via.placeholder.com/800x600/eeeeee/000000?text=Image+3',
-      ],
-    },
-    {
-      id: 3,
-      projectName: 'Project Name 3',
-      shortDescription: 'Short Description 3',
-      images: [
-        'https://via.placeholder.com/800x600/cccccc/000000?text=Image+1',
-        'https://via.placeholder.com/800x600/dddddd/000000?text=Image+2',
-        'https://via.placeholder.com/800x600/eeeeee/000000?text=Image+3',
-      ],
-    },
-    {
-      id: 4,
-      projectName: 'Project Name 4',
-      shortDescription: 'Short Description 4',
-      images: [
-        'https://via.placeholder.com/800x600/cccccc/000000?text=Image+1',
-        'https://via.placeholder.com/800x600/dddddd/000000?text=Image+2',
-        'https://via.placeholder.com/800x600/eeeeee/000000?text=Image+3',
-      ],
-    },
-    {
-      id: 5,
-      projectName: 'Project Name 5',
-      shortDescription: 'Short Description 5',
-      images: [
-        'https://via.placeholder.com/800x600/cccccc/000000?text=Image+1',
-        'https://via.placeholder.com/800x600/dddddd/000000?text=Image+2',
-        'https://via.placeholder.com/800x600/eeeeee/000000?text=Image+3',
-      ],
-    },
-    {
-      id: 6,
-      projectName: 'Project Name 6',
-      shortDescription: 'Short Description 6',
-      images: [
-        'https://via.placeholder.com/800x600/cccccc/000000?text=Image+1',
-        'https://via.placeholder.com/800x600/dddddd/000000?text=Image+2',
-        'https://via.placeholder.com/800x600/eeeeee/000000?text=Image+3',
-      ],
-    },
-  ]);
+  // Branding items from Firestore
+  const [brandingItems, setBrandingItems] = useState([]);
 
   // Items per page for "Explore Other Projects" (responsive)
   const [itemsPerPage, setItemsPerPage] = useState(6);
@@ -111,27 +49,29 @@ function BrandingGallery() {
       setIsLoaded(true);
     }, 100);
 
-    // Fetch branding page data from Firestore
-    const fetchPageData = async () => {
+    // Fetch branding projects from Firestore
+    const fetchBrandingProjects = async () => {
       try {
-        // Try to fetch from 'branding_page' collection first
-        // If it doesn't exist, use default values
-        const data = await getDocument('branding_page', 'hero_section');
-        if (data) {
-          setPageData({
-            desktopHeroImage: data.desktopHeroImage || '',
-            mobileHeroImage: data.mobileHeroImage || '',
-            title: data.title || 'Branding & Identity',
-            mainText: data.mainText || 'Crafting identities that define who you are and what you stand for.',
-            shortDescription: data.shortDescription || 'Short Description',
-          });
-        }
+        const projects = await brandingProjectService.getAll();
+        
+        // Format projects for the component
+        const formattedProjects = projects.map(project => ({
+          id: project.id,
+          projectName: project.title,
+          shortDescription: project.description,
+          images: project.images || []
+        }));
+
+        setBrandingItems(formattedProjects);
       } catch (error) {
-        console.log('Branding page data not found in Firestore, using defaults');
+        console.error('Error loading branding projects:', error);
+        setBrandingItems([]);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchPageData();
+    fetchBrandingProjects();
   }, []);
 
   const handleNavClick = (e, targetPath) => {
@@ -139,7 +79,7 @@ function BrandingGallery() {
     setNavExpanded(false);
 
     if (targetPath === 'hero') {
-      navigate('/');
+      navigate('/', { replace: true });
       setTimeout(() => {
         const element = document.getElementById('hero');
         if (element) {
@@ -147,9 +87,9 @@ function BrandingGallery() {
         }
       }, 100);
     } else if (targetPath.startsWith('/')) {
-      navigate(targetPath);
+      navigate(targetPath, { replace: true });
     } else {
-      navigate('/');
+      navigate('/', { replace: true });
       setTimeout(() => {
         const element = document.getElementById(targetPath);
         if (element) {
@@ -161,7 +101,7 @@ function BrandingGallery() {
 
   const handleHomeClick = (e) => {
     e.preventDefault();
-    navigate('/');
+    navigate('/', { replace: true });
   };
 
   // Handle thumbnail carousel navigation
@@ -238,31 +178,21 @@ function BrandingGallery() {
 
       {/* Breadcrumb */}
       <div className="branding-breadcrumb">
-        <Link to="/" className="breadcrumb-link" onClick={handleHomeClick}>
+        <button 
+          onClick={handleHomeClick}
+          className="breadcrumb-link"
+          type="button"
+        >
           <svg className="breadcrumb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
           </svg>
-        </Link>
+        </button>
         <span className="breadcrumb-separator">&gt;</span>
         <span className="breadcrumb-current">Branding & Identity</span>
       </div>
 
       {/* Hero Section */}
       <div className="branding-hero-section">
-        {/* Desktop Background Image */}
-        <div className="branding-hero-bg branding-hero-bg-desktop">
-          {pageData.desktopHeroImage && (
-            <img src={pageData.desktopHeroImage} alt="Branding Hero Desktop" />
-          )}
-        </div>
-
-        {/* Mobile Background Image */}
-        <div className="branding-hero-bg branding-hero-bg-mobile">
-          {pageData.mobileHeroImage && (
-            <img src={pageData.mobileHeroImage} alt="Branding Hero Mobile" />
-          )}
-        </div>
-
         {/* Overlay Text Box */}
         <div className="branding-hero-overlay-box">
           <div className="branding-hero-content">
@@ -281,8 +211,19 @@ function BrandingGallery() {
             <p className="branding-showcase-subtitle">Discover more of our creative work across different disciplines.</p>
           </div>
 
-          {/* Main Showcase Card */}
-          <div className="branding-showcase-card">
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '60px 20px', color: '#fff' }}>
+              <p>Loading projects...</p>
+            </div>
+          ) : brandingItems.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '60px 20px', color: '#fff' }}>
+              <h3>No branding projects yet</h3>
+              <p>Add branding projects in the <a href="/admin" style={{ color: '#0066ff' }}>admin panel</a></p>
+            </div>
+          ) : (
+            <>
+              {/* Main Showcase Card */}
+              <div className="branding-showcase-card">
             {/* Large Main Image - Full Width */}
             {currentItem && currentItem.images && currentItem.images.length > 0 && (
               <div className="branding-main-image">
@@ -391,6 +332,8 @@ function BrandingGallery() {
               )}
             </div>
           </div>
+            </>
+          )}
         </div>
       </section>
 
