@@ -3,14 +3,15 @@ import { Navbar, Nav, Container } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import './BrandingGallery.css';
 import logo from '../../../../assets/images/common/logoMSS.PNG';
-import { brandingProjectService } from '../../../../firebase/collections';
+import { brandingProjectService, workCardThumbnailService } from '../../../../firebase/collections';
 import ContactUs from '../../../contact/components/ContactUs';
 
 function BrandingGallery() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [navExpanded, setNavExpanded] = useState(false);
-  const [pageData] = useState({
+  const [heroImage, setHeroImage] = useState(null);
+  const [pageData, setPageData] = useState({
     title: 'Branding & Identity',
     mainText: 'Crafting identities that define who you are and what you stand for.',
     shortDescription: 'Explore our branding projects',
@@ -21,6 +22,9 @@ function BrandingGallery() {
   const [currentItemIndex, setCurrentItemIndex] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [explorePage, setExplorePage] = useState(1);
+  const [thumbnailStartOffset, setThumbnailStartOffset] = useState(0); // Starting index for visible thumbnails (scrolls one at a time)
+  const [imageSelected, setImageSelected] = useState(true); // Track if an image has been clicked - default true to show first image
+  const [imageTransitioning, setImageTransitioning] = useState(false); // Track image transition for smooth fade
 
   // Branding items from Firestore
   const [brandingItems, setBrandingItems] = useState([]);
@@ -28,6 +32,14 @@ function BrandingGallery() {
   // Items per page for "Explore Other Projects" (responsive)
   const [itemsPerPage, setItemsPerPage] = useState(6);
   
+  // Scroll to top when component mounts
+  useEffect(() => {
+    // Force scroll to top when component mounts
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, []);
+
   useEffect(() => {
     const updateItemsPerPage = () => {
       if (window.innerWidth <= 768) {
@@ -72,7 +84,22 @@ function BrandingGallery() {
     };
 
     fetchBrandingProjects();
+    loadHeroDataFromFirestore();
   }, []);
+
+  const loadHeroDataFromFirestore = async () => {
+    try {
+      // Load the same thumbnail used in the "Our Work" section
+      const workCardData = await workCardThumbnailService.getByCardType('branding');
+      if (workCardData) {
+        if (workCardData.thumbnailUrl) setHeroImage(workCardData.thumbnailUrl);
+        if (workCardData.name) setPageData(prev => ({ ...prev, title: workCardData.name }));
+        if (workCardData.description) setPageData(prev => ({ ...prev, mainText: workCardData.description }));
+      }
+    } catch (error) {
+      console.log('Branding card thumbnail not found in Firestore, using defaults');
+    }
+  };
 
   const handleNavClick = (e, targetPath) => {
     e.preventDefault();
@@ -104,28 +131,73 @@ function BrandingGallery() {
     navigate('/', { replace: true });
   };
 
-  // Handle thumbnail carousel navigation
-  const handleThumbnailPrev = () => {
-    const currentItem = brandingItems[currentItemIndex];
-    if (currentItem && currentItem.images.length > 0) {
-      setCurrentImageIndex((prev) => 
-        prev === 0 ? currentItem.images.length - 1 : prev - 1
-      );
-    }
+  // Calculate thumbnail display
+  const currentItem = brandingItems[currentItemIndex] || brandingItems[0];
+  const thumbnailsPerPage = 3;
+  const totalImages = currentItem && currentItem.images ? currentItem.images.length : 0;
+  const maxStartOffset = Math.max(0, totalImages - thumbnailsPerPage);
+  
+  const thumbnailStartIndex = thumbnailStartOffset;
+  const thumbnailEndIndex = thumbnailStartIndex + thumbnailsPerPage;
+  const visibleThumbnails = currentItem && currentItem.images 
+    ? currentItem.images.slice(thumbnailStartIndex, thumbnailEndIndex)
+    : [];
+
+  // Handle thumbnail navigation (scroll one image at a time)
+  const handleThumbnailPagePrev = () => {
+    setThumbnailStartOffset((prev) => {
+      if (prev === 0) {
+        return maxStartOffset; // Wrap to end
+      }
+      return prev - 1;
+    });
   };
 
-  const handleThumbnailNext = () => {
-    const currentItem = brandingItems[currentItemIndex];
-    if (currentItem && currentItem.images.length > 0) {
-      setCurrentImageIndex((prev) => 
-        prev === currentItem.images.length - 1 ? 0 : prev + 1
-      );
-    }
+  const handleThumbnailPageNext = () => {
+    setThumbnailStartOffset((prev) => {
+      if (prev >= maxStartOffset) {
+        return 0; // Wrap to beginning
+      }
+      return prev + 1;
+    });
   };
 
   const handleThumbnailClick = (index) => {
-    setCurrentImageIndex(index);
+    // Smooth fade transition for image change
+    setImageTransitioning(true);
+    
+    setTimeout(() => {
+      setCurrentImageIndex(index);
+      setImageSelected(true); // Mark that an image has been selected
+      setImageTransitioning(false);
+    }, 200); // Fade duration
+    
+    // Check if the clicked thumbnail is the last one visible (rightmost)
+    const localIndex = index - thumbnailStartIndex;
+    const isLastVisible = localIndex === visibleThumbnails.length - 1;
+    const isFirstVisible = localIndex === 0;
+    
+    // If it's the last visible thumbnail and there are more images to show, scroll forward by one
+    if (isLastVisible && thumbnailStartIndex + thumbnailsPerPage < totalImages) {
+      setTimeout(() => {
+        setThumbnailStartOffset((prev) => prev + 1);
+      }, 400); // Delay for smooth transition
+    }
+    
+    // If it's the first visible thumbnail and there are previous images to show, scroll backward by one
+    if (isFirstVisible && thumbnailStartIndex > 0) {
+      setTimeout(() => {
+        setThumbnailStartOffset((prev) => prev - 1);
+      }, 400); // Delay for smooth transition
+    }
   };
+
+  // Reset thumbnail offset and image selection when item changes
+  useEffect(() => {
+    setThumbnailStartOffset(0);
+    setImageSelected(true); // Show first image when switching projects
+    setCurrentImageIndex(0);
+  }, [currentItemIndex]);
 
   // Handle "Explore Other Projects" pagination
   const handleExplorePrev = () => {
@@ -140,15 +212,13 @@ function BrandingGallery() {
   const handleProjectClick = (itemIndex) => {
     setCurrentItemIndex(itemIndex);
     setCurrentImageIndex(0);
+    setImageSelected(true); // Show first image when changing project
     // Scroll to showcase section
     const showcaseSection = document.getElementById('branding-showcase');
     if (showcaseSection) {
       showcaseSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
-
-  // Get current branding item
-  const currentItem = brandingItems[currentItemIndex] || brandingItems[0];
   
   // Get items for current explore page
   const startIndex = (explorePage - 1) * itemsPerPage;
@@ -192,7 +262,15 @@ function BrandingGallery() {
       </div>
 
       {/* Hero Section */}
-      <div className="branding-hero-section">
+      <div 
+        className="branding-hero-section" 
+        style={heroImage ? { 
+          backgroundImage: `url(${heroImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        } : {}}
+      >
         {/* Overlay Text Box */}
         <div className="branding-hero-overlay-box">
           <div className="branding-hero-content">
@@ -206,11 +284,6 @@ function BrandingGallery() {
       {/* Branding Work Showcase Section */}
       <section id="branding-showcase" className="branding-showcase-section">
         <div className="branding-showcase-container">
-          <div className="branding-showcase-header">
-            <h2 className="branding-showcase-title">Branding & Identity Work Showcase</h2>
-            <p className="branding-showcase-subtitle">Discover more of our creative work across different disciplines.</p>
-          </div>
-
           {loading ? (
             <div style={{ textAlign: 'center', padding: '60px 20px', color: '#fff' }}>
               <p>Loading projects...</p>
@@ -222,125 +295,194 @@ function BrandingGallery() {
             </div>
           ) : (
             <>
-              {/* Main Showcase Card */}
-              <div className="branding-showcase-card">
-            {/* Large Main Image - Full Width */}
-            {currentItem && currentItem.images && currentItem.images.length > 0 && (
-              <div className="branding-main-image">
-                <img 
-                  src={currentItem.images[currentImageIndex]} 
-                  alt={currentItem.projectName}
-                />
-                
-                {/* Project Name Overlay - Top Left */}
-                <div className="branding-project-name-overlay">
-                  <h3 className="branding-project-name">{currentItem?.projectName || 'Project Name'}</h3>
-                  <p className="branding-project-description">{currentItem?.shortDescription || 'Short Description'}</p>
+              {/* Combined Container with Shadow */}
+              <div className="branding-unified-container">
+                {/* Showcase Header */}
+                <div className="branding-showcase-header">
+                  <h2 className="branding-showcase-title">Branding & Identity Work Showcase</h2>
+                  <p className="branding-showcase-subtitle">Discover more of our creative work across different disciplines.</p>
                 </div>
 
-                {/* Thumbnail Carousel - Bottom Left */}
-                {currentItem.images.length > 0 && (
-                  <div className="branding-thumbnail-carousel">
-                    <button 
-                      className="branding-carousel-btn branding-carousel-btn-prev"
-                      onClick={handleThumbnailPrev}
-                      aria-label="Previous image"
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M15 18l-6-6 6-6" />
-                      </svg>
-                    </button>
-                    
-                    <div className="branding-thumbnail-indicator">
-                      {currentImageIndex + 1}/{currentItem.images.length}
-                    </div>
+                {/* Main Showcase Card */}
+                <div className="branding-showcase-card">
+                  {/* Large Main Image - Full Width */}
+                  <div className="branding-main-image">
+                    {currentItem && currentItem.images && currentItem.images.length > 0 && imageSelected && (
+                      <img 
+                        src={currentItem.images[currentImageIndex]} 
+                        alt={`${currentItem.projectName} - Image ${currentImageIndex + 1}`}
+                        className={imageTransitioning ? 'transitioning' : ''}
+                      />
+                    )}
 
-                    <div className="branding-thumbnails-container">
-                      {currentItem.images.map((image, index) => (
-                        <div
-                          key={index}
-                          className={`branding-thumbnail ${index === currentImageIndex ? 'active' : ''}`}
-                          onClick={() => handleThumbnailClick(index)}
-                        >
-                          <img src={image} alt={`Thumbnail ${index + 1}`} />
+                    {/* Project Name Overlay - Top Left of Image, No Background */}
+                    {currentItem && (
+                      <div className="branding-project-name-overlay">
+                        <h3 className="branding-project-name">{currentItem?.projectName || 'Project Name'}</h3>
+                      </div>
+                    )}
+
+                    {/* Thumbnail Carousel - Bottom Left on Desktop Only */}
+                    {currentItem && currentItem.images && currentItem.images.length > 0 && (
+                      <div className="branding-thumbnail-carousel branding-thumbnail-carousel-desktop">
+                        {/* Indicator - Above Thumbnails, with White Border */}
+                        <div className="branding-thumbnail-pagination">
+                          <button 
+                            className="branding-carousel-btn branding-carousel-btn-prev"
+                            onClick={handleThumbnailPagePrev}
+                            aria-label="Previous thumbnails"
+                          >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                              <path d="M15 18l-6-6 6-6" />
+                            </svg>
+                          </button>
+                          <div className="branding-thumbnail-indicator">
+                            {thumbnailStartIndex + 1}-{Math.min(thumbnailEndIndex, totalImages)}/{totalImages}
+                          </div>
+                          <button 
+                            className="branding-carousel-btn branding-carousel-btn-next"
+                            onClick={handleThumbnailPageNext}
+                            aria-label="Next thumbnails"
+                          >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                              <path d="M9 18l6-6-6-6" />
+                            </svg>
+                          </button>
                         </div>
-                      ))}
-                    </div>
 
-                    <button 
-                      className="branding-carousel-btn branding-carousel-btn-next"
-                      onClick={handleThumbnailNext}
-                      aria-label="Next image"
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M9 18l6-6-6-6" />
-                      </svg>
-                    </button>
+                        {/* Thumbnails - Below Indicator */}
+                        <div className="branding-thumbnails-container">
+                          {visibleThumbnails.map((image, localIndex) => {
+                            const globalIndex = thumbnailStartIndex + localIndex;
+                            return (
+                              <div
+                                key={globalIndex}
+                                className={`branding-thumbnail ${globalIndex === currentImageIndex ? 'active' : ''}`}
+                                onClick={() => handleThumbnailClick(globalIndex)}
+                              >
+                                <img src={image} alt={`Thumbnail ${globalIndex + 1}`} />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            )}
-          </div>
 
-          {/* Explore Other Projects Section */}
-          <div className="branding-explore-section">
-            <h3 className="branding-explore-title">Explore Other Projects</h3>
-            
-            <div className="branding-explore-container">
-              <div className="branding-explore-grid">
-                {currentPageItems.map((item, index) => {
-                  const globalIndex = startIndex + index;
-                  const thumbnailImage = item.images && item.images.length > 0 ? item.images[0] : '';
-                  return (
-                    <div
-                      key={item.id}
-                      className={`branding-explore-thumbnail ${globalIndex === currentItemIndex ? 'active' : ''}`}
-                      onClick={() => handleProjectClick(globalIndex)}
-                    >
-                      {thumbnailImage && (
-                        <img src={thumbnailImage} alt={item.projectName} />
-                      )}
+                  {/* Thumbnail Carousel - Separate Container for Mobile/Tablet Only */}
+                  {currentItem && currentItem.images && currentItem.images.length > 0 && (
+                    <div className="branding-thumbnail-carousel branding-thumbnail-carousel-mobile">
+                      {/* Indicator - Above Thumbnails, with White Border */}
+                      <div className="branding-thumbnail-pagination">
+                        <button 
+                          className="branding-carousel-btn branding-carousel-btn-prev"
+                          onClick={handleThumbnailPagePrev}
+                          aria-label="Previous thumbnails"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <path d="M15 18l-6-6 6-6" />
+                          </svg>
+                        </button>
+                        <div className="branding-thumbnail-indicator">
+                          {thumbnailStartIndex + 1}-{Math.min(thumbnailEndIndex, totalImages)}/{totalImages}
+                        </div>
+                        <button 
+                          className="branding-carousel-btn branding-carousel-btn-next"
+                          onClick={handleThumbnailPageNext}
+                          aria-label="Next thumbnails"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <path d="M9 18l6-6-6-6" />
+                          </svg>
+                        </button>
+                      </div>
+
+                      {/* Thumbnails - Below Indicator */}
+                      <div className="branding-thumbnails-container">
+                        {visibleThumbnails.map((image, localIndex) => {
+                          const globalIndex = thumbnailStartIndex + localIndex;
+                          return (
+                            <div
+                              key={globalIndex}
+                              className={`branding-thumbnail ${globalIndex === currentImageIndex ? 'active' : ''}`}
+                              onClick={() => handleThumbnailClick(globalIndex)}
+                            >
+                              <img src={image} alt={`Thumbnail ${globalIndex + 1}`} />
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
-
-              {totalPages > 1 && (
-                <div className="branding-explore-pagination">
-                  <div className="branding-explore-page-indicator">
-                    {explorePage}/{totalPages}
-                  </div>
-                  <button 
-                    className="branding-explore-btn branding-explore-btn-prev"
-                    onClick={handleExplorePrev}
-                    aria-label="Previous page"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M15 18l-6-6 6-6" />
-                    </svg>
-                  </button>
-                  <button 
-                    className="branding-explore-btn branding-explore-btn-next"
-                    onClick={handleExploreNext}
-                    aria-label="Next page"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M9 18l6-6-6-6" />
-                    </svg>
-                  </button>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
+
+                {/* Spring Separator Line */}
+                <div className="branding-spring-separator"></div>
+
+                {/* Explore Other Projects Section */}
+                <div className="branding-explore-section">
+                  <div className="branding-explore-header">
+                    <h3 className="branding-explore-title">Explore Other Projects</h3>
+                    
+                    {totalPages > 1 && (
+                      <div className="branding-explore-pagination">
+                        <button 
+                          className="branding-explore-btn branding-explore-btn-prev"
+                          onClick={handleExplorePrev}
+                          aria-label="Previous page"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="#0066ff" strokeWidth="2.5">
+                            <path d="M15 18l-6-6 6-6" />
+                          </svg>
+                        </button>
+                        <div className="branding-explore-page-indicator">
+                          {explorePage}/{totalPages}
+                        </div>
+                        <button 
+                          className="branding-explore-btn branding-explore-btn-next"
+                          onClick={handleExploreNext}
+                          aria-label="Next page"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="#0066ff" strokeWidth="2.5">
+                            <path d="M9 18l6-6-6-6" />
+                          </svg>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="branding-explore-grid">
+                    {currentPageItems.map((item, index) => {
+                      const globalIndex = startIndex + index;
+                      const thumbnailImage = item.images && item.images.length > 0 ? item.images[0] : '';
+                      return (
+                        <div
+                          key={item.id}
+                          className={`branding-explore-thumbnail ${globalIndex === currentItemIndex ? 'active' : ''}`}
+                          onClick={() => handleProjectClick(globalIndex)}
+                        >
+                          {thumbnailImage && (
+                            <img src={thumbnailImage} alt={item.projectName} />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
             </>
           )}
         </div>
       </section>
 
-      {/* Contact Us Section */}
-      <ContactUs />
+      {/* Contact Us Section - Full Width */}
+      <div className="branding-contact-wrapper">
+        <ContactUs />
+      </div>
     </section>
+
   );
+
 }
 
 export default BrandingGallery;

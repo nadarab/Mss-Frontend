@@ -3,9 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './Work.css';
-import { videoService } from '../../../firebase/collections';
-import post3 from '../../../assets/images/design/post3.JPG';
-import Branding1 from '../../../assets/images/branding/Branding1.JPG';
+import { videoService, workCardThumbnailService } from '../../../firebase/collections';
 import arrowIcon from '../../../assets/images/OurWorkSection/arrow.png';
 
 // Register ScrollTrigger plugin
@@ -25,6 +23,13 @@ function Work() {
   const cardTitleRefs = [useRef(null), useRef(null), useRef(null)];
   const cardDescriptionRefs = [useRef(null), useRef(null), useRef(null)];
   const [firestoreVideo, setFirestoreVideo] = useState(null);
+  const [thumbnails, setThumbnails] = useState({
+    video: null,
+    design: null,
+    branding: null
+  });
+  const [videoThumbnail, setVideoThumbnail] = useState(null);
+  const [isLoadingThumbnails, setIsLoadingThumbnails] = useState(true);
 
   // Clean up GSAP when component unmounts or location changes
   useEffect(() => {
@@ -48,9 +53,10 @@ function Work() {
     };
   }, [location.pathname]);
 
-  // Load first video from Firestore
+  // Load first video and thumbnails from Firestore
   useEffect(() => {
     loadFirstVideo();
+    loadThumbnails();
   }, []);
 
   const loadFirstVideo = async () => {
@@ -67,7 +73,31 @@ function Work() {
     }
   };
 
+  const loadThumbnails = async () => {
+    try {
+      // Load thumbnails for each card type
+      const videoThumb = await workCardThumbnailService.getByCardType('video');
+      const designThumb = await workCardThumbnailService.getByCardType('design');
+      const brandingThumb = await workCardThumbnailService.getByCardType('branding');
+      
+      setThumbnails({
+        video: videoThumb,
+        design: designThumb,
+        branding: brandingThumb
+      });
+    } catch (error) {
+      console.error('Error loading thumbnails:', error);
+    } finally {
+      setIsLoadingThumbnails(false);
+    }
+  };
+
   useEffect(() => {
+    // Don't run animations until thumbnails are loaded
+    if (isLoadingThumbnails) {
+      return undefined;
+    }
+
     const section = sectionRef.current;
     const cardsContainer = cardsContainerRef.current;
     const card1 = card1Ref.current;
@@ -90,13 +120,13 @@ function Work() {
     // ========== HEADER TEXT ANIMATIONS ==========
     // Set initial states for header text
     if (headerLabel) {
-      gsap.set(headerLabel, { y: -50, opacity: 0 });
+      gsap.set(headerLabel, { y: -50, opacity: 0, force3D: false });
     }
     if (headerTitle) {
-      gsap.set(headerTitle, { x: -100, opacity: 0 });
+      gsap.set(headerTitle, { x: -100, opacity: 0, force3D: false });
     }
     if (headerSubtitle) {
-      gsap.set(headerSubtitle, { x: 100, opacity: 0 });
+      gsap.set(headerSubtitle, { x: 100, opacity: 0, force3D: false });
     }
 
     // Animate header text when section enters viewport
@@ -116,6 +146,7 @@ function Work() {
         opacity: 1,
         duration: 1.2,
         ease: 'power3.out',
+        force3D: false
       });
     }
     if (headerTitle) {
@@ -126,6 +157,7 @@ function Work() {
           opacity: 1,
           duration: 1.9,
           ease: 'power3.out',
+          force3D: false
         },
         '-=0.9'
       );
@@ -138,6 +170,7 @@ function Work() {
           opacity: 1,
           duration: 1.7,
           ease: 'power3.out',
+          force3D: false
         },
         '-=1.3'
       );
@@ -147,12 +180,12 @@ function Work() {
     // Set initial states for card text elements
     cardTitleRefs.forEach((ref) => {
       if (ref.current) {
-        gsap.set(ref.current, { x: -80, opacity: 0 });
+        gsap.set(ref.current, { x: -80, opacity: 0, force3D: false });
       }
     });
     cardDescriptionRefs.forEach((ref) => {
       if (ref.current) {
-        gsap.set(ref.current, { x: 80, opacity: 0 });
+        gsap.set(ref.current, { x: 80, opacity: 0, force3D: false });
       }
     });
 
@@ -173,6 +206,7 @@ function Work() {
         opacity: 1,
         duration: 1.7,
         ease: 'power3.out',
+        force3D: false
       });
     }
     if (cardDescriptionRefs[0].current) {
@@ -183,6 +217,7 @@ function Work() {
           opacity: 1,
           duration: 1.7,
           ease: 'power3.out',
+          force3D: false
         },
         '-=1.3'
       );
@@ -207,6 +242,7 @@ function Work() {
           opacity: 1,
           duration: 1.6,
           ease: 'power2.out',
+          force3D: false
         },
         0.2
       );
@@ -219,6 +255,7 @@ function Work() {
           opacity: 1,
           duration: 1.6,
           ease: 'power2.out',
+          force3D: false
         },
         0.5
       );
@@ -233,6 +270,7 @@ function Work() {
           opacity: 1,
           duration: 1.6,
           ease: 'power2.out',
+          force3D: false
         },
         0.8
       );
@@ -245,6 +283,7 @@ function Work() {
           opacity: 1,
           duration: 1.6,
           ease: 'power2.out',
+          force3D: false
         },
         1.
       );
@@ -252,10 +291,23 @@ function Work() {
 
     // ========== CARD STACKING ANIMATION ==========
     // Card 1: keep visible and static (GSAP does not animate it)
-    gsap.set(card1, { yPercent: 0, xPercent: -50, opacity: 1 });
+    // left: "50%" positions left edge at center, xPercent: -50 shifts by half width to center
+    gsap.set(card1, { 
+      yPercent: 0,
+      left: "50%",
+      xPercent: -50, 
+      opacity: 1,
+      force3D: false
+    });
 
     // Card 2 & 3: start hidden below and transparent, but centered horizontally
-    gsap.set([card2, card3], { yPercent: 100, xPercent: -50, opacity: 0 });
+    gsap.set([card2, card3], { 
+      yPercent: 100,
+      left: "50%",
+      xPercent: -50, 
+      opacity: 0,
+      force3D: false
+    });
 
     // Timeline: pin the whole section (title + cards) and animate only card2 & card3
     const tl = gsap.timeline({
@@ -279,14 +331,20 @@ function Work() {
 
     tl.to(card2, {
       yPercent: 0,
+      left: "50%",
       xPercent: -50,
       opacity: 1,
       duration: 0.6,
+      force3D: false,
+      ease: 'power2.inOut'
     }).to(card3, {
       yPercent: 0,
+      left: "50%",
       xPercent: -50,
       opacity: 1,
       duration: 0.6,
+      force3D: false,
+      ease: 'power2.inOut'
     });
 
     ScrollTrigger.refresh();
@@ -339,30 +397,30 @@ function Work() {
         }
       }
     };
-  }, []);
+  }, [isLoadingThumbnails]);
 
   const categories = [
     {
       type: 'video',
-      name: 'Video Making',
-      description: 'Turning ideas into cinematic stories that connect with your audience',
-      mediaSrc: firestoreVideo || '', // Use Firestore video if available
+      name: thumbnails.video?.name || 'Video Making',
+      description: thumbnails.video?.description || 'Turning ideas into cinematic stories that connect with your audience',
+      mediaSrc: thumbnails.video?.thumbnailUrl || firestoreVideo || null,
       link: '/work/video',
-      isVideo: true,
+      isVideo: thumbnails.video?.thumbnailUrl ? false : (firestoreVideo ? true : false),
     },
     {
       type: 'design',
-      name: 'Design',
-      description: 'Bold, clean, and purposeful design that makes your brand unforgettable',
-      mediaSrc: post3,
+      name: thumbnails.design?.name || 'Design',
+      description: thumbnails.design?.description || 'Bold, clean, and purposeful design that makes your brand unforgettable',
+      mediaSrc: thumbnails.design?.thumbnailUrl || null,
       link: '/work/design',
       isVideo: false,
     },
     {
       type: 'branding',
-      name: 'Branding & Identity',
-      description: 'Crafting identities that define who you are and what you stand for',
-      mediaSrc: Branding1,
+      name: thumbnails.branding?.name || 'Branding & Identity',
+      description: thumbnails.branding?.description || 'Crafting identities that define who you are and what you stand for',
+      mediaSrc: thumbnails.branding?.thumbnailUrl || null,
       link: '/work/branding',
       isVideo: false,
     },
@@ -372,83 +430,98 @@ function Work() {
     <section id="work" className="work-section" ref={sectionRef}>
       <div className="row">
         <p ref={headerLabelRef} className="work-label">
-          Our Work
+          OUR WORK
         </p>
-        <h1 ref={headerTitleRef}>Stories built with purpose</h1>
+        <h1 ref={headerTitleRef}>Where Creativity Meets Growth</h1>
         <p ref={headerSubtitleRef} className="section-subtitle">
-          Every project reflects vision, craft, and the brands we help grow.
+          Explore our portfolio , showcasing the creativity and strategic execution we bring to every client challenge.
         </p>
       </div>
 
       <div className="row cards-row">
         <div className="col-12">
-          <div className="cards" ref={cardsContainerRef}>
-            {categories.map((category, index) => (
-              <div
-                key={index}
-                ref={index === 0 ? card1Ref : index === 1 ? card2Ref : card3Ref}
-                className={`custom-card card${index + 1} category-${category.type}`}
-                style={{
-                  zIndex: index + 2,
-                }}
-              >
-                <div className="card-background">
-                  {category.isVideo ? (
-                    <video
-                      className="card-bg-media"
-                      src={category.mediaSrc}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                    />
-                  ) : (
-                    <img
-                      className="card-bg-media"
-                      src={category.mediaSrc}
-                      alt={category.name}
-                    />
-                  )}
-                  <div className="card-overlay"></div>
-                </div>
+          {isLoadingThumbnails ? (
+            <div className="cards-loading" style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              minHeight: '500px',
+              color: '#fff',
+              fontSize: '1.2rem'
+            }}>
+              Loading...
+            </div>
+          ) : (
+            <div className="cards" ref={cardsContainerRef}>
+              {categories.map((category, index) => (
+                category.mediaSrc ? (
+                  <div
+                    key={index}
+                    ref={index === 0 ? card1Ref : index === 1 ? card2Ref : card3Ref}
+                    className={`custom-card card${index + 1} category-${category.type}`}
+                    style={{
+                      zIndex: index + 2,
+                    }}
+                  >
+                    <div className="card-background">
+                      {category.isVideo ? (
+                        <video
+                          className="card-bg-media"
+                          src={category.mediaSrc}
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                        />
+                      ) : (
+                        <img
+                          className="card-bg-media"
+                          src={category.mediaSrc}
+                          alt={category.name}
+                        />
+                      )}
+                      <div className="card-overlay"></div>
+                    </div>
 
-                <div className="card-content">
-                  <h3 ref={cardTitleRefs[index]} className="card-title">
-                    {category.name}
-                  </h3>
-                  <p ref={cardDescriptionRefs[index]} className="card-description">
-                    {category.description}
-                  </p>
-                </div>
-                <button 
-                  onClick={() => {
-                    // Immediately disable and kill all ScrollTriggers
-                    try {
-                      ScrollTrigger.getAll().forEach((trigger) => {
+                    <div className="card-content">
+                      <h3 ref={cardTitleRefs[index]} className="card-title">
+                        {category.name}
+                      </h3>
+                      <p ref={cardDescriptionRefs[index]} className="card-description">
+                        {category.description}
+                      </p>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        // Immediately disable and kill all ScrollTriggers
                         try {
-                          trigger.disable();
-                          trigger.kill(false);
+                          ScrollTrigger.getAll().forEach((trigger) => {
+                            try {
+                              trigger.disable();
+                              trigger.kill(false);
+                            } catch (err) {
+                              // Ignore
+                            }
+                          });
+                          ScrollTrigger.clearMatchMedia();
+                          ScrollTrigger.refresh();
                         } catch (err) {
                           // Ignore
                         }
-                      });
-                      ScrollTrigger.clearMatchMedia();
-                      ScrollTrigger.refresh();
-                    } catch (err) {
-                      // Ignore
-                    }
-                    // Navigate immediately - React will handle unmount
-                    navigate(category.link, { replace: true });
-                  }}
-                  className="check-work-btn"
-                  type="button"
-                >
-                  Check Our Work
-                  <img src={arrowIcon} alt="arrow" className="btn-arrow" />
-                </button>
-              </div>
-            ))}
-          </div>
+                        // Navigate immediately - React will handle unmount
+                        navigate(category.link, { replace: true });
+                      }}
+                      className="check-work-btn"
+                      type="button"
+                    >
+                      Check Our Work
+                      <img src={arrowIcon} alt="arrow" className="btn-arrow" />
+                    </button>
+                  </div>
+                ) : null
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>

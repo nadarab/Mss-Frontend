@@ -9,36 +9,36 @@ import webCardImage from '../../../assets/images/serviceSection/webCard.png';
 const services = [
   {
     id: 'social-media',
-    title: 'Social Media Management',
-    description: 'Grow your audience. Drive engagement.Own every platform.',
+    title: 'Digital Marketing',
+    description: 'Solutions tailored to give you a competitive edge and keep your brand always at the forefront.',
     image: socialMediaCardImage,
     slideDirection: 'left',
   },
   {
     id: 'seo',
     title: 'SEO',
-    description: 'Get found first. Rank higher. Drive real results.',
+    description: 'Rank higher. Get found. Achieve long-term growth with advanced digital marketing.',
     image: seoCardImage,
     slideDirection: 'left',
   },
   {
     id: 'branding',
     title: 'Branding & Identity',
-    description: 'Craft a brand that\'s unforgettable, bold, and unmistakably you',
+    description: 'Stand out. Be bold. Craft a clear and unforgettable brand identity.',
     image: brandingCardImage,
     slideDirection: 'bottom',
   },
   {
     id: 'marketing-strategies',
     title: 'Marketing Strategies',
-    description: 'Smart, customized strategies that drive measurable results and move you closer to your goals.',
+    description: 'Smart, customized strategies that drive measurable results and move you closer to your most ambitious business goals.',
     image: marketingCardImage,
     slideDirection: 'right',
   },
   {
     id: 'web-development',
     title: 'Web Development',
-    description: 'Building robust, scalable web applications with cutting-edge technologies and industry best practices.',
+    description: 'Building robust, scalable, and cutting-edge web applications with superior stability and best industry practices.',
     image: webCardImage,
     slideDirection: 'right',
   },
@@ -116,9 +116,9 @@ function Services() {
     <section id="services" ref={sectionRef} className="services-section">
       <div className={`services-header ${isHeaderVisible ? 'animate-header' : ''}`}>
         <p className="services-label">Our Services</p>
-        <h1 className="services-title">Services That Keep You Ahead</h1>
+        <h1 className="services-title">Smart Solutions That Keep You Ahead</h1>
         <p className="services-subtitle">
-          Smart, creative, and always on-trend solutions crafted for real audience impact.
+        We craft smart, creative solutions that guarantee measurable growth.
         </p>
       </div>
 

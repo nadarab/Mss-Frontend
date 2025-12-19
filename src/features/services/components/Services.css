@@ -20,7 +20,7 @@
 }
 
 .services-label {
-  color: #022cc4;
+  color: #4589FF;
   font-size: 1.2rem;
   font-weight: 400;
   text-transform: uppercase;
@@ -39,7 +39,7 @@
 }
 
 .services-subtitle {
-  font-size: 14px;
+  font-size: 19px;
   color: #fff;
   opacity: 0.8;
   letter-spacing: 0.5px;
@@ -339,7 +339,7 @@
   left: -30px;
   right: -30px;
   bottom: -30px;
-  height: 40%;
+  height: 36%;
   background: linear-gradient(
     to top,
     rgba(1, 77, 184, 0.21) 14%,
@@ -348,8 +348,8 @@
     #103b78b7 80%,
     #02398aa3 90%
   );
-  backdrop-filter: blur(9px);
-  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius:  20px;
   z-index: -1; /* between character/background and text */
 }
@@ -438,10 +438,16 @@
 @media (min-width: 900px) and (max-width: 1023px) {
   .services-section {
     padding: clamp(12px, 1vw, 14px) clamp(20px, 3vw, 40px) clamp(8px, 0.6vw, 10px);
+    padding-bottom: 80px;
   }
   
   .services-container {
     transform: translateX(-50%) scale(0.4);
+  }
+
+  /* Increase branding card blur height on tablet landscape */
+  .branding-card .service-card-content::before {
+    height: 50%;
   }
 }
 
@@ -454,12 +460,18 @@
   .services-container {
     transform: translateX(-50%) scale(0.35);
   }
+
+  /* Increase branding card blur height on tablet portrait */
+  .branding-card .service-card-content::before {
+    height: 50%;
+  }
 }
 
 /* Mobile and small tablets (768px and below) - Switch to alternating layout */
 @media (max-width: 768px) {
   .services-section {
     padding: clamp(12px, 1.5vw, 16px) clamp(15px, 4vw, 30px) clamp(8px, 1vw, 12px);
+    padding-bottom: 60px;
   }
 
   .services-title {
@@ -522,6 +534,12 @@
   .service-card:nth-child(3) .service-card-title,
   .service-card:nth-child(3) .service-card-description {
     text-align: left;
+  }
+
+  /* Give subtitle more width for cards 2 & 3 */
+  .service-card:nth-child(2) .service-card-description,
+  .service-card:nth-child(3) .service-card-description {
+    max-width: 95%;
   }
 
   /* 4th card and onwards: full width, position content at left-bottom */
@@ -591,12 +609,18 @@
   .service-card-description {
     font-size: clamp(0.85rem, 2.5vw, 1rem);
   }
+
+  /* Increase branding card blur height on mobile */
+  .branding-card .service-card-content::before {
+    height: 40%;
+  }
 }
 
 /* Small mobile devices (480px and below) */
 @media (max-width: 480px) {
   .services-section {
     padding: clamp(10px, 2vw, 14px) clamp(12px, 4vw, 20px) clamp(6px, 1.2vw, 10px);
+    padding-bottom: 50px;
   }
   
   .services-label {
@@ -604,7 +628,8 @@
   }
   
   .services-title {
-    font-size: clamp(1.3rem, 5vw, 1.8rem);
+    font-size: clamp(1.4rem, 5vw, 1.8rem);
+    font-weight: 700;
   }
   
   .services-subtitle {
@@ -647,6 +672,13 @@
   .service-card:nth-child(3) .service-card-title,
   .service-card:nth-child(3) .service-card-description {
     text-align: left;
+    margin-left: -15px !important;
+  }
+
+  /* Give subtitle more width for cards 2 & 3 */
+  .service-card:nth-child(2) .service-card-description,
+  .service-card:nth-child(3) .service-card-description {
+    min-width: 147% !important;
   }
 
   .service-card:nth-child(n+4) {
@@ -711,6 +743,11 @@
     font-size: clamp(0.5rem, 2.5vw, 0.7rem);
     margin-bottom: -11px;
   }
+
+  /* Increase branding card blur height on small mobile */
+  .branding-card .service-card-content::before {
+    height: 43%;
+  }
 }
 
 /* Very small devices (360px and below) */
@@ -759,6 +796,13 @@
   .service-card:nth-child(3) .service-card-title,
   .service-card:nth-child(3) .service-card-description {
     text-align: left;
+  }
+
+  /* Give subtitle more width for cards 2 & 3 */
+  .service-card:nth-child(2) .service-card-description,
+  .service-card:nth-child(3) .service-card-description {
+    min-width: 120% !important;
+    margin-left: -25px !important;
   }
 
   .service-card:nth-child(n+4) {
@@ -822,6 +866,11 @@
 
   .service-card-description {
     font-size: clamp(0.75rem, 2.5vw, 0.9rem);
+  }
+
+  /* Increase branding card blur height on very small devices */
+  .branding-card .service-card-content::before {
+    height: 45%;
   }
 }
 

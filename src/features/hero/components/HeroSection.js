@@ -4,11 +4,15 @@ import './HeroSection.css';
 import logo from '../../../assets/images/common/logoMSS.PNG';
 import orbetLogo from '../../../assets/images/Hero/orbet.png';
 import rashedLogo from '../../../assets/images/Hero/rashed.png';
-import { smoothScrollTo } from '../../../shared/utils/smoothScroll';
+import heroImage from '../../../assets/Vedio/MSS Render.00_00_05_01.Still001.png';
+import heroVideo from '../../../assets/Vedio/MSS Render New.mp4';
+// Removed smoothScrollTo import - using CSS scroll-behavior instead
 
 function HeroSection() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [navExpanded, setNavExpanded] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
   const videoRef = useRef(null);
   const logosTrackRef = useRef(null);
 
@@ -16,6 +20,38 @@ function HeroSection() {
     setTimeout(() => {
       setIsLoaded(true);
     }, 100);
+  }, []);
+
+  // Handle video loading and seamless transition from image to video
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleCanPlay = () => {
+      setVideoReady(true);
+      // Small delay to ensure smooth transition
+      setTimeout(() => {
+        setShowVideo(true);
+        video.play().catch((error) => {
+          console.error('Error playing video:', error);
+        });
+      }, 100);
+    };
+
+    const handleLoadedData = () => {
+      setVideoReady(true);
+    };
+
+    video.addEventListener('canplay', handleCanPlay);
+    video.addEventListener('loadeddata', handleLoadedData);
+
+    // Preload video
+    video.load();
+
+    return () => {
+      video.removeEventListener('canplay', handleCanPlay);
+      video.removeEventListener('loadeddata', handleLoadedData);
+    };
   }, []);
 
   // Handle seamless infinite scroll for partner logos
@@ -73,25 +109,14 @@ function HeroSection() {
     e.stopPropagation();
     setNavExpanded(false);
 
-    // Immediate check first
+    // Use native scrollIntoView with CSS scroll-behavior: smooth
     const targetElement = document.getElementById(targetId);
     if (targetElement) {
-      smoothScrollTo(targetElement, 80);
-      return;
+      targetElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
     }
-
-    // Quick retry for dynamic content (only if not found immediately)
-    const scrollToTarget = (retries = 2) => {
-      const element = document.getElementById(targetId);
-      if (element) {
-        smoothScrollTo(element, 80);
-      } else if (retries > 0) {
-        // Very short delay for retry
-        setTimeout(() => scrollToTarget(retries - 1), 10);
-      }
-    };
-    
-    scrollToTarget();
   };
 
   const handleVideoEnd = () => {
@@ -134,36 +159,44 @@ function HeroSection() {
       </Navbar>
 
       <div className="hero-video-container">
-      <video 
-  ref={videoRef}
-  className="hero-video" 
-  autoPlay 
-  muted 
-  playsInline
-  onTimeUpdate={() => {
-    const video = videoRef.current;
-    if (!video) return;
+        {/* Hero Image - shown first, then hidden when video is ready */}
+        <img 
+          src={heroImage} 
+          alt="Hero" 
+          className={`hero-image ${showVideo ? 'hero-image-hidden' : ''}`}
+        />
+        
+        {/* Hero Video - shown after image */}
+        <video 
+          ref={videoRef}
+          className={`hero-video ${showVideo ? 'hero-video-visible' : ''}`}
+          muted 
+          playsInline
+          preload="auto"
+          onTimeUpdate={() => {
+            const video = videoRef.current;
+            if (!video) return;
 
-    const freezeThreshold = 0.07; // 50ms قبل النهاية
-    if (video.currentTime >= video.duration - freezeThreshold) {
-      video.pause();
-      video.currentTime = video.duration - freezeThreshold; // ابقِ على آخر إطار تقريبًا
-    }
-  }}
->
-  {/* Add your video URL from Firebase Storage here */}
-  Your browser does not support the video tag.
-</video>
+            const freezeThreshold = 0.07; // 50ms before end
+            if (video.currentTime >= video.duration - freezeThreshold) {
+              video.pause();
+              video.currentTime = video.duration - freezeThreshold;
+            }
+          }}
+        >
+          <source src={heroVideo} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
 
         <div className="hero-video-overlay"></div>
       </div>
 
       <div className="hero-content">
         <h1 className="hero-title">
-          Content That <span className="highlight-blue">Captures.</span>
+        Your Growth<span className="highlight-blue"> Partners </span>
         </h1>
         <h1 className="hero-title hero-title-second">
-          <span className="highlight-blue">Strategies </span> That Scale.
+          <span className="highlight-blue"> </span> 
         </h1>
       </div>
 

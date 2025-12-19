@@ -1,8 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { Navbar, Nav, Container } from 'react-bootstrap';
 import './VideoGallery.css';
 import { CenteredVideoCarousel } from '../../../work/ui';
-import { videoCategoryService, videoService } from '../../../../firebase/collections';
+import { videoCategoryService, videoService, workCardThumbnailService } from '../../../../firebase/collections';
+import logo from '../../../../assets/images/common/logoMSS.PNG';
+import { smoothScrollTo } from '../../../../shared/utils/smoothScroll';
+import ContactUs from '../../../contact';
 
 function VideoGallery() {
   const navigate = useNavigate();
@@ -11,11 +15,69 @@ function VideoGallery() {
   const [scrollY, setScrollY] = useState(0);
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [navExpanded, setNavExpanded] = useState(false);
+  const [heroImage, setHeroImage] = useState(null);
+  const [carouselIndices, setCarouselIndices] = useState({});
+  const [heroData, setHeroData] = useState({
+    label: 'Video Making',
+    title: 'Turning ideas into cinematic stories that connect with your audience.',
+    subtitle: 'Start your project'
+  });
 
   // Load videos from Firestore
   useEffect(() => {
+    // Force scroll to top when component mounts
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    
+    setIsLoaded(true);
     loadVideosFromFirestore();
+    loadHeroDataFromFirestore();
   }, []);
+
+  const loadHeroDataFromFirestore = async () => {
+    try {
+      // Load the same thumbnail used in the "Our Work" section
+      const workCardData = await workCardThumbnailService.getByCardType('video');
+      if (workCardData) {
+        if (workCardData.thumbnailUrl) setHeroImage(workCardData.thumbnailUrl);
+        if (workCardData.name) setHeroData(prev => ({ ...prev, label: workCardData.name }));
+        if (workCardData.description) setHeroData(prev => ({ ...prev, title: workCardData.description }));
+      }
+    } catch (error) {
+      console.log('Video card thumbnail not found in Firestore, using defaults');
+    }
+  };
+
+  const handleNavClick = (e, targetId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setNavExpanded(false);
+
+    if (targetId === 'hero') {
+      navigate('/');
+      return;
+    }
+
+    const targetElement = document.getElementById(targetId);
+    if (targetElement) {
+      smoothScrollTo(targetElement, 80);
+      return;
+    }
+
+    const scrollToTarget = (retries = 2) => {
+      const element = document.getElementById(targetId);
+      if (element) {
+        smoothScrollTo(element, 80);
+      } else if (retries > 0) {
+        setTimeout(() => scrollToTarget(retries - 1), 10);
+      }
+    };
+    
+    scrollToTarget();
+  };
 
   const loadVideosFromFirestore = async () => {
     try {
@@ -55,6 +117,54 @@ function VideoGallery() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Sync carousel indices with carousel dots using MutationObserver
+  useEffect(() => {
+    if (sections.length === 0) return;
+
+    const observers = [];
+    
+    sections.forEach(section => {
+      const carousel = document.querySelector(`#carousel-${section.id}`);
+      if (carousel) {
+        const dotsContainer = carousel.querySelector('.carousel-dots');
+        if (dotsContainer) {
+          const syncIndex = () => {
+            const activeDot = dotsContainer.querySelector('.dot.active');
+            if (activeDot) {
+              const dots = dotsContainer.querySelectorAll('.dot');
+              const activeIndex = Array.from(dots).indexOf(activeDot);
+              if (activeIndex !== -1) {
+                setCarouselIndices(prev => {
+                  if (prev[section.id] !== activeIndex) {
+                    return { ...prev, [section.id]: activeIndex };
+                  }
+                  return prev;
+                });
+              }
+            }
+          };
+
+          // Initial sync
+          syncIndex();
+
+          // Watch for changes
+          const observer = new MutationObserver(syncIndex);
+          observer.observe(dotsContainer, {
+            childList: true,
+            attributes: true,
+            attributeFilter: ['class'],
+            subtree: true
+          });
+          observers.push(observer);
+        }
+      }
+    });
+
+    return () => {
+      observers.forEach(obs => obs.disconnect());
+    };
+  }, [sections]);
 
   useEffect(() => {
     let observer = null;
@@ -143,97 +253,162 @@ function VideoGallery() {
 
   return (
     <div className="video-gallery-page">
-      <section 
-        className="video-hero-section" 
-        ref={heroRef}
-        style={{
-          transform: `translateY(${scrollY * 0.5}px)`,
-          opacity: 1 - scrollY / 800
-        }}
-      >
-        <div className="video-hero-overlay">
-          <h1 className="video-hero-title">Video Production</h1>
-          <p className="video-hero-subtitle">Cinematic storytelling that brings your brand to life</p>
-          <div 
-            className="scroll-indicator"
-            onClick={() => {
-              sectionsRef.current?.scrollIntoView({ 
-                behavior: 'smooth',
-                block: 'start'
-              });
-            }}
-          >
-            <span>Scroll to Explore</span>
-            <div className="scroll-arrow"></div>
-          </div>
-        </div>
-        <video
-          className="video-hero-bg"
-          autoPlay
-          loop
-          muted
-          playsInline
-        >
-          {/* Add your hero video URL from Firebase Storage here */}
-        </video>
-      </section>
+      {/* Navbar - exactly like home page */}
+      <Navbar expand="lg" className="gallery-navbar" expanded={navExpanded} onToggle={setNavExpanded}>
+        <Container fluid>
+          <Navbar.Brand href="/" className="navbar-brand-custom">
+            <img src={logo} alt="MSS Agency" className="navbar-logo" />
+          </Navbar.Brand>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="ms-auto">
+              <Nav.Link href="/" onClick={(e) => handleNavClick(e, 'hero')}>Home</Nav.Link>
+              <Nav.Link href="/#services" onClick={(e) => handleNavClick(e, 'services')}>Our Services</Nav.Link>
+              <Nav.Link href="/#work" onClick={(e) => handleNavClick(e, 'work')}>Our Work</Nav.Link>
+              <Nav.Link href="/#about" onClick={(e) => handleNavClick(e, 'about')}>About Us</Nav.Link>
+              <Nav.Link href="/#contact" onClick={(e) => handleNavClick(e, 'contact')}>Contact Us</Nav.Link>
+            </Nav>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
 
-      <div className="video-sections-container" ref={sectionsRef}>
-        {sections.length === 0 ? (
-          <div style={{ 
-            textAlign: 'center', 
-            padding: '100px 20px',
-            color: '#fff'
-          }}>
-            <h2>No video categories yet</h2>
-            <p>Add video categories and videos in the admin panel at <a href="/admin" style={{ color: '#0066ff' }}>/admin</a></p>
-          </div>
-        ) : (
-          sections.map((section) => (
-          <section 
-            key={section.id}
-            className={`video-section ${section.reverse ? 'reverse' : ''}`}
-          >
-            <div className="video-section-content-carousel">
-              <div className="video-text-content">
-                <h2>{section.title}</h2>
-                <p>{section.description}</p>
-              </div>
-
-                {section.videos.length > 0 ? (
-              <div className="section-carousel-wrapper">
-                <CenteredVideoCarousel 
-                  videos={section.videos} 
-                  carouselId={`carousel-${section.id}`}
-                />
-              </div>
-                ) : (
-                  <div style={{ 
-                    textAlign: 'center', 
-                    padding: '40px',
-                    color: '#aaa'
-                  }}>
-                    <p>No videos in this category yet</p>
-                  </div>
-                )}
-            </div>
-          </section>
-          ))
-        )}
-      </div>
-
-      <div className="video-footer">
+      {/* Breadcrumb */}
+      <div className="gallery-breadcrumb">
         <button 
-          onClick={() => navigate('/', { replace: true })}
-          className="back-home-btn"
+          onClick={() => navigate('/')}
+          className="breadcrumb-link"
           type="button"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M19 12H5M12 19l-7-7 7-7" />
+          <svg className="breadcrumb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
           </svg>
-          Back to Home
         </button>
+        <span className="breadcrumb-separator">&gt;</span>
+        <span className="breadcrumb-current">Video Making</span>
       </div>
+
+      {/* Hero Section */}
+      <div 
+        className="video-hero-section" 
+        ref={heroRef}
+        style={heroImage ? { 
+          backgroundImage: `url(${heroImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        } : {}}
+      >
+        {/* Overlay Text Box */}
+        <div className="video-hero-overlay-box">
+          <div className="video-hero-content">
+            <div className="video-hero-title-small">{heroData.label}</div>
+            <div className="video-hero-text-main">{heroData.title}</div>
+            <div className="video-hero-description">{heroData.subtitle}</div>
+          </div>
+        </div>
+      </div>
+
+       <div className="video-sections-container" ref={sectionsRef}>
+         {sections.length === 0 ? (
+           <div style={{ 
+             textAlign: 'center', 
+             padding: '100px 20px',
+             color: '#fff'
+           }}>
+             <h2>No video categories yet</h2>
+             <p>Add video categories and videos in the admin panel at <a href="/admin" style={{ color: '#0066ff' }}>/admin</a></p>
+           </div>
+         ) : (
+           <div className="video-sections-wrapper">
+             {sections.map((section, index) => (
+             <section 
+               key={section.id}
+               className={`video-section ${section.reverse ? 'reverse' : ''}`}
+             >
+               <div className="video-section-content-carousel">
+                 <div className="video-text-content">
+                   <span className="section-number">{String(index + 1).padStart(2, '0')}</span>
+                   <h2>{section.title}</h2>
+                   <p>{section.description}</p>
+                 </div>
+
+                 {section.videos.length > 0 ? (
+               <div className="section-carousel-wrapper">
+                 <CenteredVideoCarousel 
+                   videos={section.videos} 
+                   carouselId={`carousel-${section.id}`}
+                 />
+                 <div className="carousel-navigation-controls">
+                   <button 
+                     className="carousel-nav-btn carousel-nav-prev"
+                     onClick={() => {
+                       const carousel = document.querySelector(`#carousel-${section.id}`);
+                       if (carousel) {
+                         const prevBtn = carousel.querySelector('.carousel-arrow-left');
+                         if (prevBtn) {
+                           prevBtn.click();
+                           // Update index after click
+                           setTimeout(() => {
+                             const currentIdx = carouselIndices[section.id] || 0;
+                             const newIdx = (currentIdx - 1 + section.videos.length) % section.videos.length;
+                             setCarouselIndices(prev => ({ ...prev, [section.id]: newIdx }));
+                           }, 100);
+                         }
+                       }
+                     }}
+                     aria-label="Previous"
+                   >
+                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                       <path d="M15 18l-6-6 6-6" />
+                     </svg>
+                   </button>
+                   <span className="carousel-counter">
+                     <span className="carousel-current">{(carouselIndices[section.id] ?? 0) + 1}</span>
+                     <span className="carousel-separator">/</span>
+                     <span className="carousel-total">{section.videos.length}</span>
+                   </span>
+                   <button 
+                     className="carousel-nav-btn carousel-nav-next"
+                     onClick={() => {
+                       const carousel = document.querySelector(`#carousel-${section.id}`);
+                       if (carousel) {
+                         const nextBtn = carousel.querySelector('.carousel-arrow-right');
+                         if (nextBtn) {
+                           nextBtn.click();
+                           // Update index after click
+                           setTimeout(() => {
+                             const currentIdx = carouselIndices[section.id] || 0;
+                             const newIdx = (currentIdx + 1) % section.videos.length;
+                             setCarouselIndices(prev => ({ ...prev, [section.id]: newIdx }));
+                           }, 100);
+                         }
+                       }
+                     }}
+                     aria-label="Next"
+                   >
+                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                       <path d="M9 18l6-6-6-6" />
+                     </svg>
+                   </button>
+                 </div>
+               </div>
+                 ) : (
+                   <div style={{ 
+                     textAlign: 'center', 
+                     padding: '40px',
+                     color: '#aaa'
+                   }}>
+                     <p>No videos in this category yet</p>
+                   </div>
+                 )}
+               </div>
+             </section>
+             ))}
+           </div>
+         )}
+       </div>
+
+      <ContactUs />
     </div>
   );
 }

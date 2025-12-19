@@ -48,7 +48,7 @@ function ContactUs() {
     <section id="contact" ref={sectionRef} className="contact-section">
       <div className="container">
         <div ref={headerRef} className="section-header">
-          <p className="section-eyebrow">Contact Us</p>
+          <p className="section-eyebrow">CONTACT US</p>
           <h2 className="section-headline">Have a question, idea, or project?</h2>
           <p className="section-subtitle">Reach out and let&apos;s make it happen.</p>
         </div>
@@ -57,7 +57,7 @@ function ContactUs() {
           <div 
             ref={mapRef}
             className="map-card grid-map" 
-            aria-label="Map - Amman, Jordan"
+            aria-label="Map - Jezan St., Amman 11185"
           >
             <img src={contactUsMap} alt="Map showing Amman, Jordan" loading="lazy" />
           </div>
@@ -91,12 +91,15 @@ function ContactUs() {
             </div>
             <div>
               <h5 className="contact-title">Email</h5>
-              <p className="contact-info">mss.hrteam@gmail.com</p>
+              <p className="contact-info"> info@mssteam.com</p>
             </div>
           </a>
 
-          <div 
+          <a 
             ref={(el) => (cardRefs.current[2] = el)}
+            href="https://maps.app.goo.gl/NgTsHuMAAkEf2ipF9?g_st=ic"
+            target="_blank"
+            rel="noopener noreferrer"
             className="contact-card grid-location"
             style={{ animationDelay: '0.3s' }}
           >
@@ -105,9 +108,9 @@ function ContactUs() {
             </div>
             <div>
               <h5 className="contact-title">Location</h5>
-              <p className="contact-info">Amman, Jordan</p>
+              <p className="contact-info">Jezan St., Amman 11185</p>
             </div>
-          </div>
+          </a>
 
           <a
             ref={(el) => (cardRefs.current[3] = el)}
@@ -128,8 +131,11 @@ function ContactUs() {
 
           {/* Mobile & Tablet Layout - 2x2 Grid */}
           <div className="contact-cards-mobile">
-            <div 
+            <a 
               ref={(el) => (cardRefs.current[4] = el)}
+              href="https://maps.app.goo.gl/NgTsHuMAAkEf2ipF9?g_st=ic"
+              target="_blank"
+              rel="noopener noreferrer"
               className="contact-card mobile-card"
               style={{ animationDelay: '0.1s' }}
             >
@@ -138,9 +144,9 @@ function ContactUs() {
               </div>
               <div>
                 <h5 className="contact-title">Location</h5>
-                <p className="contact-info">Amman, Jordan</p>
+                <p className="contact-info">Jezan St., Amman 11185</p>
               </div>
-            </div>
+            </a>
 
             <a 
               ref={(el) => (cardRefs.current[5] = el)}
@@ -159,7 +165,7 @@ function ContactUs() {
 
             <a
               ref={(el) => (cardRefs.current[6] = el)}
-              href="mailto:mss.hrteam@gmail.com"
+              href="mailto:info@mssteam.com"
               target="_blank"
               rel="noopener noreferrer"
               className="contact-card mobile-card"
@@ -170,7 +176,7 @@ function ContactUs() {
               </div>
               <div>
                 <h5 className="contact-title">Email</h5>
-                <p className="contact-info">mss.hrteam@gmail.com</p>
+                <p className="contact-info">info@mssteam.com</p>
               </div>
             </a>
 

@@ -1,57 +1,6 @@
 /* Import all Video Gallery styles */
 @import '../VideoGallery/VideoGallery.css';
 
-/* Override only the background for Design Gallery */
-.video-gallery-page {
-}
-
-.video-gallery-page::before {
-}
-
-/* Animated Background Keyframes */
-@keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-@keyframes gradientMove {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
-  25% {
-    opacity: 0.8;
-    transform: scale(1.05) rotate(1deg);
-  }
-  50% {
-    opacity: 0.9;
-    transform: scale(1.1) rotate(0deg);
-  }
-  75% {
-    opacity: 0.85;
-    transform: scale(1.05) rotate(-1deg);
-  }
-}
-
-/* Override text colors for light background */
-.video-text-content h2 {
-  color: #1e293b;
-  text-shadow: none;
-  background: linear-gradient(135deg, #aeb0b9, #0066ff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.video-text-content p {
-  color: #ffffff;
-  text-shadow: none;
-}
+/* Design Gallery uses the same styles as Video Gallery */
+/* Both pages share the same layout and design */
 

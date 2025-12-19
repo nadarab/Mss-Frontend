@@ -24,6 +24,7 @@ export const COLLECTIONS = {
   VIDEOS: 'videos',
   BRANDING_PROJECTS: 'branding_projects',
   DESIGN_PROJECTS: 'design_projects',
+  WORK_CARD_THUMBNAILS: 'work_card_thumbnails',
 };
 
 // ============================================
@@ -261,6 +262,58 @@ export const designProjectService = {
 
   delete: async (id) => {
     return await deleteDocument(COLLECTIONS.DESIGN_PROJECTS, id);
+  },
+};
+
+// ============================================
+// WORK CARD THUMBNAILS Collection
+// ============================================
+
+/**
+ * Work Card Thumbnail Structure:
+ * {
+ *   id: auto-generated
+ *   cardType: string ('video', 'design', or 'branding')
+ *   thumbnailUrl: string (Firebase Storage URL for the thumbnail image)
+ *   name: string (e.g., "Video Making", "Design", "Branding & Identity")
+ *   description: string (card description)
+ *   active: boolean (whether this thumbnail should be used)
+ * }
+ */
+
+export const workCardThumbnailService = {
+  // Add new thumbnail
+  add: async (thumbnailData) => {
+    return await addDocument(COLLECTIONS.WORK_CARD_THUMBNAILS, thumbnailData);
+  },
+
+  // Get all thumbnails
+  getAll: async () => {
+    return await getAllDocuments(COLLECTIONS.WORK_CARD_THUMBNAILS);
+  },
+
+  // Get thumbnail by card type
+  getByCardType: async (cardType) => {
+    const thumbnails = await queryDocuments(COLLECTIONS.WORK_CARD_THUMBNAILS, [
+      { field: 'cardType', operator: '==', value: cardType },
+      { field: 'active', operator: '==', value: true }
+    ]);
+    return thumbnails.length > 0 ? thumbnails[0] : null;
+  },
+
+  // Get thumbnail by ID
+  getById: async (id) => {
+    return await getDocument(COLLECTIONS.WORK_CARD_THUMBNAILS, id);
+  },
+
+  // Update thumbnail
+  update: async (id, updates) => {
+    return await updateDocument(COLLECTIONS.WORK_CARD_THUMBNAILS, id, updates);
+  },
+
+  // Delete thumbnail
+  delete: async (id) => {
+    return await deleteDocument(COLLECTIONS.WORK_CARD_THUMBNAILS, id);
   },
 };
 

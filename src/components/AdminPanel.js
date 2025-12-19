@@ -4,7 +4,8 @@ import {
   videoService,
   brandingProjectService,
   designProjectService,
-  employeeService
+  employeeService,
+  workCardThumbnailService
 } from '../firebase/collections';
 
 /**
@@ -27,6 +28,9 @@ function AdminPanel() {
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: '10px', marginBottom: '30px', flexWrap: 'wrap' }}>
+        <button onClick={() => setActiveTab('work-cards')} style={tabStyle(activeTab === 'work-cards')}>
+          🎨 Work Card Thumbnails
+        </button>
         <button onClick={() => setActiveTab('video-category')} style={tabStyle(activeTab === 'video-category')}>
           Video Categories
         </button>
@@ -58,12 +62,120 @@ function AdminPanel() {
       )}
 
       {/* Forms */}
+      {activeTab === 'work-cards' && <WorkCardThumbnailForm onSuccess={showMessage} />}
       {activeTab === 'video-category' && <VideoCategoryForm onSuccess={showMessage} />}
       {activeTab === 'video' && <VideoForm onSuccess={showMessage} />}
       {activeTab === 'branding' && <BrandingProjectForm onSuccess={showMessage} />}
       {activeTab === 'design' && <DesignProjectForm onSuccess={showMessage} />}
       {activeTab === 'employee' && <EmployeeForm onSuccess={showMessage} />}
     </div>
+  );
+}
+
+// ============================================
+// Work Card Thumbnail Form
+// ============================================
+function WorkCardThumbnailForm({ onSuccess }) {
+  const [formData, setFormData] = useState({
+    cardType: 'video',
+    thumbnailUrl: '',
+    name: '',
+    description: '',
+    active: true
+  });
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await workCardThumbnailService.add(formData);
+      onSuccess('✅ Work card thumbnail added successfully!');
+      setFormData({ cardType: 'video', thumbnailUrl: '', name: '', description: '', active: true });
+    } catch (error) {
+      onSuccess('❌ Error: ' + error.message, true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} style={formStyle}>
+      <h3>🎨 Add Work Card Thumbnail</h3>
+      <p style={{ color: '#4ade80', fontSize: '14px', background: 'rgba(74, 222, 128, 0.1)', padding: '10px', borderRadius: '6px' }}>
+        📝 This manages the thumbnails for the 3 cards in "Our Work" section on the home page
+      </p>
+      
+      <label style={{ color: '#fff', fontSize: '14px', fontWeight: '600' }}>Card Type:</label>
+      <select
+        value={formData.cardType}
+        onChange={(e) => setFormData({ ...formData, cardType: e.target.value })}
+        required
+        style={inputStyle}
+      >
+        <option value="video">Video Making Card</option>
+        <option value="design">Design Card</option>
+        <option value="branding">Branding & Identity Card</option>
+      </select>
+
+      <label style={{ color: '#fff', fontSize: '14px', fontWeight: '600' }}>Card Name:</label>
+      <input
+        type="text"
+        placeholder="e.g., Video Making"
+        value={formData.name}
+        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+        required
+        style={inputStyle}
+      />
+
+      <label style={{ color: '#fff', fontSize: '14px', fontWeight: '600' }}>Card Description:</label>
+      <textarea
+        placeholder="e.g., Turning ideas into cinematic stories that connect with your audience"
+        value={formData.description}
+        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+        required
+        rows="3"
+        style={inputStyle}
+      />
+
+      <label style={{ color: '#fff', fontSize: '14px', fontWeight: '600' }}>Thumbnail Image URL:</label>
+      <p style={{ color: '#aaa', fontSize: '13px', marginTop: '-10px' }}>
+        📤 Upload your thumbnail image to Firebase Storage first, then paste the URL here
+      </p>
+      <input
+        type="url"
+        placeholder="https://firebasestorage.googleapis.com/..."
+        value={formData.thumbnailUrl}
+        onChange={(e) => setFormData({ ...formData, thumbnailUrl: e.target.value })}
+        required
+        style={inputStyle}
+      />
+
+      <label style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#fff' }}>
+        <input
+          type="checkbox"
+          checked={formData.active}
+          onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+        />
+        Set as Active (show this thumbnail on the home page)
+      </label>
+
+      <button type="submit" disabled={loading} style={buttonStyle}>
+        {loading ? 'Adding...' : '✨ Add Thumbnail'}
+      </button>
+
+      <div style={{ marginTop: '20px', padding: '15px', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '8px' }}>
+        <h4 style={{ color: '#3b82f6', marginTop: 0 }}>💡 How to use:</h4>
+        <ol style={{ color: '#aaa', fontSize: '13px', lineHeight: '1.6' }}>
+          <li>Upload your thumbnail image to Firebase Storage</li>
+          <li>Copy the image URL from Firebase Storage</li>
+          <li>Paste the URL in the "Thumbnail Image URL" field above</li>
+          <li>Select which card this thumbnail is for (Video, Design, or Branding)</li>
+          <li>Click "Add Thumbnail"</li>
+          <li>The thumbnail will automatically appear on your home page!</li>
+        </ol>
+      </div>
+    </form>
   );
 }
 

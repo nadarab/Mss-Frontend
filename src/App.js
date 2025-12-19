@@ -28,6 +28,13 @@ function AppRoutes() {
 }
 
 function App() {
+  // Disable browser's automatic scroll restoration
+  React.useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, []);
+
   return (
     <Router>
       <AppRoutes />

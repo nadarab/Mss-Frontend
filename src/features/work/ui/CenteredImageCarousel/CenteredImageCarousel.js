@@ -7,6 +7,9 @@ function CenteredImageCarousel({ images = [], carouselId = 'image-carousel' }) {
   const [direction, setDirection] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const [isSwiping, setIsSwiping] = useState(false);
   const containerRef = useRef(null);
   const autoPlayTimerRef = useRef(null);
 
@@ -27,6 +30,43 @@ function CenteredImageCarousel({ images = [], carouselId = 'image-carousel' }) {
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
   }, [images.length]);
 
+  // Swipe gesture handlers
+  const minSwipeDistance = 50;
+
+  const onTouchStart = useCallback((e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+    setIsSwiping(false);
+  }, []);
+
+  const onTouchMove = useCallback((e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+    if (touchStart) {
+      const distance = Math.abs(touchStart - e.targetTouches[0].clientX);
+      if (distance > 10) {
+        setIsSwiping(true);
+      }
+    }
+  }, [touchStart]);
+
+  const onTouchEnd = useCallback(() => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      handleNext();
+    } else if (isRightSwipe) {
+      handlePrev();
+    }
+
+    setTouchStart(null);
+    setTouchEnd(null);
+    setIsSwiping(false);
+  }, [touchStart, touchEnd, handleNext, handlePrev]);
+
   useEffect(() => {
     if (!isHovered) {
       autoPlayTimerRef.current = setTimeout(() => {
@@ -42,14 +82,13 @@ function CenteredImageCarousel({ images = [], carouselId = 'image-carousel' }) {
   }, [currentIndex, isHovered, handleNext]);
 
   const getVisible = () => {
-    if (isMobile) return [currentIndex];
+    // Always show left, center, and right images for horizontal scrolling (like video carousel)
     const prevIndex = (currentIndex - 1 + images.length) % images.length;
     const nextIndex = (currentIndex + 1) % images.length;
     return [prevIndex, currentIndex, nextIndex];
   };
 
   const getPosition = (index) => {
-    if (isMobile) return index === currentIndex ? 'center' : 'hidden';
     const [prevIndex, centerIndex, nextIndex] = getVisible();
     if (index === prevIndex) return 'left';
     if (index === centerIndex) return 'center';
@@ -59,8 +98,18 @@ function CenteredImageCarousel({ images = [], carouselId = 'image-carousel' }) {
 
   const slideVariants = {
     center: { x: '0%', scale: 1, opacity: 1, zIndex: 3 },
-    left: { x: '-85%', scale: 0.7, opacity: 0.6, zIndex: 1 },
-    right: { x: '85%', scale: 0.7, opacity: 0.6, zIndex: 1 },
+    left: { 
+      x: isMobile ? '-75%' : '-85%', 
+      scale: isMobile ? 0.75 : 0.7, 
+      opacity: isMobile ? 0.6 : 0.5, 
+      zIndex: 1 
+    },
+    right: { 
+      x: isMobile ? '75%' : '85%', 
+      scale: isMobile ? 0.75 : 0.7, 
+      opacity: isMobile ? 0.6 : 0.5, 
+      zIndex: 1 
+    },
     hidden: { x: direction > 0 ? '200%' : '-200%', scale: 0.5, opacity: 0, zIndex: 0 },
   };
 
@@ -73,7 +122,12 @@ function CenteredImageCarousel({ images = [], carouselId = 'image-carousel' }) {
           </svg>
         </button>
 
-        <div className="carousel-track">
+        <div 
+          className="carousel-track"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
           {images.map((img, index) => {
             const position = getPosition(index);
             if (position === 'hidden') return null;

@@ -117,6 +117,28 @@
   box-sizing: border-box;
 }
 
+.hero-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
+  z-index: 0;
+}
+
+.hero-image-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .hero-video {
   position: absolute;
   top: 50%;
@@ -129,6 +151,15 @@
   height: auto;
   transform: translate(-50%, -50%);
   object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero-video-visible {
+  opacity: 1;
+  pointer-events: auto;
   animation: videoZoomIn 1.5s ease-out;
 }
 
