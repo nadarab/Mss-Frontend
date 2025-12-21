@@ -80,7 +80,7 @@ function ContactUs() {
 
           <a
             ref={(el) => (cardRefs.current[1] = el)}
-            href="mailto:mss.hrteam@gmail.com"
+            href="https://mail.google.com/mail/?view=cm&fs=1&to=info@mssteam.com"
             target="_blank"
             rel="noopener noreferrer"
             className="contact-card grid-email"
@@ -165,7 +165,7 @@ function ContactUs() {
 
             <a
               ref={(el) => (cardRefs.current[6] = el)}
-              href="mailto:info@mssteam.com"
+              href="https://mail.google.com/mail/?view=cm&fs=1&to=info@mssteam.com"
               target="_blank"
               rel="noopener noreferrer"
               className="contact-card mobile-card"

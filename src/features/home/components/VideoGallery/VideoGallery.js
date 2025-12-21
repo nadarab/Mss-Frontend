@@ -3,10 +3,13 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import './VideoGallery.css';
 import { CenteredVideoCarousel } from '../../../work/ui';
-import { videoCategoryService, videoService, workCardThumbnailService } from '../../../../firebase/collections';
+import { videoCategoryService, videoService } from '../../../../firebase/collections';
 import logo from '../../../../assets/images/common/logoMSS.PNG';
 import { smoothScrollTo } from '../../../../shared/utils/smoothScroll';
 import ContactUs from '../../../contact';
+// Static hero images for Video Gallery
+import videoHeroDesktop from '../../../../assets/images/Cover/lapVedio.png';
+import videoHeroMobile from '../../../../assets/images/Cover/PhoneVedio.png';
 
 function VideoGallery() {
   const navigate = useNavigate();
@@ -17,9 +20,8 @@ function VideoGallery() {
   const [loading, setLoading] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
   const [navExpanded, setNavExpanded] = useState(false);
-  const [heroImage, setHeroImage] = useState(null);
   const [carouselIndices, setCarouselIndices] = useState({});
-  const [heroData, setHeroData] = useState({
+  const [heroData] = useState({
     label: 'Video Making',
     title: 'Turning ideas into cinematic stories that connect with your audience.',
     subtitle: 'Start your project'
@@ -34,22 +36,7 @@ function VideoGallery() {
     
     setIsLoaded(true);
     loadVideosFromFirestore();
-    loadHeroDataFromFirestore();
   }, []);
-
-  const loadHeroDataFromFirestore = async () => {
-    try {
-      // Load the same thumbnail used in the "Our Work" section
-      const workCardData = await workCardThumbnailService.getByCardType('video');
-      if (workCardData) {
-        if (workCardData.thumbnailUrl) setHeroImage(workCardData.thumbnailUrl);
-        if (workCardData.name) setHeroData(prev => ({ ...prev, label: workCardData.name }));
-        if (workCardData.description) setHeroData(prev => ({ ...prev, title: workCardData.description }));
-      }
-    } catch (error) {
-      console.log('Video card thumbnail not found in Firestore, using defaults');
-    }
-  };
 
   const handleNavClick = (e, targetId) => {
     e.preventDefault();
@@ -284,20 +271,19 @@ function VideoGallery() {
           </svg>
         </button>
         <span className="breadcrumb-separator">&gt;</span>
-        <span className="breadcrumb-current">Video Making</span>
+        <span className="breadcrumb-current">{heroData.label}</span>
       </div>
 
       {/* Hero Section */}
       <div 
         className="video-hero-section" 
         ref={heroRef}
-        style={heroImage ? { 
-          backgroundImage: `url(${heroImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        } : {}}
       >
+        <picture className="hero-background-image">
+          <source media="(max-width: 768px)" srcSet={videoHeroMobile} />
+          <source media="(min-width: 769px)" srcSet={videoHeroDesktop} />
+          <img src={videoHeroDesktop} alt="Video Gallery Hero" />
+        </picture>
         {/* Overlay Text Box */}
         <div className="video-hero-overlay-box">
           <div className="video-hero-content">

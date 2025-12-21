@@ -16,6 +16,16 @@ function HeroSection() {
   const videoRef = useRef(null);
   const logosTrackRef = useRef(null);
 
+  // Partner logos data - defined early so it can be used in useEffect
+  const partnerLogos = [
+    { name: 'Orbet', image: orbetLogo },
+    { name: 'Rashed', image: rashedLogo },
+    { name: 'MSS', image: logo },
+  ];
+
+  // Duplicate logos 3 times for seamless infinite scroll (3 × 3 = 9 total)
+  const duplicatedPartnerLogos = [...partnerLogos, ...partnerLogos, ...partnerLogos];
+
   useEffect(() => {
     setTimeout(() => {
       setIsLoaded(true);
@@ -54,56 +64,140 @@ function HeroSection() {
     };
   }, []);
 
-  // Handle seamless infinite scroll for partner logos
+  // Infinite scrolling carousel using requestAnimationFrame
   useEffect(() => {
     const track = logosTrackRef.current;
     if (!track) return;
 
-    let animationId;
+    let animationId = null;
     let position = 0;
-    let lastTime = performance.now();
-    const duration = 30000; // 30 seconds in milliseconds
     let setWidth = 0;
-
-    // Calculate set width after layout
-    const calculateSetWidth = () => {
-      if (track.scrollWidth > 0) {
-        setWidth = track.scrollWidth / 2; // Width of one set of logos
-        return true;
+    let lastTime = performance.now();
+    
+    // Calculate scroll speed based on screen size
+    // Slower on laptop screens (992px - 1400px)
+    const getScrollSpeed = () => {
+      const width = window.innerWidth;
+      // Laptop screens: much slower speed
+      if (width >= 992 && width <= 1400) {
+        return 0.025; // Much slower for laptop screens
       }
-      return false;
+      // Default speed for other screens
+      return 0.1;
+    };
+    
+    let scrollSpeed = getScrollSpeed();
+    
+    // Update speed on window resize
+    const handleResize = () => {
+      scrollSpeed = getScrollSpeed();
+    };
+    window.addEventListener('resize', handleResize);
+    
+    // Calculate number of sets dynamically based on duplicated logos
+    const numSets = duplicatedPartnerLogos.length / partnerLogos.length;
+
+    // Calculate the width of one set accurately
+    const calculateSetWidth = () => {
+      // Wait for track to have content
+      if (!track.children || track.children.length === 0) return false;
+      
+      // Get the total scroll width (includes all duplicated sets)
+      const totalWidth = track.scrollWidth;
+      
+      // Ensure we have a valid width
+      if (totalWidth <= 0) return false;
+      
+      // Divide by number of sets to get width of one set
+      // This works because we have identical duplicated sets
+      setWidth = totalWidth / numSets;
+      
+      // Verify the calculation is reasonable
+      if (setWidth <= 0 || !isFinite(setWidth)) return false;
+      
+      return true;
     };
 
+    // Ensure no CSS animation is interfering
+    track.style.animation = 'none';
+    track.style.transform = 'translateX(0px)';
+    track.style.willChange = 'transform';
+
     const animate = (currentTime) => {
-      if (!setWidth && !calculateSetWidth()) {
-        animationId = requestAnimationFrame(animate);
-        return;
+      // Calculate set width if not already calculated
+      if (!setWidth) {
+        if (!calculateSetWidth()) {
+          animationId = requestAnimationFrame(animate);
+          return;
+        }
       }
 
       const deltaTime = currentTime - lastTime;
       lastTime = currentTime;
 
-      // Calculate speed based on duration (setWidth pixels in 30 seconds)
-      const speed = (setWidth / duration) * deltaTime;
-      position -= speed;
-
-      // Reset position seamlessly when we've moved one full set width
-      if (Math.abs(position) >= setWidth) {
-        position = 0;
+      // Skip if deltaTime is too large (tab was inactive)
+      if (deltaTime > 100) {
+        animationId = requestAnimationFrame(animate);
+        return;
       }
 
-      track.style.transform = `translateX(${position}px)`;
+      // Move left (negative direction) - logos scroll from right to left
+      position -= scrollSpeed * deltaTime;
+
+      // Seamless infinite loop: continuously wrap position
+      // Keep position in range [-setWidth, 0) for seamless scrolling
+      // The while loop ensures we handle any overshoot smoothly
+      while (position <= -setWidth) {
+        position += setWidth;
+      }
+
+      // Apply transform with hardware acceleration
+      // translate3d uses GPU acceleration for smoother rendering
+      // This prevents stutter and layout recalculation
+      track.style.transform = `translate3d(${position}px, 0, 0)`;
       animationId = requestAnimationFrame(animate);
     };
 
-    animationId = requestAnimationFrame(animate);
+    // Start animation after ensuring DOM is ready
+    const startAnimation = () => {
+      // Force a reflow to ensure layout is calculated
+      void track.offsetHeight;
+      
+      if (calculateSetWidth()) {
+        // Reset position to 0 to start fresh
+        position = 0;
+        track.style.transform = 'translateX(0px)';
+        lastTime = performance.now();
+        animationId = requestAnimationFrame(animate);
+      } else {
+        // Retry if layout not ready
+        requestAnimationFrame(startAnimation);
+      }
+    };
+
+    // Wait for images to load and DOM to be fully rendered
+    const timeoutId = setTimeout(() => {
+      startAnimation();
+    }, 300);
+
+    // Also try to start when window loads
+    const handleLoad = () => {
+      if (!setWidth) {
+        startAnimation();
+      }
+    };
+    window.addEventListener('load', handleLoad);
 
     return () => {
-      if (animationId) {
+      clearTimeout(timeoutId);
+      window.removeEventListener('load', handleLoad);
+      window.removeEventListener('resize', handleResize);
+      if (animationId !== null) {
         cancelAnimationFrame(animationId);
       }
     };
-  }, []);  
+  }, [partnerLogos, duplicatedPartnerLogos.length]); // Re-run if logos change
+
   const handleNavClick = (e, targetId) => {
     e.preventDefault();
     e.stopPropagation();
@@ -130,13 +224,6 @@ function HeroSection() {
       }
     }
   };
-
-  // Partner logos data
-  const partnerLogos = [
-    { name: 'Orbet', image: orbetLogo },
-    { name: 'Rashed', image: rashedLogo },
-    { name: 'MSS', image: logo },
-  ];
 
   return (
     <section id="hero" className={`hero-section ${isLoaded ? 'loaded' : ''}`}>
@@ -204,23 +291,18 @@ function HeroSection() {
         <div className="trusted-text">Our<div> Partners</div></div>
         <div className="partner-logos-container">
           <div className="partner-logos-track" ref={logosTrackRef}>
-            {partnerLogos.map((logo, index) => (
-              <div key={index} className={`partner-logo ${logo.name === 'MSS' || logo.name === 'Rashed' || logo.name === 'Orbet' ? 'partner-logo-with-text' : ''} ${logo.name === 'Orbet' ? 'partner-logo-orbet' : ''}`}>
-                <img src={logo.image} alt={logo.name} />
-                {logo.name === 'MSS' && <span className="partner-logo-text">MSS Team</span>}
-                {logo.name === 'Rashed' && <span className="partner-logo-text">Rashed Courses</span>}
-                {logo.name === 'Orbet' && <span className="partner-logo-text">Orbit Production</span>}
-              </div>
-            ))}
-            {/* Duplicate logos for seamless loop */}
-            {partnerLogos.map((logo, index) => (
-              <div key={`duplicate-${index}`} className={`partner-logo ${logo.name === 'MSS' || logo.name === 'Rashed' || logo.name === 'Orbet' ? 'partner-logo-with-text' : ''} ${logo.name === 'Orbet' ? 'partner-logo-orbet' : ''}`}>
-                <img src={logo.image} alt={logo.name} />
-                {logo.name === 'MSS' && <span className="partner-logo-text">MSS Team</span>}
-                {logo.name === 'Rashed' && <span className="partner-logo-text">Rashed Courses</span>}
-                {logo.name === 'Orbet' && <span className="partner-logo-text">Orbit Production</span>}
-              </div>
-            ))}
+            {duplicatedPartnerLogos.map((logo, index) => {
+              const originalIndex = index % partnerLogos.length;
+              const originalLogo = partnerLogos[originalIndex];
+              return (
+                <div key={`partner-${index}`} className={`partner-logo ${originalLogo.name === 'MSS' || originalLogo.name === 'Rashed' || originalLogo.name === 'Orbet' ? 'partner-logo-with-text' : ''} ${originalLogo.name === 'Orbet' ? 'partner-logo-orbet' : ''}`}>
+                  <img src={logo.image} alt={originalLogo.name} />
+                  {originalLogo.name === 'MSS' && <span className="partner-logo-text">MSS Team</span>}
+                  {originalLogo.name === 'Rashed' && <span className="partner-logo-text">Rashed Courses</span>}
+                  {originalLogo.name === 'Orbet' && <span className="partner-logo-text">Orbit Production</span>}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

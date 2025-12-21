@@ -257,14 +257,19 @@ function AboutAndTeam() {
         });
       };
 
-      // Separate Company Owners from other employees
-      const owners = employees.filter(emp => 
-        emp.role.toLowerCase() === 'company owner'
-      );
+      const owners = employees.filter(emp => {
+        const roleLower = emp.role?.toLowerCase() || '';
+        return roleLower === 'co-founder' || 
+               roleLower === 'ceo & co-founder' ||
+               roleLower.includes('co-founder');
+      });
       
-      const otherMembers = employees.filter(emp => 
-        emp.role.toLowerCase() !== 'company owner'
-      );
+      const otherMembers = employees.filter(emp => {
+        const roleLower = emp.role?.toLowerCase() || '';
+        return roleLower !== 'co-founder' && 
+               roleLower !== 'ceo & co-founder ' &&
+               !roleLower.includes('co-founder');
+      });
 
       // Sort both groups
       const sortedOwners = sortEmployees(owners);

@@ -3,10 +3,13 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import './DesignGallery.css';
 import { CenteredImageCarousel } from '../../../work/ui';
-import { designProjectService, workCardThumbnailService } from '../../../../firebase/collections';
+import { designProjectService } from '../../../../firebase/collections';
 import logo from '../../../../assets/images/common/logoMSS.PNG';
 import { smoothScrollTo } from '../../../../shared/utils/smoothScroll';
 import ContactUs from '../../../contact';
+// Static hero images for Design Gallery
+import designHeroDesktop from '../../../../assets/images/Cover/lapDesign.png';
+import designHeroMobile from '../../../../assets/images/Cover/phoneDesign.png';
 
 function DesignGallery() {
   const navigate = useNavigate();
@@ -17,9 +20,8 @@ function DesignGallery() {
   const [loading, setLoading] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
   const [navExpanded, setNavExpanded] = useState(false);
-  const [heroImage, setHeroImage] = useState(null);
   const [carouselIndices, setCarouselIndices] = useState({});
-  const [heroData, setHeroData] = useState({
+  const [heroData] = useState({
     label: 'Design',
     title: 'Turning ideas into cinematic stories that connect with your audience.',
     subtitle: 'Start your project'
@@ -37,22 +39,7 @@ function DesignGallery() {
   useEffect(() => {
     setIsLoaded(true);
     loadDesignProjectsFromFirestore();
-    loadHeroDataFromFirestore();
   }, []);
-
-  const loadHeroDataFromFirestore = async () => {
-    try {
-      // Load the same thumbnail used in the "Our Work" section
-      const workCardData = await workCardThumbnailService.getByCardType('design');
-      if (workCardData) {
-        if (workCardData.thumbnailUrl) setHeroImage(workCardData.thumbnailUrl);
-        if (workCardData.name) setHeroData(prev => ({ ...prev, label: workCardData.name }));
-        if (workCardData.description) setHeroData(prev => ({ ...prev, title: workCardData.description }));
-      }
-    } catch (error) {
-      console.log('Design card thumbnail not found in Firestore, using defaults');
-    }
-  };
 
   const handleNavClick = (e, targetId) => {
     e.preventDefault();
@@ -281,20 +268,19 @@ function DesignGallery() {
           </svg>
         </button>
         <span className="breadcrumb-separator">&gt;</span>
-        <span className="breadcrumb-current">Design</span>
+        <span className="breadcrumb-current">{heroData.label}</span>
       </div>
 
       {/* Hero Section */}
       <div 
         className="video-hero-section" 
         ref={heroRef}
-        style={heroImage ? { 
-          backgroundImage: `url(${heroImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        } : {}}
       >
+        <picture className="hero-background-image">
+          <source media="(max-width: 768px)" srcSet={designHeroMobile} />
+          <source media="(min-width: 769px)" srcSet={designHeroDesktop} />
+          <img src={designHeroDesktop} alt="Design Gallery Hero" />
+        </picture>
         {/* Overlay Text Box */}
         <div className="video-hero-overlay-box">
           <div className="video-hero-content">

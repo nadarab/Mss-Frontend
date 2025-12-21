@@ -3,8 +3,22 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './Work.css';
-import { videoService, workCardThumbnailService } from '../../../firebase/collections';
 import arrowIcon from '../../../assets/images/OurWorkSection/arrow.png';
+// Static images for Our Work section cards
+// TODO: Replace these with actual OurWorkSection images when available:
+//   - assets/images/OurWorkSection/video-desktop.jpg (or .png)
+//   - assets/images/OurWorkSection/video-mobile.jpg (or .png)
+//   - assets/images/OurWorkSection/design-desktop.jpg (or .png)
+//   - assets/images/OurWorkSection/design-mobile.jpg (or .png)
+//   - assets/images/OurWorkSection/branding-desktop.jpg (or .png)
+//   - assets/images/OurWorkSection/branding-mobile.jpg (or .png)
+// Using Cover folder images as temporary placeholders
+import videoCardDesktop from '../../../assets/images/Cover/lapVedio.png';
+import videoCardMobile from '../../../assets/images/Cover/PhoneVedio.png';
+import designCardDesktop from '../../../assets/images/Cover/lapDesign.png';
+import designCardMobile from '../../../assets/images/Cover/phoneDesign.png';
+import brandingCardDesktop from '../../../assets/images/Cover/lapBranding.png';
+import brandingCardMobile from '../../../assets/images/Cover/phoneBranding.png';
 
 // Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
@@ -22,14 +36,8 @@ function Work() {
   const headerSubtitleRef = useRef(null);
   const cardTitleRefs = [useRef(null), useRef(null), useRef(null)];
   const cardDescriptionRefs = [useRef(null), useRef(null), useRef(null)];
-  const [firestoreVideo, setFirestoreVideo] = useState(null);
-  const [thumbnails, setThumbnails] = useState({
-    video: null,
-    design: null,
-    branding: null
-  });
-  const [videoThumbnail, setVideoThumbnail] = useState(null);
-  const [isLoadingThumbnails, setIsLoadingThumbnails] = useState(true);
+  // Static images are now used, no loading needed
+  const [isLoadingThumbnails, setIsLoadingThumbnails] = useState(false);
 
   // Clean up GSAP when component unmounts or location changes
   useEffect(() => {
@@ -53,44 +61,11 @@ function Work() {
     };
   }, [location.pathname]);
 
-  // Load first video and thumbnails from Firestore
+  // Static images - no loading needed
   useEffect(() => {
-    loadFirstVideo();
-    loadThumbnails();
+    // Component is ready immediately with static images
+    setIsLoadingThumbnails(false);
   }, []);
-
-  const loadFirstVideo = async () => {
-    try {
-      // Get all videos
-      const allVideos = await videoService.getAll();
-      
-      // Get the first video if available
-      if (allVideos.length > 0) {
-        setFirestoreVideo(allVideos[0].videoUrl);
-      }
-    } catch (error) {
-      console.error('Error loading video:', error);
-    }
-  };
-
-  const loadThumbnails = async () => {
-    try {
-      // Load thumbnails for each card type
-      const videoThumb = await workCardThumbnailService.getByCardType('video');
-      const designThumb = await workCardThumbnailService.getByCardType('design');
-      const brandingThumb = await workCardThumbnailService.getByCardType('branding');
-      
-      setThumbnails({
-        video: videoThumb,
-        design: designThumb,
-        branding: brandingThumb
-      });
-    } catch (error) {
-      console.error('Error loading thumbnails:', error);
-    } finally {
-      setIsLoadingThumbnails(false);
-    }
-  };
 
   useEffect(() => {
     // Don't run animations until thumbnails are loaded
@@ -402,25 +377,28 @@ function Work() {
   const categories = [
     {
       type: 'video',
-      name: thumbnails.video?.name || 'Video Making',
-      description: thumbnails.video?.description || 'Turning ideas into cinematic stories that connect with your audience',
-      mediaSrc: thumbnails.video?.thumbnailUrl || firestoreVideo || null,
+      name: 'Video Production',
+      description: 'Turning ideas into cinematic stories that connect with your audience',
+      desktopImage: videoCardDesktop,
+      mobileImage: videoCardMobile,
       link: '/work/video',
-      isVideo: thumbnails.video?.thumbnailUrl ? false : (firestoreVideo ? true : false),
+      isVideo: false,
     },
     {
       type: 'design',
-      name: thumbnails.design?.name || 'Design',
-      description: thumbnails.design?.description || 'Bold, clean, and purposeful design that makes your brand unforgettable',
-      mediaSrc: thumbnails.design?.thumbnailUrl || null,
+      name: 'Design',
+      description: 'Bold, clean, and purposeful design that makes your brand unforgettable',
+      desktopImage: designCardDesktop,
+      mobileImage: designCardMobile,
       link: '/work/design',
       isVideo: false,
     },
     {
       type: 'branding',
-      name: thumbnails.branding?.name || 'Branding & Identity',
-      description: thumbnails.branding?.description || 'Crafting identities that define who you are and what you stand for',
-      mediaSrc: thumbnails.branding?.thumbnailUrl || null,
+      name: 'Branding & Identity',
+      description: 'Crafting identities that define who you are and what you stand for',
+      desktopImage: brandingCardDesktop,
+      mobileImage: brandingCardMobile,
       link: '/work/branding',
       isVideo: false,
     },
@@ -454,34 +432,25 @@ function Work() {
           ) : (
             <div className="cards" ref={cardsContainerRef}>
               {categories.map((category, index) => (
-                category.mediaSrc ? (
-                  <div
-                    key={index}
-                    ref={index === 0 ? card1Ref : index === 1 ? card2Ref : card3Ref}
-                    className={`custom-card card${index + 1} category-${category.type}`}
-                    style={{
-                      zIndex: index + 2,
-                    }}
-                  >
-                    <div className="card-background">
-                      {category.isVideo ? (
-                        <video
-                          className="card-bg-media"
-                          src={category.mediaSrc}
-                          autoPlay
-                          loop
-                          muted
-                          playsInline
-                        />
-                      ) : (
-                        <img
-                          className="card-bg-media"
-                          src={category.mediaSrc}
-                          alt={category.name}
-                        />
-                      )}
-                      <div className="card-overlay"></div>
-                    </div>
+                <div
+                  key={index}
+                  ref={index === 0 ? card1Ref : index === 1 ? card2Ref : card3Ref}
+                  className={`custom-card card${index + 1} category-${category.type}`}
+                  style={{
+                    zIndex: index + 2,
+                  }}
+                >
+                  <div className="card-background">
+                    <picture className="card-bg-media">
+                      <source media="(max-width: 768px)" srcSet={category.mobileImage} />
+                      <source media="(min-width: 769px)" srcSet={category.desktopImage} />
+                      <img
+                        src={category.desktopImage}
+                        alt={category.name}
+                      />
+                    </picture>
+                    <div className="card-overlay"></div>
+                  </div>
 
                     <div className="card-content">
                       <h3 ref={cardTitleRefs[index]} className="card-title">
@@ -518,7 +487,6 @@ function Work() {
                       <img src={arrowIcon} alt="arrow" className="btn-arrow" />
                     </button>
                   </div>
-                ) : null
               ))}
             </div>
           )}

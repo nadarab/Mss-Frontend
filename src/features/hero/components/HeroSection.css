@@ -63,7 +63,7 @@
 }
 
 .navbar-logo {
-  height: 2.5rem; /* slimmer like first image, keep same logo asset */
+  height: 3.5rem; /* slimmer like first image, keep same logo asset */
   width: 3.125rem;
   filter: brightness(0) invert(1);
   transition: all 0.3s ease;
@@ -105,7 +105,7 @@
 /* Video Background Container */
 .hero-video-container {
   position: absolute;
-  top: 5.3125rem; /* space below navbar */
+  top: 6rem; /* space below navbar */
   left: 5%;
   right: 5%;
   width: 90%;
@@ -263,10 +263,11 @@
 .trusted-worldwide-section {
   position: absolute;
   top: calc(80vh + 1.8125rem);
-  left: 0;
+  left: 5%;
+  right: 5%;
   bottom: auto;
   z-index: 3;
-  padding: 1.3rem 5%;
+  padding: 1.3rem 0;
   display: flex;
   align-items: center;
   gap: 3rem;
@@ -288,15 +289,15 @@
   mask-image: linear-gradient(
     to right,
     transparent 0%,
-    black 10%,
-    black 90%,
+    black 5%,
+    black 95%,
     transparent 100%
   );
   -webkit-mask-image: linear-gradient(
     to right,
     transparent 0%,
-    black 10%,
-    black 90%,
+    black 5%,
+    black 95%,
     transparent 100%
   );
 }
@@ -308,6 +309,9 @@
   will-change: transform;
   width: max-content;
   flex-shrink: 0;
+  /* JavaScript handles all animation - no CSS animation */
+  animation: none !important;
+  transform: translateX(0);
 }
 
 .partner-logo {
@@ -366,6 +370,15 @@
   }
   to {
     transform: translateX(-50%);
+  }
+}
+
+@keyframes scrollLogosRight {
+  from {
+    transform: translateX(-33.333%);
+  }
+  to {
+    transform: translateX(0);
   }
 }
 
@@ -433,7 +446,7 @@
     left: 4%;
     right: 4%;
     bottom: auto;
-    padding: 1.2rem 8%;
+    padding: 1.2rem 0;
     gap: 2.75rem;
   }
 
@@ -538,7 +551,7 @@
     left: 3.5%;
     right: 3.5%;
     bottom: auto;
-    padding: 1.1rem 7%;
+    padding: 1.1rem 0;
     gap: 2.5rem;
   }
 
@@ -656,10 +669,10 @@
 
   .trusted-worldwide-section {
     top: calc(85vh + 2rem);
-    left: 0;
-    right: 0;
+    left: 3%;
+    right: 3%;
     bottom: auto;
-    padding: 1rem 5%;
+    padding: 1rem 0;
     gap: 2.25rem;
     flex-wrap: wrap;
   }
@@ -704,7 +717,7 @@
 
   .partner-logos-track {
     gap: clamp(2.25rem, 4.5vw, 4.5rem);
-    animation: scrollLogos 4s linear infinite;
+    animation: none !important;
   }
 }
 
@@ -812,7 +825,7 @@
     left: 2%;
     right: 2%;
     bottom: auto;
-    padding: 0.75rem;
+    padding: 0.75rem 0;
     gap: 1rem;
     flex-direction: row;
     align-items: center;
@@ -882,7 +895,7 @@
 
   .partner-logos-track {
     gap: clamp(1.75rem, 3.5vw, 3.5rem);
-    animation: scrollLogos 4s linear infinite;
+    animation: none !important;
   }
 }
 
@@ -956,14 +969,14 @@
   .hero-content {
     top: 5.5rem;
     left: auto;
-    right: 2%;
-    max-width: 55%;
+    right: 6%;
+    max-width: 65%;
     text-align: left;
     box-sizing: border-box;
   }
 
   .hero-title {
-    font-size: clamp(1.3rem, 3.2vw, 1.875rem);
+    font-size: clamp(1.5rem, 4.2vw, 2.875rem);
     line-height: 1.4;
     margin-bottom: 0.25rem;
   }
@@ -990,7 +1003,7 @@
     left: 2%;
     right: 2%;
     bottom: auto;
-    padding: 1.25rem 3%;
+    padding: 1.25rem 0;
     gap: 1rem;
     flex-direction: row;
     align-items: center;

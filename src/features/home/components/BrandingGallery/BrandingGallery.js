@@ -3,15 +3,17 @@ import { Navbar, Nav, Container } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import './BrandingGallery.css';
 import logo from '../../../../assets/images/common/logoMSS.PNG';
-import { brandingProjectService, workCardThumbnailService } from '../../../../firebase/collections';
+import { brandingProjectService } from '../../../../firebase/collections';
 import ContactUs from '../../../contact/components/ContactUs';
+// Static hero images for Branding Gallery
+import brandingHeroDesktop from '../../../../assets/images/Cover/lapBranding.png';
+import brandingHeroMobile from '../../../../assets/images/Cover/phoneBranding.png';
 
 function BrandingGallery() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [navExpanded, setNavExpanded] = useState(false);
-  const [heroImage, setHeroImage] = useState(null);
-  const [pageData, setPageData] = useState({
+  const [pageData] = useState({
     title: 'Branding & Identity',
     mainText: 'Crafting identities that define who you are and what you stand for.',
     shortDescription: 'Explore our branding projects',
@@ -84,22 +86,7 @@ function BrandingGallery() {
     };
 
     fetchBrandingProjects();
-    loadHeroDataFromFirestore();
   }, []);
-
-  const loadHeroDataFromFirestore = async () => {
-    try {
-      // Load the same thumbnail used in the "Our Work" section
-      const workCardData = await workCardThumbnailService.getByCardType('branding');
-      if (workCardData) {
-        if (workCardData.thumbnailUrl) setHeroImage(workCardData.thumbnailUrl);
-        if (workCardData.name) setPageData(prev => ({ ...prev, title: workCardData.name }));
-        if (workCardData.description) setPageData(prev => ({ ...prev, mainText: workCardData.description }));
-      }
-    } catch (error) {
-      console.log('Branding card thumbnail not found in Firestore, using defaults');
-    }
-  };
 
   const handleNavClick = (e, targetPath) => {
     e.preventDefault();
@@ -145,20 +132,48 @@ function BrandingGallery() {
 
   // Handle thumbnail navigation (scroll one image at a time)
   const handleThumbnailPagePrev = () => {
+    // Smooth fade transition for image change
+    setImageTransitioning(true);
+    
     setThumbnailStartOffset((prev) => {
+      let newOffset;
       if (prev === 0) {
-        return maxStartOffset; // Wrap to end
+        newOffset = maxStartOffset; // Wrap to end
+      } else {
+        newOffset = prev - 1;
       }
-      return prev - 1;
+      
+      // Update main image to show the first visible thumbnail (leftmost)
+      setTimeout(() => {
+        setCurrentImageIndex(newOffset);
+        setImageSelected(true);
+        setImageTransitioning(false);
+      }, 200); // Fade duration
+      
+      return newOffset;
     });
   };
 
   const handleThumbnailPageNext = () => {
+    // Smooth fade transition for image change
+    setImageTransitioning(true);
+    
     setThumbnailStartOffset((prev) => {
+      let newOffset;
       if (prev >= maxStartOffset) {
-        return 0; // Wrap to beginning
+        newOffset = 0; // Wrap to beginning
+      } else {
+        newOffset = prev + 1;
       }
-      return prev + 1;
+      
+      // Update main image to show the first visible thumbnail (leftmost)
+      setTimeout(() => {
+        setCurrentImageIndex(newOffset);
+        setImageSelected(true);
+        setImageTransitioning(false);
+      }, 200); // Fade duration
+      
+      return newOffset;
     });
   };
 
@@ -258,19 +273,18 @@ function BrandingGallery() {
           </svg>
         </button>
         <span className="breadcrumb-separator">&gt;</span>
-        <span className="breadcrumb-current">Branding & Identity</span>
+        <span className="breadcrumb-current">{pageData.title}</span>
       </div>
 
       {/* Hero Section */}
       <div 
-        className="branding-hero-section" 
-        style={heroImage ? { 
-          backgroundImage: `url(${heroImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        } : {}}
+        className="branding-hero-section"
       >
+        <picture className="hero-background-image">
+          <source media="(max-width: 768px)" srcSet={brandingHeroMobile} />
+          <source media="(min-width: 769px)" srcSet={brandingHeroDesktop} />
+          <img src={brandingHeroDesktop} alt="Branding Gallery Hero" />
+        </picture>
         {/* Overlay Text Box */}
         <div className="branding-hero-overlay-box">
           <div className="branding-hero-content">
@@ -337,7 +351,7 @@ function BrandingGallery() {
                             </svg>
                           </button>
                           <div className="branding-thumbnail-indicator">
-                            {thumbnailStartIndex + 1}-{Math.min(thumbnailEndIndex, totalImages)}/{totalImages}
+                            {currentImageIndex + 1}/{totalImages}
                           </div>
                           <button 
                             className="branding-carousel-btn branding-carousel-btn-next"
@@ -384,7 +398,7 @@ function BrandingGallery() {
                           </svg>
                         </button>
                         <div className="branding-thumbnail-indicator">
-                          {thumbnailStartIndex + 1}-{Math.min(thumbnailEndIndex, totalImages)}/{totalImages}
+                          {currentImageIndex + 1}/{totalImages}
                         </div>
                         <button 
                           className="branding-carousel-btn branding-carousel-btn-next"
