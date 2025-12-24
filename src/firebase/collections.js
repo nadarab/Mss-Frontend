@@ -275,7 +275,7 @@ export const designProjectService = {
  *   id: auto-generated
  *   cardType: string ('video', 'design', or 'branding')
  *   thumbnailUrl: string (Firebase Storage URL for the thumbnail image)
- *   name: string (e.g., "Video Making", "Design", "Branding & Identity")
+ *   name: string (e.g., "Video Production", "Design", "Branding & Identity")
  *   description: string (card description)
  *   active: boolean (whether this thumbnail should be used)
  * }

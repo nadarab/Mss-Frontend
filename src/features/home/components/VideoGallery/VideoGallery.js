@@ -22,7 +22,7 @@ function VideoGallery() {
   const [navExpanded, setNavExpanded] = useState(false);
   const [carouselIndices, setCarouselIndices] = useState({});
   const [heroData] = useState({
-    label: 'Video Making',
+    label: 'Video Production',
     title: 'Turning ideas into cinematic stories that connect with your audience.',
     subtitle: 'Start your project'
   });

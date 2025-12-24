@@ -137,11 +137,11 @@ HOME PAGE - "Our Work" Section:
 │  OUR WORK                                                    │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐                 │
 │  │  VIDEO   │  │  DESIGN  │  │ BRANDING │                 │
-│  │  MAKING  │  │          │  │          │                 │
+│  │PRODUCTION│  │          │  │          │                 │
 │  └──────────┘  └──────────┘  └──────────┘                 │
 └─────────────────────────────────────────────────────────────┘
 
-When user clicks "VIDEO MAKING":
+When user clicks "VIDEO PRODUCTION":
 ┌─────────────────────────────────────────────────────────────┐
 │  VIDEO CATEGORIES                                            │
 │  ┌────────────────────────────────────┐                     │

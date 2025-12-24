@@ -113,7 +113,7 @@ function WorkCardThumbnailForm({ onSuccess }) {
         required
         style={inputStyle}
       >
-        <option value="video">Video Making Card</option>
+        <option value="video">Video Production Card</option>
         <option value="design">Design Card</option>
         <option value="branding">Branding & Identity Card</option>
       </select>
@@ -121,7 +121,7 @@ function WorkCardThumbnailForm({ onSuccess }) {
       <label style={{ color: '#fff', fontSize: '14px', fontWeight: '600' }}>Card Name:</label>
       <input
         type="text"
-        placeholder="e.g., Video Making"
+        placeholder="e.g., Video Production"
         value={formData.name}
         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
         required
