@@ -89,19 +89,22 @@ function Work() {
     // Track if component is mounted
     let isMounted = true;
 
+    // Check for reduced motion preference (accessibility)
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     // Kill any existing ScrollTriggers (defensive in case of hot reloads)
     ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
 
     // ========== HEADER TEXT ANIMATIONS ==========
     // Set initial states for header text
     if (headerLabel) {
-      gsap.set(headerLabel, { y: -50, opacity: 0, force3D: false });
+      gsap.set(headerLabel, { y: -50, opacity: 0, force3D: true });
     }
     if (headerTitle) {
-      gsap.set(headerTitle, { x: -100, opacity: 0, force3D: false });
+      gsap.set(headerTitle, { x: -100, opacity: 0, force3D: true });
     }
     if (headerSubtitle) {
-      gsap.set(headerSubtitle, { x: 100, opacity: 0, force3D: false });
+      gsap.set(headerSubtitle, { x: 100, opacity: 0, force3D: true });
     }
 
     // Animate header text when section enters viewport
@@ -119,9 +122,9 @@ function Work() {
       headerTl.to(headerLabel, {
         y: 0,
         opacity: 1,
-        duration: 1.2,
-        ease: 'power3.out',
-        force3D: false
+        duration: prefersReducedMotion ? 0.1 : 1.2,
+        ease: prefersReducedMotion ? 'none' : 'power3.out',
+        force3D: true // GPU acceleration
       });
     }
     if (headerTitle) {
@@ -130,11 +133,11 @@ function Work() {
         {
           x: 0,
           opacity: 1,
-          duration: 1.9,
-          ease: 'power3.out',
-          force3D: false
+          duration: prefersReducedMotion ? 0.1 : 1.9,
+          ease: prefersReducedMotion ? 'none' : 'power3.out',
+          force3D: true // GPU acceleration
         },
-        '-=0.9'
+        prefersReducedMotion ? 0 : '-=0.9'
       );
     }
     if (headerSubtitle) {
@@ -143,11 +146,11 @@ function Work() {
         {
           x: 0,
           opacity: 1,
-          duration: 1.7,
-          ease: 'power3.out',
-          force3D: false
+          duration: prefersReducedMotion ? 0.1 : 1.7,
+          ease: prefersReducedMotion ? 'none' : 'power3.out',
+          force3D: true // GPU acceleration
         },
-        '-=1.3'
+        prefersReducedMotion ? 0 : '-=1.3'
       );
     }
 
@@ -155,12 +158,12 @@ function Work() {
     // Set initial states for card text elements
     cardTitleRefs.forEach((ref) => {
       if (ref.current) {
-        gsap.set(ref.current, { x: -80, opacity: 0, force3D: false });
+        gsap.set(ref.current, { x: -80, opacity: 0, force3D: true });
       }
     });
     cardDescriptionRefs.forEach((ref) => {
       if (ref.current) {
-        gsap.set(ref.current, { x: 80, opacity: 0, force3D: false });
+        gsap.set(ref.current, { x: 80, opacity: 0, force3D: true });
       }
     });
 
@@ -179,9 +182,9 @@ function Work() {
       card1TextTl.to(cardTitleRefs[0].current, {
         x: 0,
         opacity: 1,
-        duration: 1.7,
-        ease: 'power3.out',
-        force3D: false
+        duration: prefersReducedMotion ? 0.1 : 1.7,
+        ease: prefersReducedMotion ? 'none' : 'power3.out',
+        force3D: true // GPU acceleration
       });
     }
     if (cardDescriptionRefs[0].current) {
@@ -190,21 +193,37 @@ function Work() {
         {
           x: 0,
           opacity: 1,
-          duration: 1.7,
-          ease: 'power3.out',
-          force3D: false
+          duration: prefersReducedMotion ? 0.1 : 1.7,
+          ease: prefersReducedMotion ? 'none' : 'power3.out',
+          force3D: true // GPU acceleration
         },
-        '-=1.3'
+        prefersReducedMotion ? 0 : '-=1.3'
       );
     }
 
     // Animate card 2 text when card 2 appears (tied to card animation)
+    // Use responsive pin duration calculation
+    const getTextTimelineEnd = () => {
+      const viewportHeight = window.innerHeight;
+      const cardCount = 2;
+      const buffer = 250;
+      let multiplier = 1.0;
+      
+      if (window.innerWidth <= 576) {
+        multiplier = 0.6;
+      } else if (window.innerWidth <= 992) {
+        multiplier = 0.8;
+      }
+      
+      return (viewportHeight * cardCount * multiplier) + buffer;
+    };
+
     const card2TextTl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
         start: 'top top',
-        end: '+=1500',
-        scrub: 1.8,
+        end: () => `+=${getTextTimelineEnd()}`, // Dynamic end based on viewport
+        scrub: 1.1, // Matched with main timeline for consistent scroll responsiveness
       },
     });
 
@@ -215,9 +234,9 @@ function Work() {
         {
           x: 0,
           opacity: 1,
-          duration: 1.6,
-          ease: 'power2.out',
-          force3D: false
+          duration: prefersReducedMotion ? 0.1 : 1.6,
+          ease: prefersReducedMotion ? 'none' : 'power2.out',
+          force3D: true // GPU acceleration
         },
         0.2
       );
@@ -228,9 +247,9 @@ function Work() {
         {
           x: 0,
           opacity: 1,
-          duration: 1.6,
-          ease: 'power2.out',
-          force3D: false
+          duration: prefersReducedMotion ? 0.1 : 1.6,
+          ease: prefersReducedMotion ? 'none' : 'power2.out',
+          force3D: true // GPU acceleration
         },
         0.5
       );
@@ -243,9 +262,9 @@ function Work() {
         {
           x: 0,
           opacity: 1,
-          duration: 1.6,
-          ease: 'power2.out',
-          force3D: false
+          duration: prefersReducedMotion ? 0.1 : 1.6,
+          ease: prefersReducedMotion ? 'none' : 'power2.out',
+          force3D: true // GPU acceleration
         },
         0.8
       );
@@ -256,70 +275,225 @@ function Work() {
         {
           x: 0,
           opacity: 1,
-          duration: 1.6,
-          ease: 'power2.out',
-          force3D: false
+          duration: prefersReducedMotion ? 0.1 : 1.6,
+          ease: prefersReducedMotion ? 'none' : 'power2.out',
+          force3D: true // GPU acceleration
         },
         1.
       );
     }
 
     // ========== CARD STACKING ANIMATION ==========
-    // Card 1: keep visible and static (GSAP does not animate it)
+    // Add is-animating class to enable will-change optimization
+    [card1, card2, card3].forEach(card => {
+      if (card) card.classList.add('is-animating');
+    });
+
+    // Card 1: keep visible and static with strongest shadow (always in front)
     // left: "50%" positions left edge at center, xPercent: -50 shifts by half width to center
     gsap.set(card1, { 
       yPercent: 0,
       left: "50%",
       xPercent: -50, 
       opacity: 1,
-      force3D: false
+      '--shadow-blur': '35px', // Strongest shadow for active card
+      '--shadow-opacity': '0.25',
+      force3D: true // GPU acceleration enabled for better performance
     });
 
-    // Card 2 & 3: start hidden below and transparent, but centered horizontally
+    // Card 2 & 3: start hidden below, transparent, scaled down, with softer shadows
     gsap.set([card2, card3], { 
       yPercent: 100,
       left: "50%",
       xPercent: -50, 
-      opacity: 0,
-      force3D: false
+      opacity: prefersReducedMotion ? 1 : 0, // Show immediately if reduced motion
+      scale: prefersReducedMotion ? 1 : 0.96, // Skip scale animation if reduced motion
+      '--shadow-blur': '20px', // Softer shadow when stacked behind
+      '--shadow-opacity': '0.15',
+      force3D: true // GPU acceleration enabled for better performance
     });
 
-    // Timeline: pin the whole section (title + cards) and animate only card2 & card3
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: section,
-        pin: section,
-        pinSpacing: true,
-        markers: false,
-        start: 'top top',
-        end: '+=1500',
-        scrub: 1.8,
-        onLeave: () => {
-          // Ensure we don't manipulate DOM if component is unmounting
-          if (!isMounted) return;
-        },
-        onEnterBack: () => {
-          if (!isMounted) return;
-        },
+    // Calculate dynamic pin duration based on viewport height and card count
+    const calculatePinDuration = (multiplier = 1.0) => {
+      const viewportHeight = window.innerHeight;
+      const cardCount = 2; // Cards 2 and 3 that animate
+      const buffer = 250; // Buffer space for smooth transitions
+      return (viewportHeight * cardCount * multiplier) + buffer;
+    };
+
+    // Helper function to create card animation timeline
+    const createCardTimeline = (scrollTriggerConfig) => {
+      const tl = gsap.timeline({
+        scrollTrigger: scrollTriggerConfig,
+      });
+
+      // Card 2: starts immediately with smooth easing, scales up, fades in, and shadow intensifies
+      tl.to(card2, {
+        yPercent: 0,
+        left: "50%",
+        xPercent: -50,
+        opacity: 1,
+        scale: 1, // Scale from 0.96 to 1.0 for depth effect
+        '--shadow-blur': '35px', // Progressive shadow intensity as card comes forward
+        '--shadow-opacity': '0.25',
+        duration: prefersReducedMotion ? 0.1 : 0.6, // Faster, simpler animation if reduced motion
+        force3D: true, // GPU acceleration enabled for better performance
+        ease: prefersReducedMotion ? 'none' : 'power3.out' // No easing if reduced motion
+      })
+      // Card 3: starts 0.3s into timeline (overlaps with card2 for cascading effect)
+      .to(card3, {
+        yPercent: 0,
+        left: "50%",
+        xPercent: -50,
+        opacity: 1,
+        scale: 1, // Scale from 0.96 to 1.0 for depth effect
+        '--shadow-blur': '35px', // Progressive shadow intensity as card comes forward
+        '--shadow-opacity': '0.25',
+        duration: prefersReducedMotion ? 0.1 : 0.6, // Faster, simpler animation if reduced motion
+        force3D: true, // GPU acceleration enabled for better performance
+        ease: prefersReducedMotion ? 'none' : 'power3.out' // No easing if reduced motion
+      }, prefersReducedMotion ? 0 : "-=0.3"); // No overlap if reduced motion, otherwise start 0.3s before card2 finishes
+
+      return tl;
+    };
+
+    // Use ScrollTrigger.matchMedia() for responsive pinning
+    ScrollTrigger.matchMedia({
+      // Mobile: Shorter pin duration
+      "(max-width: 576px)": () => {
+        const pinDuration = calculatePinDuration(0.6); // 60% of viewport height per card
+        return createCardTimeline({
+          trigger: section,
+          pin: section,
+          pinSpacing: true,
+          markers: false,
+          start: 'top top',
+          end: `+=${pinDuration}`,
+          scrub: 1.1,
+          anticipatePin: 1,
+          snap: {
+            snapTo: [0, 0.5, 1],
+            duration: { min: 0.2, max: 0.6 },
+            delay: 0.1,
+            inertia: false,
+          },
+          onLeave: () => {
+            if (!isMounted) return;
+            if (section) {
+              gsap.to(section, {
+                opacity: 1,
+                duration: 0.3,
+                ease: 'power2.out',
+                force3D: true
+              });
+            }
+          },
+          onEnterBack: () => {
+            if (!isMounted) return;
+            if (section) {
+              gsap.fromTo(section, 
+                { opacity: 0.95 },
+                { 
+                  opacity: 1,
+                  duration: 0.3,
+                  ease: 'power2.out',
+                  force3D: true
+                }
+              );
+            }
+          },
+        });
       },
-    });
-
-    tl.to(card2, {
-      yPercent: 0,
-      left: "50%",
-      xPercent: -50,
-      opacity: 1,
-      duration: 0.6,
-      force3D: false,
-      ease: 'power2.inOut'
-    }).to(card3, {
-      yPercent: 0,
-      left: "50%",
-      xPercent: -50,
-      opacity: 1,
-      duration: 0.6,
-      force3D: false,
-      ease: 'power2.inOut'
+      // Tablet: Medium pin duration
+      "(min-width: 577px) and (max-width: 992px)": () => {
+        const pinDuration = calculatePinDuration(0.8); // 80% of viewport height per card
+        return createCardTimeline({
+          trigger: section,
+          pin: section,
+          pinSpacing: true,
+          markers: false,
+          start: 'top top',
+          end: `+=${pinDuration}`,
+          scrub: 1.1,
+          anticipatePin: 1,
+          snap: {
+            snapTo: [0, 0.5, 1],
+            duration: { min: 0.2, max: 0.6 },
+            delay: 0.1,
+            inertia: false,
+          },
+          onLeave: () => {
+            if (!isMounted) return;
+            if (section) {
+              gsap.to(section, {
+                opacity: 1,
+                duration: 0.3,
+                ease: 'power2.out',
+                force3D: true
+              });
+            }
+          },
+          onEnterBack: () => {
+            if (!isMounted) return;
+            if (section) {
+              gsap.fromTo(section, 
+                { opacity: 0.95 },
+                { 
+                  opacity: 1,
+                  duration: 0.3,
+                  ease: 'power2.out',
+                  force3D: true
+                }
+              );
+            }
+          },
+        });
+      },
+      // Desktop: Full pin duration
+      "(min-width: 993px)": () => {
+        const pinDuration = calculatePinDuration(1.0); // 100% of viewport height per card
+        return createCardTimeline({
+          trigger: section,
+          pin: section,
+          pinSpacing: true,
+          markers: false,
+          start: 'top top',
+          end: `+=${pinDuration}`,
+          scrub: 1.1,
+          anticipatePin: 1,
+          snap: {
+            snapTo: [0, 0.5, 1],
+            duration: { min: 0.2, max: 0.6 },
+            delay: 0.1,
+            inertia: false,
+          },
+          onLeave: () => {
+            if (!isMounted) return;
+            if (section) {
+              gsap.to(section, {
+                opacity: 1,
+                duration: 0.3,
+                ease: 'power2.out',
+                force3D: true
+              });
+            }
+          },
+          onEnterBack: () => {
+            if (!isMounted) return;
+            if (section) {
+              gsap.fromTo(section, 
+                { opacity: 0.95 },
+                { 
+                  opacity: 1,
+                  duration: 0.3,
+                  ease: 'power2.out',
+                  force3D: true
+                }
+              );
+            }
+          },
+        });
+      },
     });
 
     ScrollTrigger.refresh();
@@ -327,6 +501,11 @@ function Work() {
     return () => {
       // Mark as unmounted first
       isMounted = false;
+      
+      // Remove is-animating class to disable will-change optimization
+      [card1, card2, card3].forEach(card => {
+        if (card) card.classList.remove('is-animating');
+      });
       
       // Safely clean up GSAP ScrollTrigger and pinned elements
       try {
