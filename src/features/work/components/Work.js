@@ -36,8 +36,12 @@ function Work() {
   const headerSubtitleRef = useRef(null);
   const cardTitleRefs = [useRef(null), useRef(null), useRef(null)];
   const cardDescriptionRefs = [useRef(null), useRef(null), useRef(null)];
+  const cardButtonRefs = [useRef(null), useRef(null), useRef(null)];
+  const cardOverlayRefs = [useRef(null), useRef(null), useRef(null)];
+  const particlesContainerRef = useRef(null);
   // Static images are now used, no loading needed
   const [isLoadingThumbnails, setIsLoadingThumbnails] = useState(false);
+  const [particlesEnabled, setParticlesEnabled] = useState(true);
 
   // Clean up GSAP when component unmounts or location changes
   useEffect(() => {
@@ -81,6 +85,18 @@ function Work() {
     const headerLabel = headerLabelRef.current;
     const headerTitle = headerTitleRef.current;
     const headerSubtitle = headerSubtitleRef.current;
+    const particlesContainer = particlesContainerRef.current;
+    
+    // Check device performance for particle effects
+    const checkPerformance = () => {
+      // Disable particles on mobile or low-end devices
+      const isMobile = window.innerWidth <= 768;
+      const isLowEnd = navigator.hardwareConcurrency <= 4 || 
+                       (navigator.deviceMemory && navigator.deviceMemory <= 4);
+      return !isMobile && !isLowEnd;
+    };
+    
+    const shouldShowParticles = checkPerformance() && particlesEnabled;
 
     if (!section || !cardsContainer || !card1 || !card2 || !card3) {
       return undefined;
@@ -163,6 +179,12 @@ function Work() {
         gsap.set(ref.current, { x: 80, opacity: 0, force3D: false });
       }
     });
+    // Set initial states for buttons (slide up from bottom)
+    cardButtonRefs.forEach((ref) => {
+      if (ref.current) {
+        gsap.set(ref.current, { y: 30, opacity: 0, force3D: false });
+      }
+    });
 
     // Animate card 1 text when card 1 is visible
     const card1TextTl = gsap.timeline({
@@ -197,70 +219,18 @@ function Work() {
         '-=1.3'
       );
     }
-
-    // Animate card 2 text when card 2 appears (tied to card animation)
-    const card2TextTl = gsap.timeline({
-      scrollTrigger: {
-        trigger: section,
-        start: 'top top',
-        end: '+=1500',
-        scrub: 1.8,
-      },
-    });
-
-    // Card 2 text appears when card 2 is about 30% visible
-    if (cardTitleRefs[1].current) {
-      card2TextTl.to(
-        cardTitleRefs[1].current,
+    // Card 1 button appears after text (staggered)
+    if (cardButtonRefs[0].current) {
+      card1TextTl.to(
+        cardButtonRefs[0].current,
         {
-          x: 0,
+          y: 0,
           opacity: 1,
-          duration: 1.6,
-          ease: 'power2.out',
+          duration: 1.2,
+          ease: 'power3.out',
           force3D: false
         },
-        0.2
-      );
-    }
-    if (cardDescriptionRefs[1].current) {
-      card2TextTl.to(
-        cardDescriptionRefs[1].current,
-        {
-          x: 0,
-          opacity: 1,
-          duration: 1.6,
-          ease: 'power2.out',
-          force3D: false
-        },
-        0.5
-      );
-    }
-
-    // Animate card 3 text when card 3 appears (tied to card animation)
-    if (cardTitleRefs[2].current) {
-      card2TextTl.to(
-        cardTitleRefs[2].current,
-        {
-          x: 0,
-          opacity: 1,
-          duration: 1.6,
-          ease: 'power2.out',
-          force3D: false
-        },
-        0.8
-      );
-    }
-    if (cardDescriptionRefs[2].current) {
-      card2TextTl.to(
-        cardDescriptionRefs[2].current,
-        {
-          x: 0,
-          opacity: 1,
-          duration: 1.6,
-          ease: 'power2.out',
-          force3D: false
-        },
-        1.
+        '-=0.8'
       );
     }
 
@@ -284,6 +254,62 @@ function Work() {
       force3D: false
     });
 
+    // ========== SCROLL PROGRESS INTEGRATION ==========
+    // Progress-based animations with smooth interpolation and bidirectional support
+    
+    // ========== PARTICLE EFFECTS SYSTEM ==========
+    // Create subtle particle effects during card transitions
+    const createParticles = (container, intensity) => {
+      if (!container || !shouldShowParticles) return;
+      
+      // Clear existing particles
+      container.innerHTML = '';
+      
+      // Create 15-20 subtle particles
+      const particleCount = Math.floor(15 + (intensity * 5));
+      
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        
+        // Random position
+        const x = Math.random() * 100;
+        const y = Math.random() * 100;
+        const size = 2 + Math.random() * 3;
+        const duration = 3 + Math.random() * 2;
+        const delay = Math.random() * 1;
+        
+        particle.style.cssText = `
+          position: absolute;
+          left: ${x}%;
+          top: ${y}%;
+          width: ${size}px;
+          height: ${size}px;
+          background: rgba(69, 137, 255, ${0.4 * intensity});
+          border-radius: 50%;
+          pointer-events: none;
+          animation: particleFloat ${duration}s ease-in-out ${delay}s infinite;
+          box-shadow: 0 0 ${size * 2}px rgba(69, 137, 255, ${0.6 * intensity});
+        `;
+        
+        container.appendChild(particle);
+      }
+    };
+    
+    // Initialize particles container if enabled
+    if (shouldShowParticles && particlesContainer) {
+      particlesContainer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+        opacity: 0;
+      `;
+    }
+    
     // Timeline: pin the whole section (title + cards) and animate only card2 & card3
     const tl = gsap.timeline({
       scrollTrigger: {
@@ -293,34 +319,210 @@ function Work() {
         markers: false,
         start: 'top top',
         end: '+=1500',
-        scrub: 1.8,
+        scrub: 1.8, // Smooth scroll-linked animation (bidirectional)
+        onUpdate: (self) => {
+          if (!isMounted) return;
+          
+          // Get scroll progress (0 to 1)
+          const progress = self.progress;
+          
+          // Progress-based card animations with smooth interpolation
+          // Card 2: Animates from 0% to 50% progress (0 to 0.5)
+          const card2Progress = Math.min(Math.max((progress - 0) / 0.5, 0), 1);
+          // Card 3: Animates from 50% to 100% progress (0.5 to 1.0)
+          const card3Progress = Math.min(Math.max((progress - 0.5) / 0.5, 0), 1);
+          
+          // Smooth interpolation using ease function
+          const easeCard2 = gsap.parseEase('power2.inOut')(card2Progress);
+          const easeCard3 = gsap.parseEase('power2.inOut')(card3Progress);
+          
+          // Apply interpolated values to card 2
+          if (card2) {
+            gsap.set(card2, {
+              yPercent: 100 * (1 - easeCard2), // 100% to 0%
+              opacity: easeCard2, // 0 to 1
+              force3D: true
+            });
+          }
+          
+          // Apply interpolated values to card 3
+          if (card3) {
+            gsap.set(card3, {
+              yPercent: 100 * (1 - easeCard3), // 100% to 0%
+              opacity: easeCard3, // 0 to 1
+              force3D: true
+            });
+          }
+          
+          // Update card text animations based on progress
+          // Card 2 text appears when card 2 is ~30% visible
+          if (card2Progress > 0.3) {
+            const textProgress = (card2Progress - 0.3) / 0.7; // 0 to 1 when card is 30-100% visible
+            const textEase = gsap.parseEase('power2.out')(textProgress);
+            
+            if (cardTitleRefs[1].current) {
+              gsap.set(cardTitleRefs[1].current, {
+                x: -80 * (1 - textEase),
+                opacity: textEase,
+                force3D: true
+              });
+            }
+            if (cardDescriptionRefs[1].current) {
+              const descProgress = Math.max(0, (card2Progress - 0.4) / 0.6);
+              const descEase = gsap.parseEase('power2.out')(descProgress);
+              gsap.set(cardDescriptionRefs[1].current, {
+                x: 80 * (1 - descEase),
+                opacity: descEase,
+                force3D: true
+              });
+            }
+            if (cardButtonRefs[1].current) {
+              const btnProgress = Math.max(0, (card2Progress - 0.5) / 0.5);
+              const btnEase = gsap.parseEase('power2.out')(btnProgress);
+              gsap.set(cardButtonRefs[1].current, {
+                y: 30 * (1 - btnEase),
+                opacity: btnEase,
+                force3D: true
+              });
+            }
+          } else {
+            // Reset card 2 text when scrolling back
+            if (cardTitleRefs[1].current) {
+              gsap.set(cardTitleRefs[1].current, { x: -80, opacity: 0, force3D: true });
+            }
+            if (cardDescriptionRefs[1].current) {
+              gsap.set(cardDescriptionRefs[1].current, { x: 80, opacity: 0, force3D: true });
+            }
+            if (cardButtonRefs[1].current) {
+              gsap.set(cardButtonRefs[1].current, { y: 30, opacity: 0, force3D: true });
+            }
+          }
+          
+          // Card 3 text appears when card 3 is ~30% visible
+          if (card3Progress > 0.3) {
+            const textProgress = (card3Progress - 0.3) / 0.7;
+            const textEase = gsap.parseEase('power2.out')(textProgress);
+            
+            if (cardTitleRefs[2].current) {
+              gsap.set(cardTitleRefs[2].current, {
+                x: -80 * (1 - textEase),
+                opacity: textEase,
+                force3D: true
+              });
+            }
+            if (cardDescriptionRefs[2].current) {
+              const descProgress = Math.max(0, (card3Progress - 0.4) / 0.6);
+              const descEase = gsap.parseEase('power2.out')(descProgress);
+              gsap.set(cardDescriptionRefs[2].current, {
+                x: 80 * (1 - descEase),
+                opacity: descEase,
+                force3D: true
+              });
+            }
+            if (cardButtonRefs[2].current) {
+              const btnProgress = Math.max(0, (card3Progress - 0.5) / 0.5);
+              const btnEase = gsap.parseEase('power2.out')(btnProgress);
+              gsap.set(cardButtonRefs[2].current, {
+                y: 30 * (1 - btnEase),
+                opacity: btnEase,
+                force3D: true
+              });
+            }
+          } else {
+            // Reset card 3 text when scrolling back
+            if (cardTitleRefs[2].current) {
+              gsap.set(cardTitleRefs[2].current, { x: -80, opacity: 0, force3D: true });
+            }
+            if (cardDescriptionRefs[2].current) {
+              gsap.set(cardDescriptionRefs[2].current, { x: 80, opacity: 0, force3D: true });
+            }
+            if (cardButtonRefs[2].current) {
+              gsap.set(cardButtonRefs[2].current, { y: 30, opacity: 0, force3D: true });
+            }
+          }
+          
+          // ========== VISUAL POLISH: DYNAMIC GRADIENT OVERLAYS & COLOR TRANSITIONS ==========
+          // Card 1: Always visible, blue tint
+          if (cardOverlayRefs[0].current) {
+            const card1Intensity = 0.15; // Base intensity for visible card
+            cardOverlayRefs[0].current.style.setProperty('--gradient-top', `rgba(69, 137, 255, ${card1Intensity * 0.3})`);
+            cardOverlayRefs[0].current.style.setProperty('--gradient-mid', `rgba(0, 102, 255, ${card1Intensity * 0.4})`);
+            cardOverlayRefs[0].current.style.setProperty('--gradient-bottom', `rgba(0, 0, 0, ${card1Intensity * 0.6})`);
+          }
+          
+          // Card 2: Dynamic intensity and color transition (blue to purple)
+          if (cardOverlayRefs[1].current) {
+            // Intensity: higher when in background, lower when active
+            const baseIntensity = 0.25;
+            const activeIntensity = 0.12;
+            const intensity = baseIntensity - (activeIntensity * easeCard2);
+            
+            // Color transition: blue (0) to purple (1) based on card progress
+            const colorMix = easeCard2;
+            const blueR = 69 + (138 - 69) * colorMix;
+            const blueG = 137 + (43 - 137) * colorMix;
+            const blueB = 255 + (226 - 255) * colorMix;
+            
+            cardOverlayRefs[1].current.style.setProperty('--gradient-top', `rgba(${blueR}, ${blueG}, ${blueB}, ${intensity * 0.3})`);
+            cardOverlayRefs[1].current.style.setProperty('--gradient-mid', `rgba(${blueR * 0.7}, ${blueG * 0.7}, ${blueB * 0.7}, ${intensity * 0.5})`);
+            cardOverlayRefs[1].current.style.setProperty('--gradient-bottom', `rgba(0, 0, 0, ${intensity * 0.7})`);
+          }
+          
+          // Card 3: Dynamic intensity and color transition (purple back to blue)
+          if (cardOverlayRefs[2].current) {
+            // Intensity: higher when in background, lower when active
+            const baseIntensity = 0.3;
+            const activeIntensity = 0.1;
+            const intensity = baseIntensity - (activeIntensity * easeCard3);
+            
+            // Color transition: purple (0) to blue (1) based on card progress
+            const colorMix = easeCard3;
+            const purpleR = 138 - (138 - 69) * colorMix;
+            const purpleG = 43 - (43 - 137) * colorMix;
+            const purpleB = 226 - (226 - 255) * colorMix;
+            
+            cardOverlayRefs[2].current.style.setProperty('--gradient-top', `rgba(${purpleR}, ${purpleG}, ${purpleB}, ${intensity * 0.3})`);
+            cardOverlayRefs[2].current.style.setProperty('--gradient-mid', `rgba(${purpleR * 0.7}, ${purpleG * 0.7}, ${purpleB * 0.7}, ${intensity * 0.5})`);
+            cardOverlayRefs[2].current.style.setProperty('--gradient-bottom', `rgba(0, 0, 0, ${intensity * 0.7})`);
+          }
+          
+          // ========== VISUAL POLISH: PARTICLE EFFECTS ==========
+          if (shouldShowParticles && particlesContainer) {
+            // Update particle intensity based on card transitions
+            const particleIntensity = Math.max(
+              easeCard2 * 0.5, // Particles during card 2 transition
+              easeCard3 * 0.5  // Particles during card 3 transition
+            );
+            
+            // Update container opacity
+            particlesContainer.style.opacity = particleIntensity.toString();
+            
+            // Create particles during transitions
+            if ((card2Progress > 0.1 && card2Progress < 0.9) || (card3Progress > 0.1 && card3Progress < 0.9)) {
+              if (!particlesContainer.hasAttribute('data-particles-active')) {
+                particlesContainer.setAttribute('data-particles-active', 'true');
+                createParticles(particlesContainer, particleIntensity);
+              }
+            } else {
+              particlesContainer.removeAttribute('data-particles-active');
+              particlesContainer.innerHTML = ''; // Clear particles when not transitioning
+            }
+          }
+        },
         onLeave: () => {
           // Ensure we don't manipulate DOM if component is unmounting
           if (!isMounted) return;
         },
         onEnterBack: () => {
           if (!isMounted) return;
+          // Ensure smooth reverse when scrolling back into view
+          ScrollTrigger.refresh();
         },
       },
     });
 
-    tl.to(card2, {
-      yPercent: 0,
-      left: "50%",
-      xPercent: -50,
-      opacity: 1,
-      duration: 0.6,
-      force3D: false,
-      ease: 'power2.inOut'
-    }).to(card3, {
-      yPercent: 0,
-      left: "50%",
-      xPercent: -50,
-      opacity: 1,
-      duration: 0.6,
-      force3D: false,
-      ease: 'power2.inOut'
-    });
+    // Animations are now fully driven by onUpdate callback for precise progress-based control
+    // This ensures smooth bidirectional animations with perfect scroll synchronization
 
     ScrollTrigger.refresh();
 
@@ -405,7 +607,11 @@ function Work() {
   ];
 
   return (
-    <section id="work" className="work-section" ref={sectionRef}>
+    <>
+      {/* Particle Effects Container */}
+      <div ref={particlesContainerRef} className="particles-container" />
+      
+      <section id="work" className="work-section" ref={sectionRef}>
       <div className="row">
         <p ref={headerLabelRef} className="work-label">
           OUR WORK
@@ -449,7 +655,7 @@ function Work() {
                         alt={category.name}
                       />
                     </picture>
-                    <div className="card-overlay"></div>
+                    <div ref={cardOverlayRefs[index]} className="card-overlay"></div>
                   </div>
 
                     <div className="card-content">
@@ -461,6 +667,7 @@ function Work() {
                       </p>
                     </div>
                     <button 
+                      ref={cardButtonRefs[index]}
                       onClick={() => {
                         // Immediately disable and kill all ScrollTriggers
                         try {
@@ -493,6 +700,7 @@ function Work() {
         </div>
       </div>
     </section>
+    </>
   );
 }
 

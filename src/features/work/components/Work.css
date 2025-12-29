@@ -126,20 +126,25 @@
   image-rendering: crisp-edges;
 }
 
-/* Light Gradient Overlay */
+/* Dynamic Gradient Overlay with Color Transitions */
 .card-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+  /* CSS Custom Properties for dynamic gradients - updated via JavaScript */
+  --gradient-top: rgba(0, 0, 0, 0.1);
+  --gradient-mid: rgba(0, 0, 0, 0.2);
+  --gradient-bottom: rgba(0, 0, 0, 0.35);
   background: linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 0.1) 0%,
-    rgba(0, 0, 0, 0.2) 50%,
-    rgba(0, 0, 0, 0.35) 100%
+    var(--gradient-top) 0%,
+    var(--gradient-mid) 50%,
+    var(--gradient-bottom) 100%
   );
   z-index: 2;
+  transition: background 0.1s linear;
 }
 
 /* ============================================ 6. NEXT BLOCK (End content) ============================================ */
@@ -236,7 +241,45 @@
   transform: translateX(3px);
 }
 
-/* ============================================ 9. RESPONSIVE DESIGN ============================================ */
+/* ============================================ 9. PARTICLE EFFECTS ============================================ */
+.particles-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+@keyframes particleFloat {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.6;
+  }
+  25% {
+    transform: translate(10px, -20px) scale(1.2);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translate(-10px, -40px) scale(0.8);
+    opacity: 0.4;
+  }
+  75% {
+    transform: translate(15px, -20px) scale(1.1);
+    opacity: 0.7;
+  }
+}
+
+/* ============================================ 10. RESPONSIVE DESIGN ============================================ */
 
 /* Desktop - Large Screens */
 @media (min-width: 993px) {
