@@ -87,10 +87,12 @@ function Work() {
     const headerSubtitle = headerSubtitleRef.current;
     const particlesContainer = particlesContainerRef.current;
     
+    // Detect mobile device early - used throughout the effect
+    const isMobile = window.innerWidth <= 768;
+    
     // Check device performance for particle effects
     const checkPerformance = () => {
       // Disable particles on mobile or low-end devices
-      const isMobile = window.innerWidth <= 768;
       const isLowEnd = navigator.hardwareConcurrency <= 4 || 
                        (navigator.deviceMemory && navigator.deviceMemory <= 4);
       return !isMobile && !isLowEnd;
@@ -237,12 +239,14 @@ function Work() {
     // ========== CARD STACKING ANIMATION ==========
     // Card 1: keep visible and static (GSAP does not animate it)
     // left: "50%" positions left edge at center, xPercent: -50 shifts by half width to center
+    // Use force3D: true on mobile for better performance and to prevent layout jumps
     gsap.set(card1, { 
       yPercent: 0,
       left: "50%",
       xPercent: -50, 
       opacity: 1,
-      force3D: false
+      force3D: isMobile ? true : false,
+      immediateRender: true // Ensure position is set immediately
     });
 
     // Card 2 & 3: start hidden below and transparent, but centered horizontally
@@ -251,7 +255,8 @@ function Work() {
       left: "50%",
       xPercent: -50, 
       opacity: 0,
-      force3D: false
+      force3D: isMobile ? true : false,
+      immediateRender: true // Ensure position is set immediately
     });
 
     // ========== SCROLL PROGRESS INTEGRATION ==========
@@ -311,6 +316,12 @@ function Work() {
     }
     
     // Timeline: pin the whole section (title + cards) and animate only card2 & card3
+    // Use matchMedia to handle mobile-specific pinning issues
+    const pinEndValue = isMobile ? window.innerHeight * 2.5 : 1500; // Viewport-based for mobile
+    
+    // Track if we're entering from below to prevent jump on mobile
+    let isEnteringFromBelow = false;
+    
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
@@ -318,8 +329,11 @@ function Work() {
         pinSpacing: true,
         markers: false,
         start: 'top top',
-        end: '+=1500',
+        end: `+=${pinEndValue}`,
         scrub: 1.8, // Smooth scroll-linked animation (bidirectional)
+        anticipatePin: isMobile ? 1 : 0, // Help prevent jump on mobile
+        invalidateOnRefresh: isMobile, // Recalculate on mobile viewport changes
+        fastScrollEnd: isMobile, // Optimize for mobile scroll performance
         onUpdate: (self) => {
           if (!isMounted) return;
           
@@ -340,7 +354,7 @@ function Work() {
           if (card2) {
             gsap.set(card2, {
               yPercent: 100 * (1 - easeCard2), // 100% to 0%
-              opacity: easeCard2, // 0 to 1
+              opacity: card2Progress > 0 ? 1 : 0, // Immediately fully visible when appearing
               force3D: true
             });
           }
@@ -349,7 +363,7 @@ function Work() {
           if (card3) {
             gsap.set(card3, {
               yPercent: 100 * (1 - easeCard3), // 100% to 0%
-              opacity: easeCard3, // 0 to 1
+              opacity: card3Progress > 0 ? 1 : 0, // Immediately fully visible when appearing
               force3D: true
             });
           }
@@ -441,51 +455,6 @@ function Work() {
             }
           }
           
-          // ========== VISUAL POLISH: DYNAMIC GRADIENT OVERLAYS & COLOR TRANSITIONS ==========
-          // Card 1: Always visible, blue tint
-          if (cardOverlayRefs[0].current) {
-            const card1Intensity = 0.15; // Base intensity for visible card
-            cardOverlayRefs[0].current.style.setProperty('--gradient-top', `rgba(69, 137, 255, ${card1Intensity * 0.3})`);
-            cardOverlayRefs[0].current.style.setProperty('--gradient-mid', `rgba(0, 102, 255, ${card1Intensity * 0.4})`);
-            cardOverlayRefs[0].current.style.setProperty('--gradient-bottom', `rgba(0, 0, 0, ${card1Intensity * 0.6})`);
-          }
-          
-          // Card 2: Dynamic intensity and color transition (blue to purple)
-          if (cardOverlayRefs[1].current) {
-            // Intensity: higher when in background, lower when active
-            const baseIntensity = 0.25;
-            const activeIntensity = 0.12;
-            const intensity = baseIntensity - (activeIntensity * easeCard2);
-            
-            // Color transition: blue (0) to purple (1) based on card progress
-            const colorMix = easeCard2;
-            const blueR = 69 + (138 - 69) * colorMix;
-            const blueG = 137 + (43 - 137) * colorMix;
-            const blueB = 255 + (226 - 255) * colorMix;
-            
-            cardOverlayRefs[1].current.style.setProperty('--gradient-top', `rgba(${blueR}, ${blueG}, ${blueB}, ${intensity * 0.3})`);
-            cardOverlayRefs[1].current.style.setProperty('--gradient-mid', `rgba(${blueR * 0.7}, ${blueG * 0.7}, ${blueB * 0.7}, ${intensity * 0.5})`);
-            cardOverlayRefs[1].current.style.setProperty('--gradient-bottom', `rgba(0, 0, 0, ${intensity * 0.7})`);
-          }
-          
-          // Card 3: Dynamic intensity and color transition (purple back to blue)
-          if (cardOverlayRefs[2].current) {
-            // Intensity: higher when in background, lower when active
-            const baseIntensity = 0.3;
-            const activeIntensity = 0.1;
-            const intensity = baseIntensity - (activeIntensity * easeCard3);
-            
-            // Color transition: purple (0) to blue (1) based on card progress
-            const colorMix = easeCard3;
-            const purpleR = 138 - (138 - 69) * colorMix;
-            const purpleG = 43 - (43 - 137) * colorMix;
-            const purpleB = 226 - (226 - 255) * colorMix;
-            
-            cardOverlayRefs[2].current.style.setProperty('--gradient-top', `rgba(${purpleR}, ${purpleG}, ${purpleB}, ${intensity * 0.3})`);
-            cardOverlayRefs[2].current.style.setProperty('--gradient-mid', `rgba(${purpleR * 0.7}, ${purpleG * 0.7}, ${purpleB * 0.7}, ${intensity * 0.5})`);
-            cardOverlayRefs[2].current.style.setProperty('--gradient-bottom', `rgba(0, 0, 0, ${intensity * 0.7})`);
-          }
-          
           // ========== VISUAL POLISH: PARTICLE EFFECTS ==========
           if (shouldShowParticles && particlesContainer) {
             // Update particle intensity based on card transitions
@@ -512,19 +481,65 @@ function Work() {
         onLeave: () => {
           // Ensure we don't manipulate DOM if component is unmounting
           if (!isMounted) return;
+          isEnteringFromBelow = true; // Mark that we're leaving (will enter from below next time)
+        },
+        onEnter: () => {
+          if (!isMounted) return;
+          isEnteringFromBelow = false; // Reset when entering from top
         },
         onEnterBack: () => {
           if (!isMounted) return;
-          // Ensure smooth reverse when scrolling back into view
-          ScrollTrigger.refresh();
+          // On mobile, avoid refresh to prevent jump/stutter when scrolling back up
+          // The pin spacing should already be correct, refreshing causes recalculation jump
+          if (!isMobile) {
+            // Only refresh on desktop where it's needed
+            ScrollTrigger.refresh();
+          }
+          // Reset the tracking flag
+          isEnteringFromBelow = false;
         },
       },
     });
 
+    // ========== SET OVERLAY VALUES ONCE (PRESERVE IMAGE COLORS) ==========
+    // Set constant overlay values for all cards to preserve image brightness and tone
+    // This is done once, not in onUpdate, to prevent color changes during scroll
+    const constantIntensity = 0.15; // Same intensity for all cards
+    
+    // Set overlay for Card 1
+    if (cardOverlayRefs[0].current) {
+      cardOverlayRefs[0].current.style.setProperty('--gradient-top', `rgba(69, 137, 255, ${constantIntensity * 0.3})`);
+      cardOverlayRefs[0].current.style.setProperty('--gradient-mid', `rgba(0, 102, 255, ${constantIntensity * 0.4})`);
+      cardOverlayRefs[0].current.style.setProperty('--gradient-bottom', `rgba(0, 0, 0, ${constantIntensity * 0.6})`);
+    }
+    
+    // Set overlay for Card 2 (same as Card 1)
+    if (cardOverlayRefs[1].current) {
+      cardOverlayRefs[1].current.style.setProperty('--gradient-top', `rgba(69, 137, 255, ${constantIntensity * 0.3})`);
+      cardOverlayRefs[1].current.style.setProperty('--gradient-mid', `rgba(0, 102, 255, ${constantIntensity * 0.4})`);
+      cardOverlayRefs[1].current.style.setProperty('--gradient-bottom', `rgba(0, 0, 0, ${constantIntensity * 0.6})`);
+    }
+    
+    // Set overlay for Card 3 (same as Card 1)
+    if (cardOverlayRefs[2].current) {
+      cardOverlayRefs[2].current.style.setProperty('--gradient-top', `rgba(69, 137, 255, ${constantIntensity * 0.3})`);
+      cardOverlayRefs[2].current.style.setProperty('--gradient-mid', `rgba(0, 102, 255, ${constantIntensity * 0.4})`);
+      cardOverlayRefs[2].current.style.setProperty('--gradient-bottom', `rgba(0, 0, 0, ${constantIntensity * 0.6})`);
+    }
+
     // Animations are now fully driven by onUpdate callback for precise progress-based control
     // This ensures smooth bidirectional animations with perfect scroll synchronization
 
-    ScrollTrigger.refresh();
+    // Delay refresh on mobile to let layout settle and prevent jump
+    if (isMobile) {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          ScrollTrigger.refresh();
+        });
+      });
+    } else {
+      ScrollTrigger.refresh();
+    }
 
     return () => {
       // Mark as unmounted first

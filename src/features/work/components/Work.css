@@ -89,6 +89,10 @@
   overflow: hidden;
   top: 0;
   /* GSAP handles left and xPercent for centering */
+  /* Prevent layout shifts on mobile when scrolling back */
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 /* First card - always visible and static (GSAP controls all positioning) */
