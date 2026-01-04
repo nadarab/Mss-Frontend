@@ -87,6 +87,19 @@ function VideoGallery() {
       );
 
       setSections(sectionsData);
+      
+      // Preload first section's videos for faster initial display
+      if (sectionsData.length > 0 && sectionsData[0].videos && sectionsData[0].videos.length > 0) {
+        // Preload first 3 videos of the first section (center + adjacent)
+        const videosToPreload = sectionsData[0].videos.slice(0, 3);
+        videosToPreload.forEach((videoUrl) => {
+          if (videoUrl) {
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+            video.src = videoUrl;
+          }
+        });
+      }
     } catch (error) {
       console.error('Error loading videos:', error);
       // Fallback to empty array if error
@@ -244,7 +257,13 @@ function VideoGallery() {
       <Navbar expand="lg" className="gallery-navbar" expanded={navExpanded} onToggle={setNavExpanded}>
         <Container fluid>
           <Navbar.Brand href="/" className="navbar-brand-custom">
-            <img src={logo} alt="MSS Agency" className="navbar-logo" />
+            <img 
+              src={logo} 
+              alt="MSS Agency" 
+              className="navbar-logo"
+              loading="eager"
+              fetchPriority="high"
+            />
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
@@ -282,7 +301,12 @@ function VideoGallery() {
         <picture className="hero-background-image">
           <source media="(max-width: 768px)" srcSet={videoHeroMobile} />
           <source media="(min-width: 769px)" srcSet={videoHeroDesktop} />
-          <img src={videoHeroDesktop} alt="Video Gallery Hero" />
+          <img 
+            src={videoHeroDesktop} 
+            alt="Video Gallery Hero" 
+            loading="eager"
+            fetchPriority="high"
+          />
         </picture>
         {/* Overlay Text Box */}
         <div className="video-hero-overlay-box">

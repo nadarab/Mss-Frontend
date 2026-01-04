@@ -32,6 +32,16 @@ function HeroSection() {
     }, 100);
   }, []);
 
+  // Preload partner logos for faster display
+  useEffect(() => {
+    partnerLogos.forEach((logo) => {
+      if (logo.image) {
+        const img = new Image();
+        img.src = logo.image;
+      }
+    });
+  }, []);
+
   // Handle video loading and seamless transition from image to video
   useEffect(() => {
     const video = videoRef.current;
@@ -230,7 +240,13 @@ function HeroSection() {
       <Navbar expand="lg" className="hero-navbar" expanded={navExpanded} onToggle={setNavExpanded}>
         <Container fluid>
           <Navbar.Brand href="#" className="navbar-brand-custom">
-            <img src={logo} alt="MSS Agency" className="navbar-logo" />
+            <img 
+              src={logo} 
+              alt="MSS Agency" 
+              className="navbar-logo"
+              loading="eager"
+              fetchPriority="high"
+            />
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
@@ -251,6 +267,8 @@ function HeroSection() {
           src={heroImage} 
           alt="Hero" 
           className={`hero-image ${showVideo ? 'hero-image-hidden' : ''}`}
+          loading="eager"
+          fetchPriority="high"
         />
         
         {/* Hero Video - shown after image */}
@@ -296,7 +314,11 @@ function HeroSection() {
               const originalLogo = partnerLogos[originalIndex];
               return (
                 <div key={`partner-${index}`} className={`partner-logo ${originalLogo.name === 'MSS' || originalLogo.name === 'Rashed' || originalLogo.name === 'Orbet' ? 'partner-logo-with-text' : ''} ${originalLogo.name === 'Orbet' ? 'partner-logo-orbet' : ''}`}>
-                  <img src={logo.image} alt={originalLogo.name} />
+                  <img 
+                    src={logo.image} 
+                    alt={originalLogo.name}
+                    loading={index < 3 ? "eager" : "lazy"}
+                  />
                   {originalLogo.name === 'MSS' && <span className="partner-logo-text">MSS Team</span>}
                   {originalLogo.name === 'Rashed' && <span className="partner-logo-text">Rashed Courses</span>}
                   {originalLogo.name === 'Orbet' && <span className="partner-logo-text">Orbit Production</span>}

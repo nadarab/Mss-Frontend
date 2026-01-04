@@ -104,6 +104,18 @@ function DesignGallery() {
       }));
 
       setSections(sectionsData);
+      
+      // Preload first section's images for faster initial display
+      if (sectionsData.length > 0 && sectionsData[0].images && sectionsData[0].images.length > 0) {
+        // Preload first 3 images of the first section (center + adjacent)
+        const imagesToPreload = sectionsData[0].images.slice(0, 3);
+        imagesToPreload.forEach((imageUrl) => {
+          if (imageUrl) {
+            const img = new Image();
+            img.src = imageUrl;
+          }
+        });
+      }
     } catch (error) {
       console.error('Error loading design projects:', error);
       // Fallback to empty array if error
@@ -241,7 +253,13 @@ function DesignGallery() {
       <Navbar expand="lg" className="gallery-navbar" expanded={navExpanded} onToggle={setNavExpanded}>
         <Container fluid>
           <Navbar.Brand href="/" className="navbar-brand-custom">
-            <img src={logo} alt="MSS Agency" className="navbar-logo" />
+            <img 
+              src={logo} 
+              alt="MSS Agency" 
+              className="navbar-logo"
+              loading="eager"
+              fetchPriority="high"
+            />
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
@@ -279,7 +297,12 @@ function DesignGallery() {
         <picture className="hero-background-image">
           <source media="(max-width: 768px)" srcSet={designHeroMobile} />
           <source media="(min-width: 769px)" srcSet={designHeroDesktop} />
-          <img src={designHeroDesktop} alt="Design Gallery Hero" />
+          <img 
+            src={designHeroDesktop} 
+            alt="Design Gallery Hero" 
+            loading="eager"
+            fetchPriority="high"
+          />
         </picture>
         {/* Overlay Text Box */}
         <div className="video-hero-overlay-box">

@@ -82,7 +82,7 @@ function CenteredVideoCarousel({ videos, carouselId = 'default' }) {
       },
       {
         threshold: 0.1,
-        rootMargin: '200px',
+        rootMargin: '1000px',
       }
     );
 
@@ -114,17 +114,29 @@ function CenteredVideoCarousel({ videos, carouselId = 'default' }) {
     });
   }, [currentIndex]);
 
+  // Preload adjacent videos when carousel enters viewport or index changes
   useEffect(() => {
     pauseAllVideosExceptCenter();
     
-    if (isInViewport) {
+    if (isInViewport && videos.length > 0) {
+      // Get visible video indices (left, center, right) for preloading
+      const prevIndex = (currentIndex - 1 + videos.length) % videos.length;
+      const nextIndex = (currentIndex + 1) % videos.length;
+      const visibleIndices = [prevIndex, currentIndex, nextIndex];
+      
       Object.entries(videoRefsMap.current).forEach(([index, videoRef]) => {
-        if (videoRef && parseInt(index) !== currentIndex && videoRef.readyState === 0) {
-          videoRef.load();
+        const videoIndex = parseInt(index);
+        const isVisible = visibleIndices.includes(videoIndex);
+        
+        if (videoRef && isVisible) {
+          // Preload visible videos (center, left, right) - load metadata for smooth transitions
+          if (videoRef.readyState === 0) {
+            videoRef.load();
+          }
         }
       });
     }
-  }, [currentIndex, pauseAllVideosExceptCenter, isInViewport]);
+  }, [currentIndex, pauseAllVideosExceptCenter, isInViewport, videos.length]);
 
   const handleVideoLoadStart = useCallback((index) => {
     setVideoLoading(prev => ({ ...prev, [index]: true }));
@@ -396,7 +408,13 @@ function CenteredVideoCarousel({ videos, carouselId = 'default' }) {
                     loop
                     playsInline
                     muted={!isCenter || !isHovered}
-                    preload={isCenter ? "auto" : (connectionSpeed === 'slow-2g' || connectionSpeed === '2g' ? "none" : "metadata")}
+                    preload={
+                      isCenter 
+                        ? "auto" 
+                        : (connectionSpeed === 'slow-2g' || connectionSpeed === '2g' 
+                            ? "none" 
+                            : "metadata")
+                    }
                     className={`carousel-video ${!isCenter ? 'side-video' : ''}`}
                     onLoadStart={() => handleVideoLoadStart(index)}
                     onCanPlay={() => handleVideoCanPlay(index)}

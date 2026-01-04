@@ -88,6 +88,41 @@ function BrandingGallery() {
     fetchBrandingProjects();
   }, []);
 
+  // Preload first project images and explore section thumbnails for faster initial display
+  useEffect(() => {
+    if (brandingItems.length === 0) return;
+
+    const preloadedImages = new Set();
+
+    // Preload first project's images (main showcase)
+    const firstProject = brandingItems[0];
+    if (firstProject && firstProject.images && firstProject.images.length > 0) {
+      // Preload first 3 images of the first project (main image + 2 thumbnails)
+      const imagesToPreload = firstProject.images.slice(0, 3);
+      imagesToPreload.forEach((imageUrl) => {
+        if (imageUrl && !preloadedImages.has(imageUrl)) {
+          const img = new Image();
+          img.src = imageUrl;
+          preloadedImages.add(imageUrl);
+        }
+      });
+    }
+
+    // Preload first page of explore section thumbnails
+    const exploreImagesToPreload = Math.min(itemsPerPage, brandingItems.length);
+    for (let i = 0; i < exploreImagesToPreload; i++) {
+      const project = brandingItems[i];
+      if (project && project.images && project.images.length > 0) {
+        const thumbnailUrl = project.images[0]; // First image is used as thumbnail
+        if (thumbnailUrl && !preloadedImages.has(thumbnailUrl)) {
+          const img = new Image();
+          img.src = thumbnailUrl;
+          preloadedImages.add(thumbnailUrl);
+        }
+      }
+    }
+  }, [brandingItems, itemsPerPage]);
+
   const handleNavClick = (e, targetPath) => {
     e.preventDefault();
     setNavExpanded(false);
@@ -246,7 +281,13 @@ function BrandingGallery() {
       <Navbar expand="lg" className="branding-navbar" expanded={navExpanded} onToggle={setNavExpanded}>
         <Container fluid>
           <Navbar.Brand href="/" className="navbar-brand-custom" onClick={handleHomeClick}>
-            <img src={logo} alt="MSS Agency" className="navbar-logo" />
+            <img 
+              src={logo} 
+              alt="MSS Agency" 
+              className="navbar-logo"
+              loading="eager"
+              fetchPriority="high"
+            />
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
@@ -283,7 +324,12 @@ function BrandingGallery() {
         <picture className="hero-background-image">
           <source media="(max-width: 768px)" srcSet={brandingHeroMobile} />
           <source media="(min-width: 769px)" srcSet={brandingHeroDesktop} />
-          <img src={brandingHeroDesktop} alt="Branding Gallery Hero" />
+          <img 
+            src={brandingHeroDesktop} 
+            alt="Branding Gallery Hero" 
+            loading="eager"
+            fetchPriority="high"
+          />
         </picture>
         {/* Overlay Text Box */}
         <div className="branding-hero-overlay-box">
@@ -326,6 +372,8 @@ function BrandingGallery() {
                         src={currentItem.images[currentImageIndex]} 
                         alt={`${currentItem.projectName} - Image ${currentImageIndex + 1}`}
                         className={imageTransitioning ? 'transitioning' : ''}
+                        loading={currentImageIndex === 0 && currentItemIndex === 0 ? "eager" : "lazy"}
+                        fetchPriority={currentImageIndex === 0 && currentItemIndex === 0 ? "high" : "auto"}
                       />
                     )}
 
@@ -374,7 +422,11 @@ function BrandingGallery() {
                                 className={`branding-thumbnail ${globalIndex === currentImageIndex ? 'active' : ''}`}
                                 onClick={() => handleThumbnailClick(globalIndex)}
                               >
-                                <img src={image} alt={`Thumbnail ${globalIndex + 1}`} />
+                                <img 
+                                  src={image} 
+                                  alt={`Thumbnail ${globalIndex + 1}`}
+                                  loading={localIndex === 0 ? "eager" : "lazy"}
+                                />
                               </div>
                             );
                           })}
@@ -476,7 +528,11 @@ function BrandingGallery() {
                           onClick={() => handleProjectClick(globalIndex)}
                         >
                           {thumbnailImage && (
-                            <img src={thumbnailImage} alt={item.projectName} />
+                            <img 
+                              src={thumbnailImage} 
+                              alt={item.projectName}
+                              loading={index < 3 ? "eager" : "lazy"}
+                            />
                           )}
                         </div>
                       );

@@ -10,8 +10,10 @@ function CenteredImageCarousel({ images = [], carouselId = 'image-carousel' }) {
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
   const [isSwiping, setIsSwiping] = useState(false);
+  const [isInViewport, setIsInViewport] = useState(false);
   const containerRef = useRef(null);
   const autoPlayTimerRef = useRef(null);
+  const preloadedImagesRef = useRef(new Set());
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
@@ -19,6 +21,61 @@ function CenteredImageCarousel({ images = [], carouselId = 'image-carousel' }) {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // IntersectionObserver to detect when carousel enters viewport
+  useEffect(() => {
+    const currentContainer = containerRef.current;
+    if (!currentContainer) return;
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setIsInViewport(entry.isIntersecting);
+        });
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '1000px',
+      }
+    );
+
+    observer.observe(currentContainer);
+    
+    // Initial check - if container is already visible, set in viewport
+    const rect = currentContainer.getBoundingClientRect();
+    const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+    if (isVisible) {
+      setIsInViewport(true);
+    }
+
+    return () => {
+      try {
+        observer.disconnect();
+      } catch (error) {
+        // Ignore disconnect errors
+      }
+    };
+  }, []);
+
+  // Preload adjacent images when carousel is in viewport
+  useEffect(() => {
+    if (!isInViewport || images.length === 0) return;
+
+    // Get visible image indices (left, center, right)
+    const prevIndex = (currentIndex - 1 + images.length) % images.length;
+    const nextIndex = (currentIndex + 1) % images.length;
+    const visibleIndices = [prevIndex, currentIndex, nextIndex];
+
+    // Preload visible images using Image API
+    visibleIndices.forEach((index) => {
+      const imageUrl = images[index];
+      if (imageUrl && !preloadedImagesRef.current.has(imageUrl)) {
+        const img = new Image();
+        img.src = imageUrl;
+        preloadedImagesRef.current.add(imageUrl);
+      }
+    });
+  }, [currentIndex, isInViewport, images]);
 
   const handleNext = useCallback(() => {
     setDirection(1);
