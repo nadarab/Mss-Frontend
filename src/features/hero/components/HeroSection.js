@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import './HeroSection.css';
 import logo from '../../../assets/images/common/logoMSS.PNG';
@@ -12,19 +12,23 @@ function HeroSection() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [navExpanded, setNavExpanded] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [videoReady, setVideoReady] = useState(false);
   const videoRef = useRef(null);
   const logosTrackRef = useRef(null);
 
-  // Partner logos data - defined early so it can be used in useEffect
-  const partnerLogos = [
+  // Partner logos data - wrapped in useMemo to prevent recreation on every render
+  const partnerLogos = useMemo(() => [
     { name: 'Orbet', image: orbetLogo },
     { name: 'Rashed', image: rashedLogo },
     { name: 'MSS', image: logo },
-  ];
+  ], []);
 
   // Duplicate logos 3 times for seamless infinite scroll (3 × 3 = 9 total)
-  const duplicatedPartnerLogos = [...partnerLogos, ...partnerLogos, ...partnerLogos];
+  const duplicatedPartnerLogos = useMemo(
+    () => [...partnerLogos, ...partnerLogos, ...partnerLogos],
+    [partnerLogos]
+  );
 
   useEffect(() => {
     setTimeout(() => {
@@ -40,7 +44,7 @@ function HeroSection() {
         img.src = logo.image;
       }
     });
-  }, []);
+  }, [partnerLogos]);
 
   // Handle video loading and seamless transition from image to video
   useEffect(() => {
@@ -223,6 +227,7 @@ function HeroSection() {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleVideoEnd = () => {
     if (videoRef.current) {
       const video = videoRef.current;

@@ -41,7 +41,7 @@ function Work() {
   const particlesContainerRef = useRef(null);
   // Static images are now used, no loading needed
   const [isLoadingThumbnails, setIsLoadingThumbnails] = useState(false);
-  const [particlesEnabled, setParticlesEnabled] = useState(true);
+  const [particlesEnabled] = useState(true);
 
   // Clean up GSAP when component unmounts or location changes
   useEffect(() => {
@@ -320,8 +320,9 @@ function Work() {
     const pinEndValue = isMobile ? window.innerHeight * 2.5 : 1500; // Viewport-based for mobile
     
     // Track if we're entering from below to prevent jump on mobile
+    // eslint-disable-next-line no-unused-vars
     let isEnteringFromBelow = false;
-    
+    // eslint-disable-next-line no-unused-vars
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
@@ -589,6 +590,7 @@ function Work() {
         }
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoadingThumbnails]);
 
   const categories = [

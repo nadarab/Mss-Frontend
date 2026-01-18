@@ -370,7 +370,7 @@ function BrandingGallery() {
                     {currentItem && currentItem.images && currentItem.images.length > 0 && imageSelected && (
                       <img 
                         src={currentItem.images[currentImageIndex]} 
-                        alt={`${currentItem.projectName} - Image ${currentImageIndex + 1}`}
+                        alt={`${currentItem.projectName} ${currentImageIndex + 1}`}
                         className={imageTransitioning ? 'transitioning' : ''}
                         loading={currentImageIndex === 0 && currentItemIndex === 0 ? "eager" : "lazy"}
                         fetchPriority={currentImageIndex === 0 && currentItemIndex === 0 ? "high" : "auto"}

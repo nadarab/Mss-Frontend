@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import './VideoGallery.css';
 import { CenteredVideoCarousel } from '../../../work/ui';
@@ -15,9 +15,9 @@ function VideoGallery() {
   const navigate = useNavigate();
   const heroRef = useRef(null);
   const sectionsRef = useRef(null);
-  const [scrollY, setScrollY] = useState(0);
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line no-unused-vars
   const [isLoaded, setIsLoaded] = useState(false);
   const [navExpanded, setNavExpanded] = useState(false);
   const [carouselIndices, setCarouselIndices] = useState({});
@@ -108,15 +108,6 @@ function VideoGallery() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Sync carousel indices with carousel dots using MutationObserver
   useEffect(() => {

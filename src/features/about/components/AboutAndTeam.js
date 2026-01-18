@@ -109,6 +109,7 @@ function AboutAndTeam() {
   };
 
   // Calculate current page based on scroll position
+  // eslint-disable-next-line no-unused-vars
   const calculateCurrentPage = () => {
     if (!scrollContainerRef.current) return 1;
     
@@ -230,6 +231,7 @@ function AboutAndTeam() {
       clearTimeout(timer);
       window.removeEventListener('resize', handleResize);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, allTeamMembers.length]); // Run when loading completes or team size changes
 
   const loadEmployees = async () => {

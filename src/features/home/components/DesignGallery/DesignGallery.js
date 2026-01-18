@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import './DesignGallery.css';
 import { CenteredImageCarousel } from '../../../work/ui';
@@ -15,9 +15,9 @@ function DesignGallery() {
   const navigate = useNavigate();
   const heroRef = useRef(null);
   const sectionsRef = useRef(null);
-  const [scrollY, setScrollY] = useState(0);
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line no-unused-vars
   const [isLoaded, setIsLoaded] = useState(false);
   const [navExpanded, setNavExpanded] = useState(false);
   const [carouselIndices, setCarouselIndices] = useState({});
@@ -121,15 +121,6 @@ function DesignGallery() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Initialize carousel indices to 0 for all sections
   useEffect(() => {

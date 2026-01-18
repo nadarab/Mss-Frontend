@@ -13,7 +13,9 @@ function ContactUs() {
   const footerRef = useRef(null);
   const cardRefs = useRef([]);
   const headerRef = useRef(null);
+  // eslint-disable-next-line no-unused-vars
   const observerRef = useRef(null);
+  // eslint-disable-next-line no-unused-vars
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {

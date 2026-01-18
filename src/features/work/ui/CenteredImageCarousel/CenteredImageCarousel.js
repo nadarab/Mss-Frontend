@@ -6,9 +6,11 @@ function CenteredImageCarousel({ images = [], carouselId = 'image-carousel', onI
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [isHovered, setIsHovered] = useState(false);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [isSwiping, setIsSwiping] = useState(false);
   const [isInViewport, setIsInViewport] = useState(false);
   const containerRef = useRef(null);
