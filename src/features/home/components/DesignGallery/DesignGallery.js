@@ -131,52 +131,15 @@ function DesignGallery() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Sync carousel indices with carousel dots using MutationObserver
+  // Initialize carousel indices to 0 for all sections
   useEffect(() => {
     if (sections.length === 0) return;
-
-    const observers = [];
     
+    const initialIndices = {};
     sections.forEach(section => {
-      const carousel = document.querySelector(`#design-carousel-${section.id}`);
-      if (carousel) {
-        const dotsContainer = carousel.querySelector('.carousel-dots');
-        if (dotsContainer) {
-          const syncIndex = () => {
-            const activeDot = dotsContainer.querySelector('.dot.active');
-            if (activeDot) {
-              const dots = dotsContainer.querySelectorAll('.dot');
-              const activeIndex = Array.from(dots).indexOf(activeDot);
-              if (activeIndex !== -1) {
-                setCarouselIndices(prev => {
-                  if (prev[section.id] !== activeIndex) {
-                    return { ...prev, [section.id]: activeIndex };
-                  }
-                  return prev;
-                });
-              }
-            }
-          };
-
-          // Initial sync
-          syncIndex();
-
-          // Watch for changes
-          const observer = new MutationObserver(syncIndex);
-          observer.observe(dotsContainer, {
-            childList: true,
-            attributes: true,
-            attributeFilter: ['class'],
-            subtree: true
-          });
-          observers.push(observer);
-        }
-      }
+      initialIndices[section.id] = 0;
     });
-
-    return () => {
-      observers.forEach(obs => obs.disconnect());
-    };
+    setCarouselIndices(initialIndices);
   }, [sections]);
 
   useEffect(() => {
@@ -356,65 +319,50 @@ function DesignGallery() {
                  </div>
 
                  {section.images.length > 0 ? (
-               <div className="section-carousel-wrapper">
-                 <CenteredImageCarousel 
-                   images={section.images} 
-                   carouselId={`design-carousel-${section.id}`}
-                 />
-                 <div className="carousel-navigation-controls">
-                   <button 
-                     className="carousel-nav-btn carousel-nav-prev"
-                     onClick={() => {
-                       const carousel = document.querySelector(`#design-carousel-${section.id}`);
-                       if (carousel) {
-                         const prevBtn = carousel.querySelector('.carousel-arrow-left');
-                         if (prevBtn) {
-                           prevBtn.click();
-                           // Update index after click
-                           setTimeout(() => {
-                             const currentIdx = carouselIndices[section.id] || 0;
-                             const newIdx = (currentIdx - 1 + section.images.length) % section.images.length;
-                             setCarouselIndices(prev => ({ ...prev, [section.id]: newIdx }));
-                           }, 100);
-                         }
-                       }
-                     }}
-                     aria-label="Previous"
-                   >
-                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                       <path d="M15 18l-6-6 6-6" />
-                     </svg>
-                   </button>
-                   <span className="carousel-counter">
-                     <span className="carousel-current">{(carouselIndices[section.id] ?? 0) + 1}</span>
-                     <span className="carousel-separator">/</span>
-                     <span className="carousel-total">{section.images.length}</span>
-                   </span>
-                   <button 
-                     className="carousel-nav-btn carousel-nav-next"
-                     onClick={() => {
-                       const carousel = document.querySelector(`#design-carousel-${section.id}`);
-                       if (carousel) {
-                         const nextBtn = carousel.querySelector('.carousel-arrow-right');
-                         if (nextBtn) {
-                           nextBtn.click();
-                           // Update index after click
-                           setTimeout(() => {
-                             const currentIdx = carouselIndices[section.id] || 0;
-                             const newIdx = (currentIdx + 1) % section.images.length;
-                             setCarouselIndices(prev => ({ ...prev, [section.id]: newIdx }));
-                           }, 100);
-                         }
-                       }
-                     }}
-                     aria-label="Next"
-                   >
-                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                       <path d="M9 18l6-6-6-6" />
-                     </svg>
-                   </button>
-                 </div>
-               </div>
+              <div className="section-carousel-wrapper">
+                <CenteredImageCarousel 
+                  images={section.images} 
+                  carouselId={`design-carousel-${section.id}`}
+                  onIndexChange={(newIndex) => {
+                    setCarouselIndices(prev => ({ ...prev, [section.id]: newIndex }));
+                  }}
+                />
+                <div className="carousel-navigation-controls">
+                  <button 
+                    className="carousel-nav-btn carousel-nav-prev"
+                    onClick={() => {
+                      const carousel = document.getElementById(`design-carousel-${section.id}`);
+                      if (carousel && carousel.handlePrev) {
+                        carousel.handlePrev();
+                      }
+                    }}
+                    aria-label="Previous"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                  </button>
+                  <span className="carousel-counter">
+                    <span className="carousel-current">{(carouselIndices[section.id] ?? 0) + 1}</span>
+                    <span className="carousel-separator">/</span>
+                    <span className="carousel-total">{section.images.length}</span>
+                  </span>
+                  <button 
+                    className="carousel-nav-btn carousel-nav-next"
+                    onClick={() => {
+                      const carousel = document.getElementById(`design-carousel-${section.id}`);
+                      if (carousel && carousel.handleNext) {
+                        carousel.handleNext();
+                      }
+                    }}
+                    aria-label="Next"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M9 18l6-6-6-6" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
                  ) : (
                    <div style={{ 
                      textAlign: 'center', 

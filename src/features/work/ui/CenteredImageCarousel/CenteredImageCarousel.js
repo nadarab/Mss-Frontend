@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import './CenteredImageCarousel.css';
 
-function CenteredImageCarousel({ images = [], carouselId = 'image-carousel' }) {
+function CenteredImageCarousel({ images = [], carouselId = 'image-carousel', onIndexChange = null }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
@@ -27,6 +27,9 @@ function CenteredImageCarousel({ images = [], carouselId = 'image-carousel' }) {
     const currentContainer = containerRef.current;
     if (!currentContainer) return;
     
+    // Always set to true initially to ensure images start loading
+    setIsInViewport(true);
+    
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -43,18 +46,11 @@ function CenteredImageCarousel({ images = [], carouselId = 'image-carousel' }) {
       },
       {
         threshold: 0.1,
-        rootMargin: '1000px',
+        rootMargin: '200px',
       }
     );
 
     observer.observe(currentContainer);
-    
-    // Initial check - if container is already visible, set in viewport
-    const rect = currentContainer.getBoundingClientRect();
-    const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
-    if (isVisible) {
-      setIsInViewport(true);
-    }
 
     return () => {
       // Safely disconnect observer
@@ -88,13 +84,25 @@ function CenteredImageCarousel({ images = [], carouselId = 'image-carousel' }) {
 
   const handleNext = useCallback(() => {
     setDirection(1);
-    setCurrentIndex((prev) => (prev + 1) % images.length);
-  }, [images.length]);
+    setCurrentIndex((prev) => {
+      const newIndex = (prev + 1) % images.length;
+      if (onIndexChange) {
+        onIndexChange(newIndex);
+      }
+      return newIndex;
+    });
+  }, [images.length, onIndexChange]);
 
   const handlePrev = useCallback(() => {
     setDirection(-1);
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
-  }, [images.length]);
+    setCurrentIndex((prev) => {
+      const newIndex = (prev - 1 + images.length) % images.length;
+      if (onIndexChange) {
+        onIndexChange(newIndex);
+      }
+      return newIndex;
+    });
+  }, [images.length, onIndexChange]);
 
   // Swipe gesture handlers
   const minSwipeDistance = 50;
@@ -169,8 +177,16 @@ function CenteredImageCarousel({ images = [], carouselId = 'image-carousel' }) {
     hidden: { x: direction > 0 ? '200%' : '-200%', scale: 0.5, opacity: 0, zIndex: 0 },
   };
 
+  // Expose methods via data attributes for external control
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.handleNext = handleNext;
+      containerRef.current.handlePrev = handlePrev;
+    }
+  }, [handleNext, handlePrev]);
+
   return (
-    <div className="centered-carousel-container" ref={containerRef} id={carouselId}>
+    <div className="centered-carousel-container" ref={containerRef} id={carouselId} data-current-index={currentIndex}>
       <div className="carousel-wrapper">
         <button className="carousel-arrow carousel-arrow-left" onClick={handlePrev} aria-label="Previous image">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -199,7 +215,13 @@ function CenteredImageCarousel({ images = [], carouselId = 'image-carousel' }) {
                 onMouseLeave={() => position === 'center' && setIsHovered(false)}
               >
                 <div className="image-container">
-                  <img src={img} alt="carousel" className="carousel-image" />
+                  <img 
+                    src={img} 
+                    alt="carousel" 
+                    className="carousel-image"
+                    loading={position === 'center' ? 'eager' : 'lazy'}
+                    fetchPriority={position === 'center' ? 'high' : 'auto'}
+                  />
                 </div>
               </motion.div>
             );
@@ -221,6 +243,9 @@ function CenteredImageCarousel({ images = [], carouselId = 'image-carousel' }) {
             onClick={() => {
               setDirection(index > currentIndex ? 1 : -1);
               setCurrentIndex(index);
+              if (onIndexChange) {
+                onIndexChange(index);
+              }
             }}
             aria-label={`Go to image ${index + 1}`}
           />

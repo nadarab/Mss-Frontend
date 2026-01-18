@@ -3,12 +3,11 @@
   padding: 80px 20px;
   background: transparent;
   overflow: hidden;
-  opacity: 0;
-  transform: translateY(60px);
-  animation: fadeInCarousel 1.2s ease-out 0.3s forwards;
+  opacity: 1;
+  transform: translateY(0);
 }
 
-@keyframes fadeInCarousel { to { opacity: 1; transform: translateY(0); } }
+/* Removed fadeInCarousel animation to fix image loading on desktop */
 
 .carousel-wrapper { position: relative; max-width: 1600px; margin: 0 auto; display: flex; align-items: center; justify-content: center; min-height: 500px; }
 
@@ -99,9 +98,6 @@
 @media (max-width: 768px){ 
   .centered-carousel-container{
     padding:40px 0;
-    transform: translateY(0px);
-    opacity: 1;
-    animation: none;
   } 
   .section-carousel-wrapper .centered-carousel-container{
     padding:0px 0;
@@ -200,9 +196,6 @@
 @media (max-width: 576px){ 
   .centered-carousel-container{
     padding:20px 10px;
-    transform: translateY(0px);
-    opacity: 1;
-    animation: none;
   } 
   .section-carousel-wrapper .centered-carousel-container{
     padding:0px 10px;
