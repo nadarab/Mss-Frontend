@@ -31,6 +31,14 @@ function CenteredImageCarousel({ images = [], carouselId = 'image-carousel' }) {
       (entries) => {
         entries.forEach((entry) => {
           setIsInViewport(entry.isIntersecting);
+          
+          if (!entry.isIntersecting) {
+            // Clear auto-play timer when carousel leaves viewport
+            if (autoPlayTimerRef.current) {
+              clearTimeout(autoPlayTimerRef.current);
+              autoPlayTimerRef.current = null;
+            }
+          }
         });
       },
       {
@@ -49,6 +57,7 @@ function CenteredImageCarousel({ images = [], carouselId = 'image-carousel' }) {
     }
 
     return () => {
+      // Safely disconnect observer
       try {
         observer.disconnect();
       } catch (error) {
@@ -124,19 +133,9 @@ function CenteredImageCarousel({ images = [], carouselId = 'image-carousel' }) {
     setIsSwiping(false);
   }, [touchStart, touchEnd, handleNext, handlePrev]);
 
-  useEffect(() => {
-    if (!isHovered) {
-      autoPlayTimerRef.current = setTimeout(() => {
-        handleNext();
-      }, 2500);
-
-      return () => {
-        if (autoPlayTimerRef.current) {
-          clearTimeout(autoPlayTimerRef.current);
-        }
-      };
-    }
-  }, [currentIndex, isHovered, handleNext]);
+  // Auto-play disabled - images only change via arrow controls
+  // Removed autoPlayTimerRef setTimeout that was calling handleNext()
+  // This matches CenteredVideoCarousel behavior for consistent user experience
 
   const getVisible = () => {
     // Always show left, center, and right images for horizontal scrolling (like video carousel)
@@ -190,7 +189,7 @@ function CenteredImageCarousel({ images = [], carouselId = 'image-carousel' }) {
             if (position === 'hidden') return null;
             return (
               <motion.div
-                key={`${carouselId}-${index}`}
+                key={index}
                 className={`carousel-slide ${position}`}
                 variants={slideVariants}
                 initial={position}
@@ -217,7 +216,7 @@ function CenteredImageCarousel({ images = [], carouselId = 'image-carousel' }) {
       <div className="carousel-dots">
         {images.map((_, index) => (
           <button
-            key={`${carouselId}-dot-${index}`}
+            key={index}
             className={`dot ${index === currentIndex ? 'active' : ''}`}
             onClick={() => {
               setDirection(index > currentIndex ? 1 : -1);

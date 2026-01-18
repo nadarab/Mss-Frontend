@@ -27,16 +27,13 @@ function DesignGallery() {
     subtitle: 'Start your project'
   });
 
-  // Scroll to top when component mounts
+  // Load design projects from Firestore
   useEffect(() => {
     // Force scroll to top when component mounts
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
-  }, []);
-
-  // Load design projects from Firestore
-  useEffect(() => {
+    
     setIsLoaded(true);
     loadDesignProjectsFromFirestore();
   }, []);
@@ -126,7 +123,10 @@ function DesignGallery() {
   };
 
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -247,6 +247,23 @@ function DesignGallery() {
     };
   }, [sections]);
 
+  if (loading) {
+    return (
+      <div className="video-gallery-page">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          minHeight: '100vh',
+          color: '#fff',
+          fontSize: '1.5rem'
+        }}>
+          Loading design projects...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="video-gallery-page">
       {/* Navbar - exactly like home page */}
@@ -315,18 +332,7 @@ function DesignGallery() {
       </div>
 
        <div className="video-sections-container" ref={sectionsRef}>
-         {loading ? (
-           <div style={{ 
-             display: 'flex', 
-             justifyContent: 'center', 
-             alignItems: 'center', 
-             minHeight: '50vh',
-             color: '#fff',
-             fontSize: '1.5rem'
-           }}>
-             Loading design projects...
-           </div>
-         ) : sections.length === 0 ? (
+         {sections.length === 0 ? (
            <div style={{ 
              textAlign: 'center', 
              padding: '100px 20px',
@@ -338,73 +344,88 @@ function DesignGallery() {
          ) : (
            <div className="video-sections-wrapper">
              {sections.map((section, index) => (
-               section.images && section.images.length > 0 ? (
-                 <section key={section.id} className={`video-section ${section.reverse ? 'reverse' : ''}`}>
-                  <div className="video-section-content-carousel">
-                    <div className="video-text-content">
-                      <span className="section-number">{String(index + 1).padStart(2, '0')}</span>
-                      <h2>{section.title}</h2>
-                      <p>{section.description}</p>
-                    </div>
-                    <div className="section-carousel-wrapper">
-                      <CenteredImageCarousel images={section.images} carouselId={`design-carousel-${section.id}`} />
-                      {section.images.length > 0 && (
-                        <div className="carousel-navigation-controls">
-                          <button 
-                            className="carousel-nav-btn carousel-nav-prev"
-                            onClick={() => {
-                              const carousel = document.querySelector(`#design-carousel-${section.id}`);
-                              if (carousel) {
-                                const prevBtn = carousel.querySelector('.carousel-arrow-left');
-                                if (prevBtn) {
-                                  prevBtn.click();
-                                  setTimeout(() => {
-                                    const currentIdx = carouselIndices[section.id] || 0;
-                                    const newIdx = (currentIdx - 1 + section.images.length) % section.images.length;
-                                    setCarouselIndices(prev => ({ ...prev, [section.id]: newIdx }));
-                                  }, 100);
-                                }
-                              }
-                            }}
-                            aria-label="Previous"
-                          >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M15 18l-6-6 6-6" />
-                            </svg>
-                          </button>
-                          <span className="carousel-counter">
-                            <span className="carousel-current">{(carouselIndices[section.id] ?? 0) + 1}</span>
-                            <span className="carousel-separator">/</span>
-                            <span className="carousel-total">{section.images.length}</span>
-                          </span>
-                          <button 
-                            className="carousel-nav-btn carousel-nav-next"
-                            onClick={() => {
-                              const carousel = document.querySelector(`#design-carousel-${section.id}`);
-                              if (carousel) {
-                                const nextBtn = carousel.querySelector('.carousel-arrow-right');
-                                if (nextBtn) {
-                                  nextBtn.click();
-                                  setTimeout(() => {
-                                    const currentIdx = carouselIndices[section.id] || 0;
-                                    const newIdx = (currentIdx + 1) % section.images.length;
-                                    setCarouselIndices(prev => ({ ...prev, [section.id]: newIdx }));
-                                  }, 100);
-                                }
-                              }
-                            }}
-                            aria-label="Next"
-                          >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M9 18l6-6-6-6" />
-                            </svg>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                 </section>
-               ) : null
+             <section 
+               key={section.id}
+               className={`video-section ${section.reverse ? 'reverse' : ''}`}
+             >
+               <div className="video-section-content-carousel">
+                 <div className="video-text-content">
+                   <span className="section-number">{String(index + 1).padStart(2, '0')}</span>
+                   <h2>{section.title}</h2>
+                   <p>{section.description}</p>
+                 </div>
+
+                 {section.images.length > 0 ? (
+               <div className="section-carousel-wrapper">
+                 <CenteredImageCarousel 
+                   images={section.images} 
+                   carouselId={`design-carousel-${section.id}`}
+                 />
+                 <div className="carousel-navigation-controls">
+                   <button 
+                     className="carousel-nav-btn carousel-nav-prev"
+                     onClick={() => {
+                       const carousel = document.querySelector(`#design-carousel-${section.id}`);
+                       if (carousel) {
+                         const prevBtn = carousel.querySelector('.carousel-arrow-left');
+                         if (prevBtn) {
+                           prevBtn.click();
+                           // Update index after click
+                           setTimeout(() => {
+                             const currentIdx = carouselIndices[section.id] || 0;
+                             const newIdx = (currentIdx - 1 + section.images.length) % section.images.length;
+                             setCarouselIndices(prev => ({ ...prev, [section.id]: newIdx }));
+                           }, 100);
+                         }
+                       }
+                     }}
+                     aria-label="Previous"
+                   >
+                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                       <path d="M15 18l-6-6 6-6" />
+                     </svg>
+                   </button>
+                   <span className="carousel-counter">
+                     <span className="carousel-current">{(carouselIndices[section.id] ?? 0) + 1}</span>
+                     <span className="carousel-separator">/</span>
+                     <span className="carousel-total">{section.images.length}</span>
+                   </span>
+                   <button 
+                     className="carousel-nav-btn carousel-nav-next"
+                     onClick={() => {
+                       const carousel = document.querySelector(`#design-carousel-${section.id}`);
+                       if (carousel) {
+                         const nextBtn = carousel.querySelector('.carousel-arrow-right');
+                         if (nextBtn) {
+                           nextBtn.click();
+                           // Update index after click
+                           setTimeout(() => {
+                             const currentIdx = carouselIndices[section.id] || 0;
+                             const newIdx = (currentIdx + 1) % section.images.length;
+                             setCarouselIndices(prev => ({ ...prev, [section.id]: newIdx }));
+                           }, 100);
+                         }
+                       }
+                     }}
+                     aria-label="Next"
+                   >
+                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                       <path d="M9 18l6-6-6-6" />
+                     </svg>
+                   </button>
+                 </div>
+               </div>
+                 ) : (
+                   <div style={{ 
+                     textAlign: 'center', 
+                     padding: '40px',
+                     color: '#aaa'
+                   }}>
+                     <p>No images in this category yet</p>
+                   </div>
+                 )}
+               </div>
+             </section>
              ))}
            </div>
          )}
