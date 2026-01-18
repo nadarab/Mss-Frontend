@@ -13,6 +13,7 @@ function CenteredVideoCarousel({ videos, carouselId = 'default' }) {
   const [isMuted, setIsMuted] = useState(true);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [isSwiping, setIsSwiping] = useState(false);
   const [videoProgress, setVideoProgress] = useState({});
   const [loadingProgress, setLoadingProgress] = useState({});

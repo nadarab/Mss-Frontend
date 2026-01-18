@@ -21,9 +21,3 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# videos
-*.mp4
-*.MP4
-*.MOV
-*.mov
