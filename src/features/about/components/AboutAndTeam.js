@@ -262,6 +262,7 @@ function AboutAndTeam() {
         return roleLower === 'co-founder' || 
                roleLower === 'ceo & co-founder' ||
                roleLower.includes('co-founder');
+               
       });
       
       const otherMembers = employees.filter(emp => {
